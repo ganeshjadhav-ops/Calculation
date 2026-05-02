@@ -6,18 +6,35 @@
 <title>Dropout Repayment Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f0f4f8;--white:#fff;--blue:#2563eb;--blight:#eff6ff;--bmid:#dbeafe;--green:#059669;--glight:#ecfdf5;--orange:#d97706;--olight:#fffbeb;--red:#dc2626;--rlight:#fef2f2;--purple:#7c3aed;--plight:#f5f3ff;--text:#1e293b;--t2:#475569;--muted:#94a3b8;--border:#e2e8f0;--b2:#cbd5e1;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);--shm:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);--shl:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -2px rgba(0,0,0,.04);--r:12px;--rs:8px;}
+:root{
+  --bg:#f1f5f9;--white:#fff;--blue:#2563eb;--blight:#eff6ff;--bmid:#dbeafe;
+  --green:#059669;--glight:#ecfdf5;--orange:#d97706;--olight:#fffbeb;
+  --red:#dc2626;--rlight:#fef2f2;--purple:#7c3aed;--plight:#f5f3ff;
+  --text:#1e293b;--t2:#475569;--muted:#94a3b8;--border:#e2e8f0;--b2:#cbd5e1;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 12px rgba(0,0,0,.08);--r:14px;--rs:9px;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
 header{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
-.logo{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;}
+.logo{width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;}
 header h1{font-family:'Sora',sans-serif;font-size:1rem;color:var(--text);}
 header h1 span{color:var(--muted);font-size:.72rem;font-family:'Inter',sans-serif;font-weight:400;margin-left:6px;}
 .hdr{margin-left:auto;display:flex;gap:8px;}
+.badge{padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:600;}
+.bb2{background:var(--bmid);color:var(--blue);}
+.bg2{background:#d1fae5;color:#065f46;}
+
 main{max-width:1180px;margin:0 auto;padding:24px 18px;}
+
+/* ── CARD ── */
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh);margin-bottom:16px;}
-.sh{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sh{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .sh::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── SEARCH ── */
 .srow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
 .sf{flex:1;min-width:180px;}
 .sf label{display:block;font-size:.76rem;font-weight:500;color:var(--t2);margin-bottom:4px;}
@@ -33,65 +50,89 @@ main{max-width:1180px;margin:0 auto;padding:24px 18px;}
 #sb.loading{background:var(--blight);border-color:var(--bmid);color:var(--blue);}
 #sb.success{background:var(--glight);border-color:#a7f3d0;color:var(--green);}
 #sb.error{background:var(--rlight);border-color:#fecaca;color:var(--red);}
+
+/* ── INFO STRIP — PROFESSIONAL BOX ── */
 #strip{display:none;}
-.chips{display:flex;gap:18px;flex-wrap:wrap;}
-.ch .cl{font-size:.64rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
-.ch .cv{font-size:.85rem;font-weight:600;color:var(--text);}
-.cv.blue{color:var(--blue);}.cv.green{color:var(--green);}.cv.orange{color:var(--orange);}
+.info-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:0;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;}
+.info-box{padding:12px 14px;border-right:1px solid var(--border);background:var(--white);transition:background .15s;}
+.info-box:last-child{border-right:none;}
+.info-box:hover{background:#f8fafc;}
+.ib-label{font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.ib-val{font-size:.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ib-val.blue{color:var(--blue);}
+.ib-val.green{color:var(--green);}
+.ib-val.orange{color:var(--orange);}
+.ib-val.red{color:var(--red);}
+@media(max-width:900px){.info-grid{grid-template-columns:repeat(3,1fr);}.info-box{border-bottom:1px solid var(--border);}}
+
+/* ── MANUAL INPUTS ── */
 #ms{display:none;}
-.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:520px;}
-.fl label{display:block;font-size:.75rem;font-weight:500;color:var(--t2);margin-bottom:3px;}
-.fl input{width:100%;padding:9px 12px;border:2px solid var(--blue);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:var(--blue);background:var(--blight);outline:none;transition:border-color .2s;}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:500px;}
+.fl label{display:block;font-size:.76rem;font-weight:600;color:var(--t2);margin-bottom:5px;}
+.fl .hint{font-size:.67rem;color:var(--muted);margin-bottom:5px;}
+.fl input{width:100%;padding:10px 14px;border:2px solid var(--blue);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:700;color:var(--blue);background:var(--blight);outline:none;transition:all .2s;}
 .fl input:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+
+/* ── TILES ── */
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
 @media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr);}}
-.tile{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;}
+.tile{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;}
 .tile:hover{transform:translateY(-2px);box-shadow:var(--shm);}
-.tl{font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;}
-.tv{font-size:1.15rem;font-weight:700;}
+.tl{font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;}
+.tv{font-size:1.2rem;font-weight:700;}
 .tv.blue{color:var(--blue);}.tv.green{color:var(--green);}.tv.orange{color:var(--orange);}.tv.red{color:var(--red);}
-.ts{font-size:.67rem;color:var(--muted);margin-top:1px;}
+.ts{font-size:.67rem;color:var(--muted);margin-top:2px;}
+
+/* ── GRID ── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 @media(max-width:780px){.g2{grid-template-columns:1fr;}}
-.cr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+.cr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;}
 .cr:last-child{border-bottom:none;}
 .cr .k{font-size:.8rem;color:var(--t2);}
 .cr .v{font-size:.85rem;font-weight:600;color:var(--text);}
 .v.blue{color:var(--blue);}.v.green{color:var(--green);}.v.orange{color:var(--orange);}.v.red{color:var(--red);}.v.purple{color:var(--purple);}
+
+/* ── TABS ── */
 .tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--white);border:1px solid var(--border);border-radius:var(--rs);padding:3px;width:fit-content;box-shadow:var(--sh);}
-.tb{padding:7px 16px;border:none;border-radius:6px;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .15s;}
+.tb{padding:7px 18px;border:none;border-radius:7px;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .15s;}
 .tb.active{background:var(--blue);color:#fff;box-shadow:0 2px 6px rgba(37,99,235,.3);}
+
+/* ── TABLE ── */
 .tw{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px;}
 table{width:100%;border-collapse:collapse;font-size:.8rem;}
-thead th{padding:9px 12px;text-align:right;background:var(--bg);border-bottom:1px solid var(--border);font-size:.64rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);white-space:nowrap;}
+thead th{padding:10px 13px;text-align:right;background:#f8fafc;border-bottom:2px solid var(--border);font-size:.63rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t2);white-space:nowrap;}
 thead th:first-child{text-align:center;}
 tbody tr{border-top:1px solid var(--border);transition:background .12s;}
 tbody tr:hover{background:var(--blight);}
 tbody tr.rp{background:#f0fdf4;}
-tbody tr.rf{background:#fffbeb;}
-td{padding:9px 12px;text-align:right;color:var(--text);}
-td:first-child{text-align:center;font-weight:600;color:var(--blue);}
-.tag{padding:2px 7px;border-radius:4px;font-size:.65rem;font-weight:700;}
+tbody tr.rf{background:#fffbeb;font-weight:600;}
+td{padding:9px 13px;text-align:right;color:var(--text);}
+td:first-child{text-align:center;font-weight:700;color:var(--blue);}
+.tag{padding:2px 8px;border-radius:5px;font-size:.64rem;font-weight:700;letter-spacing:.03em;}
 .tp{background:#d1fae5;color:#065f46;}
 .tpn{background:#fef3c7;color:#92400e;}
 .ta{background:var(--plight);color:var(--purple);}
+.tfc{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+
+/* ── FORECLOSURE BOX ── */
 .fc{background:linear-gradient(135deg,#fffbeb,#fff7ed);border:1px solid #fde68a;border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);}
-.fg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.fg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
 @media(max-width:780px){.fg{grid-template-columns:repeat(2,1fr);}}
-.fi .fl2{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e;margin-bottom:2px;}
-.fi .fv{font-size:.9rem;font-weight:700;}
-.fd{height:1px;background:#fde68a;margin:14px 0;}
-.ftv{font-size:1.45rem;font-weight:700;color:#b45309;}
-.badge{padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:600;}
-.bb2{background:var(--bmid);color:var(--blue);}
-.bg2{background:#d1fae5;color:#065f46;}
-#toast{position:fixed;bottom:18px;right:18px;background:var(--text);color:#fff;padding:11px 16px;border-radius:var(--rs);font-size:.8rem;font-weight:500;transform:translateY(60px);opacity:0;transition:all .25s;z-index:9999;box-shadow:var(--shl);}
+.fi{background:rgba(255,255,255,.6);border:1px solid rgba(253,230,138,.5);border-radius:var(--rs);padding:12px 14px;}
+.fi .fl2{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#92400e;margin-bottom:4px;}
+.fi .fv{font-size:.95rem;font-weight:700;}
+.fd{height:1px;background:#fde68a;margin:16px 0;}
+.ftv{font-size:1.5rem;font-weight:700;color:#b45309;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:18px;right:18px;background:var(--text);color:#fff;padding:11px 16px;border-radius:var(--rs);font-size:.8rem;font-weight:500;transform:translateY(60px);opacity:0;transition:all .25s;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);}
 #toast.show{transform:translateY(0);opacity:1;}
-.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(37,99,235,.25);border-top-color:var(--blue);border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(37,99,235,.2);border-top-color:var(--blue);border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;}
 @keyframes sp{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
+
 <header>
   <div class="logo">D</div>
   <h1>Dropout Repayment Calculator <span>Google Sheet Auto-Fetch</span></h1>
@@ -100,15 +141,16 @@ td:first-child{text-align:center;font-weight:600;color:var(--blue);}
     <span class="badge bg2">2 Inputs Only</span>
   </div>
 </header>
+
 <main>
 
-<!-- SEARCH -->
+<!-- STEP 1: SEARCH -->
 <div class="card">
   <div class="sh">🔍 Step 1 — Enter App ID</div>
   <div class="srow">
     <div class="sf">
       <label>App ID</label>
-      <input type="text" class="big" id="aid" placeholder="e.g. 1214970  — Press Enter" onkeydown="if(event.key==='Enter')fetch_()">
+      <input type="text" class="big" id="aid" placeholder="e.g. 1214970  — Press Enter to fetch" onkeydown="if(event.key==='Enter')fetch_()">
     </div>
     <button class="btn bb" id="fb" onclick="fetch_()">⬇ Fetch Data</button>
     <button class="btn bg" onclick="clear_()">↺ Clear</button>
@@ -116,56 +158,67 @@ td:first-child{text-align:center;font-weight:600;color:var(--blue);}
   <div id="sb"></div>
 </div>
 
-<!-- INFO STRIP -->
+<!-- FETCHED RECORD — PROFESSIONAL BOXES -->
 <div id="strip" class="card">
   <div class="sh">📋 Fetched Record</div>
-  <div class="chips" id="chips"></div>
+  <div class="info-grid" id="igrid"></div>
 </div>
 
-<!-- MANUAL + RESULTS -->
+<!-- STEP 2: MANUAL INPUTS -->
 <div id="ms">
   <div class="card">
     <div class="sh">✏️ Step 2 — Enter Only These 2 Fields</div>
     <div class="mg">
       <div class="fl">
-        <label>📌 No. of EMIs Paid (Excl. Advance EMI)</label>
+        <label>📌 No. of EMIs Paid</label>
+        <div class="hint">Excluding Advance EMI</div>
         <input type="number" id="ep" value="0" min="0" oninput="calc()">
       </div>
       <div class="fl">
         <label>📌 No. of Days — Current Month</label>
+        <div class="hint">For prorated interest</div>
         <input type="number" id="dm" value="30" min="0" oninput="calc()">
       </div>
     </div>
   </div>
 
+  <!-- TILES -->
   <div class="tiles" id="tiles"></div>
 
+  <!-- TABS -->
   <div class="tabs">
     <button class="tb active" onclick="tab('summary',this)">📊 Summary</button>
     <button class="tb" onclick="tab('schedule',this)">📅 Schedule</button>
     <button class="tb" onclick="tab('foreclosure',this)">⚡ Foreclosure</button>
   </div>
 
+  <!-- SUMMARY -->
   <div id="tab-summary">
     <div class="g2">
       <div class="card" style="margin-bottom:0"><div class="sh">📋 Loan Breakdown</div><div id="bd"></div></div>
       <div class="card" style="margin-bottom:0"><div class="sh">📈 Calculated Values</div><div id="cv"></div></div>
     </div>
   </div>
-  <div id="tab-schedule" style="display:none"><div class="tw" id="st"></div></div>
+
+  <!-- SCHEDULE -->
+  <div id="tab-schedule" style="display:none">
+    <div class="tw" id="st"></div>
+  </div>
+
+  <!-- FORECLOSURE -->
   <div id="tab-foreclosure" style="display:none">
     <div class="fc">
       <div class="sh" style="color:#92400e;">⚡ Foreclosure Summary</div>
       <div class="fg" id="fg"></div>
       <div class="fd"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div>
-          <div style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e;margin-bottom:3px;">🏆 Final Foreclosure Amount</div>
+          <div style="font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#92400e;margin-bottom:5px;">🏆 Final Foreclosure Amount</div>
           <div class="ftv" id="ff">—</div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:.66rem;color:#92400e;margin-bottom:2px;">Foreclosure Date</div>
-          <div style="font-size:.9rem;font-weight:600;color:#92400e" id="fd2">—</div>
+        <div style="text-align:right;background:rgba(255,255,255,.6);border:1px solid rgba(253,230,138,.5);border-radius:var(--rs);padding:12px 16px;">
+          <div style="font-size:.62rem;color:#92400e;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Foreclosure Date</div>
+          <div style="font-size:1rem;font-weight:700;color:#92400e" id="fd2">—</div>
         </div>
       </div>
     </div>
@@ -177,26 +230,31 @@ td:first-child{text-align:center;font-weight:600;color:var(--blue);}
 
 <script>
 const SID='1FvGTH4IOzoDr6PNBKLfWVENBhevuQDrt2uy8yOwNsZ8';
-let REC=null,SCHED=[];
+let REC=null, SCHED=[];
 
-// ── IRR (exact same as Excel) ──────────────────────────────
+// ── IRR (exact Excel) ─────────────────────────────────────
 function irr(cfs){
   let r=0.01;
-  for(let i=0;i<500;i++){
+  for(let i=0;i<600;i++){
     let n=0,d=0;
-    for(let t=0;t<cfs.length;t++){const f=Math.pow(1+r,t);n+=cfs[t]/f;d-=t*cfs[t]/(f*(1+r));}
+    for(let t=0;t<cfs.length;t++){
+      const f=Math.pow(1+r,t);
+      n+=cfs[t]/f;
+      d-=t*cfs[t]/(f*(1+r));
+    }
+    if(Math.abs(d)<1e-15)break;
     const rn=r-n/d;
     if(Math.abs(rn-r)<1e-12)return rn;
-    r=isNaN(rn)?r*1.1:rn;
+    r=isNaN(rn)||!isFinite(rn)?r*1.1:rn;
   }
   return r;
 }
 
-// ── FORMAT ──
-const R2=n=>isNaN(n)||!isFinite(n)?'—':n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-const RR=n=>isNaN(n)||!isFinite(n)?'—':'₹'+R2(n);
+// ── FORMAT ──────────────────────────────────────────────
+const R2=n=>(!isFinite(n)||isNaN(n))?'—':n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const RR=n=>(!isFinite(n)||isNaN(n))?'—':'₹'+R2(n);
 
-// ── NORMALIZE column headers ──
+// ── NORMALIZE ────────────────────────────────────────────
 const nm=s=>s.toString().trim().toLowerCase().replace(/[\s\-_/%()]+/g,'');
 function gv(row,...vs){
   for(const v of vs){
@@ -207,7 +265,46 @@ function gv(row,...vs){
   return null;
 }
 
-// ── FETCH FROM SHEET ──
+// ── PARSE GVIZ DATE → display string ─────────────────────
+// gviz returns dates as "Date(year, month0indexed, day)"
+function parseDate(dd){
+  if(!dd)return'—';
+  if(dd instanceof Date)return dd.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  if(typeof dd==='string'&&dd.startsWith('Date(')){
+    const p=dd.replace('Date(','').replace(')','').split(',').map(Number);
+    // p[1] is 0-indexed month in gviz
+    const d=new Date(p[0],p[1],p[2]);
+    return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  }
+  // dd-mm-yyyy or yyyy-mm-dd
+  try{
+    const p=dd.toString().split(/[-\/]/);
+    if(p.length===3){
+      let d=p[0].length===4?new Date(`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`):new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`);
+      if(!isNaN(d))return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    }
+  }catch(e){}
+  return dd;
+}
+
+// ── PARSE GVIZ DATE → Date object (for calc) ─────────────
+function parseDateObj(dd){
+  if(!dd)return null;
+  if(dd instanceof Date)return dd;
+  if(typeof dd==='string'&&dd.startsWith('Date(')){
+    const p=dd.replace('Date(','').replace(')','').split(',').map(Number);
+    return new Date(p[0],p[1],p[2]);
+  }
+  try{
+    const p=dd.toString().split(/[-\/]/);
+    if(p.length===3){
+      return p[0].length===4?new Date(`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`):new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`);
+    }
+  }catch(e){}
+  return null;
+}
+
+// ── FETCH ────────────────────────────────────────────────
 async function fetch_(){
   const aid=document.getElementById('aid').value.trim();
   if(!aid){ss('error','⚠️ Please enter an App ID');return;}
@@ -220,188 +317,252 @@ async function fetch_(){
     const cols=json.table.cols.map(c=>c.label||c.id);
     const rows=json.table.rows.map(r=>Object.fromEntries(cols.map((c,i)=>[c,r.c[i]?.v??''])));
     const rec=rows.find(r=>{
-      const id=gv(r,'App ID','AppID','Application Id','app_id');
+      const id=gv(r,'App ID','AppID','Application Id','app_id','applicationid');
       return id&&id.toString().trim()===aid.toString().trim();
     });
-    if(!rec){ss('error',`❌ App ID "${aid}" not found. Check ID or share sheet as public.`);document.getElementById('fb').disabled=false;return;}
-    REC=parse(rec);
-    ss('success',`✅ Found: <strong>${REC.name}</strong> | ₹${R2(REC.loan)} | ${REC.te} EMIs (Adv: ${REC.ae})`);
+    if(!rec){ss('error',`❌ App ID "${aid}" not found. Check ID or make sheet public (Share → Anyone with link → Viewer).`);document.getElementById('fb').disabled=false;return;}
+    REC=parseRec(rec);
+    ss('success',`✅ Found: <strong>${REC.name}</strong> &nbsp;|&nbsp; ₹${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
     renderStrip(REC);
     document.getElementById('strip').style.display='block';
     document.getElementById('ms').style.display='block';
     calc();
     toast(`✅ ${REC.name} — loaded!`);
-  }catch(e){ss('error',`❌ ${e.message}. Make sheet public: Share → Anyone with link → Viewer`);}
+  }catch(e){
+    ss('error',`❌ ${e.message}. Ensure sheet is public.`);
+  }
   document.getElementById('fb').disabled=false;
 }
 
-function parse(row){
+function parseRec(row){
   const g=(...v)=>gv(row,...v);
-  let dd=g('Loan Live Date','loan live date','Start Date','disbursement date');
-  if(dd instanceof Date)dd=dd.toISOString().split('T')[0];
-  else if(dd){const p=dd.toString().split(/[-\/]/);if(p.length===3&&p[0].length<=2)dd=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;}
+  const rawDate=g('Loan Live Date','loan live date','Start Date','disbursement date','livedate');
   return{
     appId: g('App ID','AppID','Application Id')||'',
-    name:  g('Student Name','student name','Name')||'—',
-    loan:  parseFloat(g('Tranche Amount','tranche amount','Loan Amount'))||0,
-    te:    parseInt(g('Number of EMIs','numberofemis','No of EMIs'))||0,
-    ae:    parseInt(g('Advance EMIs','advance emis','Adv EMI'))||0,
-    subv:  parseFloat(g('Discount Rate','discount rate','Subvention %'))||0,
-    ret:   parseFloat(g('FLDG %','FLDG','Retention %'))||0,
-    intr:  parseFloat(g('Total Regular Int Rate','interest rate','IRR'))||0,
-    grp:   g('Group Name','groupname')||'—',
+    name:  g('Student Name','student name','Name','applicant name')||'—',
+    loan:  parseFloat(g('Tranche Amount','tranche amount','Loan Amount','loanamount'))||0,
+    te:    parseInt(g('Number of EMIs','numberofemis','No of EMIs','totalemis','noemis'))||0,
+    ae:    parseInt(g('Advance EMIs','advance emis','Adv EMI','advanceemis','advemi'))||0,
+    subv:  parseFloat(g('Discount Rate','discount rate','Subvention %','subvention','discountrate'))||0,
+    ret:   parseFloat(g('FLDG %','FLDG','fldg','Retention %','retentionpercentage'))||0,
+    intr:  parseFloat(g('Total Regular Int Rate','interest rate','totalregularintrate','irr'))||0,
+    grp:   g('Group Name','groupname','group name')||'—',
     nbfc:  g('NBFC','nbfc')||'—',
-    date:  dd||''
+    dateStr: parseDate(rawDate),
+    dateObj: parseDateObj(rawDate),
   };
 }
 
+// ── INFO STRIP — PROFESSIONAL BOXES ─────────────────────
 function renderStrip(r){
-  document.getElementById('chips').innerHTML=`
-    <div class="ch"><div class="cl">App ID</div><div class="cv blue">${r.appId}</div></div>
-    <div class="ch"><div class="cl">Student</div><div class="cv">${r.name}</div></div>
-    <div class="ch"><div class="cl">Loan Amount</div><div class="cv green">₹${R2(r.loan)}</div></div>
-    <div class="ch"><div class="cl">EMIs</div><div class="cv">${r.te} (Adv: ${r.ae})</div></div>
-    <div class="ch"><div class="cl">Discount %</div><div class="cv orange">${r.subv}%</div></div>
-    <div class="ch"><div class="cl">FLDG/Retention %</div><div class="cv">${r.ret}%</div></div>
-    <div class="ch"><div class="cl">Live Date</div><div class="cv">${r.date||'—'}</div></div>
-    <div class="ch"><div class="cl">Group</div><div class="cv">${r.grp}</div></div>
-    <div class="ch"><div class="cl">NBFC</div><div class="cv">${r.nbfc}</div></div>
-  `;
+  const boxes=[
+    {l:'App ID',    v:r.appId,    c:'blue'},
+    {l:'Student',   v:r.name,     c:''},
+    {l:'Loan Amount',v:'₹'+R2(r.loan),c:'green'},
+    {l:'Total EMIs', v:`${r.te} (Adv: ${r.ae})`,c:''},
+    {l:'Discount %', v:r.subv+'%',c:'orange'},
+    {l:'FLDG / Ret %',v:r.ret+'%',c:''},
+    {l:'Live Date',  v:r.dateStr, c:''},
+    {l:'Group',      v:r.grp,     c:''},
+    {l:'NBFC',       v:r.nbfc,    c:''},
+  ];
+  document.getElementById('igrid').innerHTML=boxes.map(b=>`
+    <div class="info-box">
+      <div class="ib-label">${b.l}</div>
+      <div class="ib-val ${b.c}" title="${b.v}">${b.v}</div>
+    </div>`).join('');
 }
 
-// ── MAIN CALCULATE — EXACT EXCEL FORMULAS ──────────────────
+// ── MAIN CALCULATE — EXACT EXCEL FORMULAS ─────────────────
 function calc(){
   if(!REC)return;
   const r=REC;
-  const loan=r.loan, te=r.te, ae=r.ae;
-  const subvP=r.subv/100, retP=r.ret/100, intP=r.intr/100;
+  const loan=r.loan,te=r.te,ae=r.ae;
+  const subvP=r.subv/100,retP=r.ret/100,intP=r.intr/100;
   const ep=parseInt(document.getElementById('ep').value)||0;
   const dm=parseFloat(document.getElementById('dm').value)||0;
   if(!loan||!te)return;
 
-  // ── EXACT EXCEL FORMULAS ──
-  const intFee = intP * loan;                          // D16 = D15*D4
-  const emi    = (loan/te)+(intFee/te);                // D9  = (D4/D5)+(D16/D5)
-  const advAmt = ae * emi;                             // D7  = D6*D9
-  const ne     = te - ae;                              // D8  = D5-D6
-  const subvAmt= subvP * loan;                         // D11 = D10*D4
-  const netLoan= loan - subvAmt;                       // D12 = D4-D11
-  const retAmt = retP * netLoan;                       // D14 = D13*D12
-  const netDisb= netLoan - retAmt;                     // D17 = D12-D14
-  // D18 = (D4-D7-D11-D14) - IF(D16<=0,D16,0)
+  // ── EXACT EXCEL FORMULAS ────────────────────────────────
+  const intFee = intP * loan;                     // D16=D15*D4
+  const emi    = (loan/te)+(intFee/te);           // D9=(D4/D5)+(D16/D5)
+  const advAmt = ae * emi;                         // D7=D6*D9
+  const ne     = te - ae;                          // D8=D5-D6
+  const subvAmt= subvP * loan;                     // D11=D10*D4
+  const netLoan= loan - subvAmt;                   // D12=D4-D11
+  const retAmt = retP * netLoan;                   // D14=D13*D12
+  const netDisb= netLoan - retAmt;                 // D17=D12-D14
+  // D18=(D4-D7-D11-D14)-IF(D16<=0,D16,0)
   const netP   = (loan-advAmt-subvAmt-retAmt)-(intFee<=0?intFee:0);
 
-  // IRR cash flows — EXACT as H column in Excel
-  // H33=-D18, H34+: IF(t<=ne,emi,0)-IF(ne=t,retAmt)-IF(retAmt>1,retAmt,0)+retAmt
-  // When retAmt>1: last two terms cancel → for last month only: subtract retAmt
+  // IRR cash flows — exact H column Excel
   const cfs=[-netP];
   for(let i=1;i<=ne;i++){
-    let cf=emi;                      // IF(t<=ne, emi, 0)
-    if(i===ne) cf-=retAmt;          // IF(ne=t, retAmt) → subtract on last month
-    // -IF(retAmt>1,retAmt,0)+retAmt = 0 when retAmt>1 → net zero
+    let cf=emi;
+    if(i===ne)cf-=retAmt;   // last month: retention deducted
     cfs.push(cf);
   }
-  const mR=irr(cfs);                                   // H32=IRR(H33:H93)*12/12
-  const apr=mR*12;                                     // D19=H32*12 ... wait H32=IRR*12
+  const mR=irr(cfs);
+  const apr=mR*12;   // D19=H32 (which is IRR*12)
 
-  // Build schedule — EXACT as C/D/E/F/G columns
+  // ── SCHEDULE — exact C/D/E/F/G columns ─────────────────
   SCHED=[];
   let bal=netP;
   for(let i=1;i<=ne;i++){
-    const interest=bal*mR;                             // E = G_prev * (D19/12)
+    const interest=bal*mR;           // E=G_prev*(D19/12)
     let payment=emi;
-    if(i===ne) payment-=retAmt;
-    const principal=payment-interest;                   // F = D-E
-    const closing=bal-principal;                        // G = G_prev-F
+    if(i===ne)payment-=retAmt;
+    const principal=payment-interest; // F=D-E
+    const closing=bal-principal;      // G=G_prev-F
     SCHED.push({t:i,op:bal,emi:payment,int:interest,pr:principal,cl:closing});
     bal=closing;
   }
 
-  // J32 = SUMIF(C col, emisPaid, G col) = closing at tenure=ep
-  const pendingPOS = ep>0&&ep<=SCHED.length ? SCHED[ep-1].cl : (ep===0?netP:0);
+  // ── PENDING POS — J32=SUMIF(C col, ep, G col) ──────────
+  // = closing balance at tenure = ep (last paid month)
+  const pendingPOS = ep>0&&ep<=SCHED.length ? SCHED[ep-1].cl
+                   : ep===0 ? netP : 0;
 
-  // D24 = J32*(D19/360)  ← 360 days exactly as Excel
+  // ── DAILY INTEREST — D24=J32*(D19/360) ─────────────────
   const dailyInt = pendingPOS*(apr/360);
 
-  // D26 = D25*D24
+  // ── PRORATED INT — D26=D25*D24 ─────────────────────────
   const proratedInt = dm*dailyInt;
 
-  // J33 = TODAY() - foreclosure date = today
+  // ── FORECLOSURE ── J35=pendingPOS+proratedInt, J36=2.95%*J35, J38=J35+J36 ──
+  const fcAmt   = pendingPOS + proratedInt;
+  const fcCharge= 0.0295 * fcAmt;
+  const finalFc = fcAmt + fcCharge;
+
+  // Foreclosure date = TODAY (J33=TODAY())
   const today=new Date();
   const fcDateStr=today.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 
-  // J35 = Foreclosure Amount = pendingPOS + proratedInt
-  const fcAmt = pendingPOS+proratedInt;
-
-  // J36 = 2.95% * J35  ← exact Excel formula
-  const fcCharge = 0.0295*fcAmt;
-
-  // J38 = Final = J35+J36 (bounce=0 here, added separately)
-  const finalFc = fcAmt+fcCharge;
-
   const totalInt=SCHED.reduce((s,x)=>s+x.int,0);
 
-  // ── TILES ──
+  // ── TILES ──────────────────────────────────────────────
   document.getElementById('tiles').innerHTML=`
-    <div class="tile"><div class="tl">EMI Amount</div><div class="tv blue">₹${R2(emi)}</div><div class="ts">${ne} normal + ${ae} advance</div></div>
-    <div class="tile"><div class="tl">Net Principal O/S</div><div class="tv green">₹${R2(netP)}</div><div class="ts">After all deductions</div></div>
-    <div class="tile"><div class="tl">APR (IRR×12)</div><div class="tv orange">${(apr*100).toFixed(4)}%</div><div class="ts">Monthly: ${(mR*100).toFixed(4)}%</div></div>
-    <div class="tile"><div class="tl">Final Foreclosure</div><div class="tv red">₹${R2(finalFc)}</div><div class="ts">incl. 2.95% charge</div></div>
+    <div class="tile">
+      <div class="tl">EMI Amount</div>
+      <div class="tv blue">₹${R2(emi)}</div>
+      <div class="ts">${ne} normal + ${ae} advance</div>
+    </div>
+    <div class="tile">
+      <div class="tl">Net Principal O/S</div>
+      <div class="tv green">₹${R2(netP)}</div>
+      <div class="ts">After all deductions</div>
+    </div>
+    <div class="tile">
+      <div class="tl">APR (IRR×12)</div>
+      <div class="tv orange">${(apr*100).toFixed(4)}%</div>
+      <div class="ts">Monthly: ${(mR*100).toFixed(4)}%</div>
+    </div>
+    <div class="tile">
+      <div class="tl">Final Foreclosure</div>
+      <div class="tv red">₹${R2(finalFc)}</div>
+      <div class="ts">incl. 2.95% charge</div>
+    </div>
   `;
 
-  // ── BREAKDOWN ──
+  // ── BREAKDOWN ───────────────────────────────────────────
   document.getElementById('bd').innerHTML=[
-    ['Loan Amount',RR(loan),'blue'],
-    ['Subvention Amount',RR(subvAmt),'red'],
-    ['Net Loan for Lender',RR(netLoan),''],
-    ['Retention Amount',RR(retAmt),'red'],
-    ['Interest Fee',RR(intFee),''],
-    ['Net Disbursement',RR(netDisb),'green'],
-    ['Advance EMI Amount',RR(advAmt),''],
-    ['Net Principal O/S',RR(netP),'blue'],
+    ['Loan Amount',        RR(loan),     'blue'],
+    ['Subvention Amount',  RR(subvAmt),  'red'],
+    ['Net Loan for Lender',RR(netLoan),  ''],
+    ['Retention Amount',   RR(retAmt),   'red'],
+    ['Interest Fee',       RR(intFee),   ''],
+    ['Net Disbursement',   RR(netDisb),  'green'],
+    ['Advance EMI Amount', RR(advAmt),   ''],
+    ['Net Principal O/S',  RR(netP),     'blue'],
   ].map(([l,v,c])=>`<div class="cr"><span class="k">${l}</span><span class="v ${c}">${v}</span></div>`).join('');
 
   document.getElementById('cv').innerHTML=[
-    ['Normal EMIs',ne,''],
-    ['Tenure (Years)',(te/12).toFixed(2),''],
-    ['APR %',(apr*100).toFixed(4)+'%','orange'],
-    ['Daily Interest (÷360)',RR(dailyInt),''],
-    ['Pending POS',RR(pendingPOS),'red'],
-    ['Prorated Interest',RR(proratedInt),''],
-    ['Total Interest Earned',RR(totalInt),'purple'],
-    ['Total Repayable',RR(advAmt+emi*ne),'blue'],
+    ['Normal EMIs',           ne,                         ''],
+    ['Tenure (Years)',         (te/12).toFixed(2),         ''],
+    ['APR %',                  (apr*100).toFixed(4)+'%',   'orange'],
+    ['Daily Interest (÷360)',  RR(dailyInt),               ''],
+    ['Pending POS',            RR(pendingPOS),             'red'],
+    ['Prorated Interest',      RR(proratedInt),            ''],
+    ['Total Interest Earned',  RR(totalInt),               'purple'],
+    ['Total Repayable',        RR(advAmt+emi*ne),          'blue'],
   ].map(([l,v,c])=>`<div class="cr"><span class="k">${l}</span><span class="v ${c}">${v}</span></div>`).join('');
 
-  // ── SCHEDULE TABLE ──
-  let tbl=`<table><thead><tr><th>Month</th><th>Opening (₹)</th><th>EMI Payment (₹)</th><th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th></tr></thead><tbody>`;
-  if(ae>0)tbl+=`<tr><td>ADV</td><td style="color:var(--muted)">—</td><td>${R2(advAmt)}</td><td>—</td><td>${R2(advAmt)}</td><td>${R2(netP)}</td><td><span class="tag ta">Advance</span></td></tr>`;
+  // ── SCHEDULE TABLE ──────────────────────────────────────
+  // FIXED: Foreclosure tag = LAST PAID month (ep-1 index)
+  // Paid = months 1 to ep-1, Foreclosure = month ep, Pending = rest
+  let tbl=`<table><thead><tr>
+    <th>Month</th><th>Opening (₹)</th><th>EMI Payment (₹)</th>
+    <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th>
+  </tr></thead><tbody>`;
+
+  // Advance row
+  if(ae>0)tbl+=`<tr>
+    <td>ADV</td>
+    <td style="color:var(--muted);text-align:right">—</td>
+    <td>${R2(advAmt)}</td><td style="text-align:right">—</td>
+    <td>${R2(advAmt)}</td><td>${R2(netP)}</td>
+    <td><span class="tag ta">Advance</span></td>
+  </tr>`;
+
   SCHED.forEach((row,idx)=>{
-    const paid=idx<ep,fc=idx===ep;
-    const cls=paid?'rp':fc?'rf':'';
-    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tpn">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
-    tbl+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td><td style="color:var(--red)">${R2(row.int)}</td><td style="color:var(--green)">${R2(row.pr)}</td><td>${R2(row.cl)}</td><td>${tag}</td></tr>`;
+    // idx 0 = month 1, idx ep-1 = last paid (FORECLOSURE row), idx>=ep = pending
+    const isPaid = ep>0 && idx < ep-1;           // months before last paid
+    const isFc   = ep>0 && idx === ep-1;          // LAST PAID month = foreclosure
+    const cls    = isPaid?'rp': isFc?'rf':'';
+    const tag    = isPaid
+      ? '<span class="tag tp">✓ Paid</span>'
+      : isFc
+        ? '<span class="tag tfc">⚡ Foreclosure</span>'
+        : '<span class="tag tpn">Pending</span>';
+
+    tbl+=`<tr class="${cls}">
+      <td>${row.t}</td>
+      <td>${R2(row.op)}</td>
+      <td>${R2(row.emi)}</td>
+      <td style="color:var(--red)">${R2(row.int)}</td>
+      <td style="color:var(--green)">${R2(row.pr)}</td>
+      <td><strong>${R2(row.cl)}</strong></td>
+      <td>${tag}</td>
+    </tr>`;
   });
   document.getElementById('st').innerHTML=tbl+'</tbody></table>';
 
-  // ── FORECLOSURE ──
+  // ── FORECLOSURE SUMMARY ──────────────────────────────────
   document.getElementById('fg').innerHTML=[
-    ['Pending POS',RR(pendingPOS),'#1d4ed8'],
-    ['Daily Interest (÷360)',RR(dailyInt),'#92400e'],
-    ['Days for Proration',dm+' days','#92400e'],
-    ['Prorated Interest',RR(proratedInt),'#d97706'],
-    ['Foreclosure Amount',RR(fcAmt),'#92400e'],
-    ['FC Charge @2.95%',RR(fcCharge),'#b91c1c'],
-    ['Bounce Charges','₹0.00','#b91c1c'],
-    ['Foreclosure Month',fcDateStr,'#92400e'],
-  ].map(([l,v,c])=>`<div class="fi"><div class="fl2">${l}</div><div class="fv" style="color:${c}">${v}</div></div>`).join('');
+    ['Pending POS',        RR(pendingPOS),  '#1d4ed8'],
+    ['Daily Interest (÷360)',RR(dailyInt),  '#92400e'],
+    ['Days for Proration', dm+' days',      '#92400e'],
+    ['Prorated Interest',  RR(proratedInt), '#d97706'],
+    ['Foreclosure Amount', RR(fcAmt),       '#92400e'],
+    ['FC Charge @2.95%',   RR(fcCharge),    '#b91c1c'],
+    ['Bounce Charges',     '₹0.00',         '#b91c1c'],
+    ['Foreclosure Month',  fcDateStr,       '#92400e'],
+  ].map(([l,v,c])=>`
+    <div class="fi">
+      <div class="fl2">${l}</div>
+      <div class="fv" style="color:${c}">${v}</div>
+    </div>`).join('');
+
   document.getElementById('ff').textContent=RR(finalFc);
   document.getElementById('fd2').textContent=fcDateStr;
 }
 
+// ── HELPERS ─────────────────────────────────────────────
 function ss(t,m){const e=document.getElementById('sb');e.className=t;e.innerHTML=m;e.style.display='block';}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function clear_(){document.getElementById('aid').value='';document.getElementById('sb').style.display='none';document.getElementById('strip').style.display='none';document.getElementById('ms').style.display='none';REC=null;}
-function tab(id,btn){document.querySelectorAll('[id^="tab-"]').forEach(e=>e.style.display='none');document.getElementById('tab-'+id).style.display='block';document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function clear_(){
+  document.getElementById('aid').value='';
+  document.getElementById('sb').style.display='none';
+  document.getElementById('strip').style.display='none';
+  document.getElementById('ms').style.display='none';
+  REC=null;SCHED=[];
+}
+function tab(id,btn){
+  document.querySelectorAll('[id^="tab-"]').forEach(e=>e.style.display='none');
+  document.getElementById('tab-'+id).style.display='block';
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
 </script>
 </body>
 </html>
