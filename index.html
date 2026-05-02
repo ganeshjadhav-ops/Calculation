@@ -27,7 +27,7 @@ header h1 span{color:var(--muted);font-size:.72rem;font-family:'Inter',sans-seri
 .bb2{background:var(--bmid);color:var(--blue);}
 .bg2{background:#d1fae5;color:#065f46;}
 
-main{max-width:1180px;margin:0 auto;padding:24px 18px;}
+main{max-width:1380px;margin:0 auto;padding:24px 24px;}
 
 /* ── CARD ── */
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh);margin-bottom:16px;}
@@ -53,7 +53,7 @@ main{max-width:1180px;margin:0 auto;padding:24px 18px;}
 
 /* ── INFO STRIP — PROFESSIONAL BOX ── */
 #strip{display:none;}
-.info-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:0;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;}
+.info-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:0;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;}
 .info-box{padding:12px 14px;border-right:1px solid var(--border);background:var(--white);transition:background .15s;}
 .info-box:last-child{border-right:none;}
 .info-box:hover{background:#f8fafc;}
@@ -76,12 +76,12 @@ main{max-width:1180px;margin:0 auto;padding:24px 18px;}
 /* ── TILES ── */
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
 @media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr);}}
-.tile{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;}
+.tile{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;}
 .tile:hover{transform:translateY(-2px);box-shadow:var(--shm);}
-.tl{font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;}
-.tv{font-size:1.2rem;font-weight:700;}
+.tl{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;}
+.tv{font-size:1.5rem;font-weight:700;}
 .tv.blue{color:var(--blue);}.tv.green{color:var(--green);}.tv.orange{color:var(--orange);}.tv.red{color:var(--red);}
-.ts{font-size:.67rem;color:var(--muted);margin-top:2px;}
+.ts{font-size:.72rem;color:var(--muted);margin-top:2px;}
 
 /* ── GRID ── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
@@ -122,7 +122,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 .fi .fl2{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#92400e;margin-bottom:4px;}
 .fi .fv{font-size:.95rem;font-weight:700;}
 .fd{height:1px;background:#fde68a;margin:16px 0;}
-.ftv{font-size:1.5rem;font-weight:700;color:#b45309;}
+.ftv{font-size:1.7rem;font-weight:700;color:#b45309;}
 
 /* ── TOAST ── */
 #toast{position:fixed;bottom:18px;right:18px;background:var(--text);color:#fff;padding:11px 16px;border-radius:var(--rs);font-size:.8rem;font-weight:500;transform:translateY(60px);opacity:0;transition:all .25s;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);}
@@ -168,7 +168,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 <div id="ms">
   <div class="card">
     <div class="sh">✏️ Step 2 — Enter Only These 2 Fields</div>
-    <div class="mg">
+    <div class="mg" style="max-width:720px;grid-template-columns:1fr 1fr 1fr;">
       <div class="fl">
         <label>📌 No. of EMIs Paid</label>
         <div class="hint">Excluding Advance EMI</div>
@@ -178,6 +178,11 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
         <label>📌 No. of Days — Current Month</label>
         <div class="hint">For prorated interest</div>
         <input type="number" id="dm" value="30" min="0" oninput="calc()">
+      </div>
+      <div class="fl">
+        <label>📌 Bounce Charges (₹)</label>
+        <div class="hint">If any — add manually</div>
+        <input type="number" id="bc" value="0" min="0" oninput="calc()">
       </div>
     </div>
   </div>
@@ -356,15 +361,16 @@ function parseRec(row){
 // ── INFO STRIP — PROFESSIONAL BOXES ─────────────────────
 function renderStrip(r){
   const boxes=[
-    {l:'App ID',    v:r.appId,    c:'blue'},
-    {l:'Student',   v:r.name,     c:''},
-    {l:'Loan Amount',v:'₹'+R2(r.loan),c:'green'},
-    {l:'Total EMIs', v:`${r.te} (Adv: ${r.ae})`,c:''},
-    {l:'Discount %', v:r.subv+'%',c:'orange'},
-    {l:'FLDG / Ret %',v:r.ret+'%',c:''},
-    {l:'Live Date',  v:r.dateStr, c:''},
-    {l:'Group',      v:r.grp,     c:''},
-    {l:'NBFC',       v:r.nbfc,    c:''},
+    {l:'App ID',      v:r.appId,      c:'blue'},
+    {l:'Student',     v:r.name,       c:''},
+    {l:'Loan Amount', v:'₹'+R2(r.loan),c:'green'},
+    {l:'Total EMIs',  v:`${r.te} (Adv: ${r.ae})`,c:''},
+    {l:'Discount %',  v:r.subv+'%',   c:r.subv>0?'orange':''},
+    {l:'Interest %',  v:r.intr+'%',   c:r.intr>0?'red':''},
+    {l:'FLDG / Ret %',v:r.ret+'%',    c:''},
+    {l:'Live Date',   v:r.dateStr,    c:''},
+    {l:'Group',       v:r.grp,        c:''},
+    {l:'NBFC',        v:r.nbfc,       c:''},
   ];
   document.getElementById('igrid').innerHTML=boxes.map(b=>`
     <div class="info-box">
@@ -381,6 +387,7 @@ function calc(){
   const subvP=r.subv/100,retP=r.ret/100,intP=r.intr/100;
   const ep=parseInt(document.getElementById('ep').value)||0;
   const dm=parseFloat(document.getElementById('dm').value)||0;
+  const bounce=parseFloat(document.getElementById('bc').value)||0;
   if(!loan||!te)return;
 
   // ── EXACT EXCEL FORMULAS ────────────────────────────────
@@ -432,7 +439,7 @@ function calc(){
   // ── FORECLOSURE ── J35=pendingPOS+proratedInt, J36=2.95%*J35, J38=J35+J36 ──
   const fcAmt   = pendingPOS + proratedInt;
   const fcCharge= 0.0295 * fcAmt;
-  const finalFc = fcAmt + fcCharge;
+  const finalFc = fcAmt + fcCharge + bounce;   // J38=J35+J36+J37
 
   // Foreclosure date = TODAY (J33=TODAY())
   const today=new Date();
@@ -535,7 +542,7 @@ function calc(){
     ['Prorated Interest',  RR(proratedInt), '#d97706'],
     ['Foreclosure Amount', RR(fcAmt),       '#92400e'],
     ['FC Charge @2.95%',   RR(fcCharge),    '#b91c1c'],
-    ['Bounce Charges',     '₹0.00',         '#b91c1c'],
+    ['Bounce Charges',     RR(bounce),         '#b91c1c'],
     ['Foreclosure Month',  fcDateStr,       '#92400e'],
   ].map(([l,v,c])=>`
     <div class="fi">
