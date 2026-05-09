@@ -221,9 +221,9 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
     <div class="sh">✏️ Step 2 — 3 Fields (Auto-fetched · Manual Override OK)</div>
     <div class="inp-grid">
       <div class="fl-wrap">
-        <label>📌 No. of EMIs Paid (Excl. Advance)</label>
-        <div class="fl-hint">Derived from (Total Paid − Charges) ÷ EMI</div>
-        <input class="fl-inp" type="number" id="ep" value="0" min="0" oninput="calc()">
+        <label>📌 Amount Paid by Parent / Institute (₹)</label>
+        <div class="fl-hint">Auto-fetched from Sheet 2 (Col L − R) · Manual edit OK</div>
+        <input class="fl-inp" type="number" id="amtPaid" value="0" min="0" step="0.01" oninput="calc()">
         <span class="auto-tag" id="ep-tag" style="display:none">Auto ✓</span>
       </div>
       <div class="fl-wrap">
@@ -337,12 +337,16 @@ function parseSheetDate(dd){
   }catch(e){}
   return String(dd);
 }
-function parseGviz(txt){
+function parseGviz(txt, keepRaw=false){
   const m=txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
   if(!m)throw new Error('Invalid sheet response');
   const json=JSON.parse(m[1]);
   const cols=json.table.cols.map(c=>c.label||c.id);
-  return json.table.rows.map(r=>Object.fromEntries(cols.map((c,i)=>[c,r.c[i]?.v??''])));
+  return json.table.rows.map(r=>{
+    const obj=Object.fromEntries(cols.map((c,i)=>[c,r.c[i]?.v??'']));
+    if(keepRaw) obj._raw=r.c;
+    return obj;
+  });
 }
 
 // ── FETCH — PARALLEL, FAST ────────────────────────────────
@@ -368,35 +372,39 @@ async function fetchAll(){
     if(!rec){ss('error',`❌ App ID "${aid}" not found. Ensure Sheet 1 is public.`);document.getElementById('fb').disabled=false;return;}
     REC=parseRec(rec);
 
-    // Sheet 2 — repayment data (L-R = amt paid, S = outstanding charges)
+    // Sheet 2 — PD Dump: Col A=GQ Application ID, L(idx11)=Total Payment, R(idx17)=Total Charges Paid, S(idx18)=Outstanding
     try{
-      const rows2=parseGviz(t2);
+      const rows2=parseGviz(t2, true); // keepRaw=true for index fallback
       const pmtRec=rows2.find(r=>{
-        const id=gv(r,'App ID','AppID','Application Id','A');
+        const id=gv(r,
+          'GQ Application ID','GQ App ID','gqapplicationid',
+          'App ID','AppID','Application Id'
+        );
         return id&&String(id).trim()===aid;
       });
       if(pmtRec){
-        // Flexible column name matching for L, R, S
-        const totalPaid = parseFloat(gv(pmtRec,
-          'Total Payment made till date','Total Payment Made Till Date',
-          'Total payment made till date','TotalPaymentmadeTillDate','L'
-        ))||0;
-        const totalChg = parseFloat(gv(pmtRec,
-          'Total Charges Paid','Total charges paid','TotalChargesPaid','R'
-        ))||0;
-        const outstanding = parseFloat(gv(pmtRec,
-          'Total Charges Outstanding Amount','Total Charges Outstanding',
-          'ChargesOutstandingAmount','S'
-        ))||0;
-
-        const netPaid = totalPaid - totalChg;
-        // Store for deriving EMIs after we know EMI amount
-        REC._netPaid   = netPaid>0?netPaid:0;
+        // Helper: try column name first, then raw index
+        const cv=(names,idx)=>{
+          const v=gv(pmtRec,...names);
+          if(v!==null&&v!=='')return parseFloat(v)||0;
+          return parseFloat(pmtRec._raw?.[idx]?.v)||0;
+        };
+        const totalPaid  = cv(['Total Payment made till date','Total Payment Made Till Date','TotalPaymentmadeTillDate','totalpaymentmadetilldate'], 11);
+        const totalChg   = cv(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid'], 17);
+        const outstanding= cv(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount'], 18);
+        console.log('[Sheet2 matched]', {totalPaid, totalChg, outstanding});
+        const netPaid=totalPaid-totalChg;
+        REC._netPaid   = netPaid>0?netPaid:0;  // stored for amtPaid auto-fill
         REC._bounce    = outstanding>0?outstanding:0;
         REC._totalPaid = totalPaid;
         REC._totalChg  = totalChg;
+      } else {
+        // Debug: log available cols & first ID
+        const rows2d=parseGviz(t2);
+        console.log('[Sheet2 not matched] cols:', Object.keys(rows2d[0]||{}).join(' | '));
+        console.log('[Sheet2 first row col A]:', rows2d[0]?.[Object.keys(rows2d[0])[0]]);
       }
-    }catch(e){console.log('Sheet2 parse (non-critical):',e.message);}
+    }catch(e){console.log('[Sheet2 error]',e.message);}
 
     ss('success',`✅ <strong>${REC.name}</strong> &nbsp;|&nbsp; ₹${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
     renderStrip(REC);
@@ -478,23 +486,20 @@ function calc(){
   const retAmt  = retP*netLoan;
   const netDisb = netLoan-retAmt;
 
-  // Auto-derive EMIs paid once we know emi
-  let ep = parseInt(document.getElementById('ep').value)||0;
-  if(r._netPaid>0 && emi>0){
-    const derived = Math.min(Math.floor(r._netPaid/emi), ne);
-    // Only auto-fill if field is still 0 (first load)
-    if(document.getElementById('ep').dataset.autoSet!=='1'){
-      document.getElementById('ep').value = derived;
-      document.getElementById('ep').dataset.autoSet='1';
-      document.getElementById('ep-tag').style.display='';
-      ep = derived;
-    }
+  // ── Auto-fill Amount Paid from sheet2 (first load only) ──
+  if(r._netPaid>0 && document.getElementById('amtPaid').dataset.autoSet!=='1'){
+    document.getElementById('amtPaid').value = r._netPaid.toFixed(2);
+    document.getElementById('amtPaid').dataset.autoSet='1';
+    document.getElementById('ep-tag').style.display='';
   }
   if(r._bounce>0 && document.getElementById('bc').dataset.autoSet!=='1'){
     document.getElementById('bc').value = r._bounce.toFixed(2);
     document.getElementById('bc').dataset.autoSet='1';
     document.getElementById('bc-tag').style.display='';
   }
+
+  // ── Amount paid by parent — direct input ──
+  const amtPaid = parseFloat(document.getElementById('amtPaid').value)||0;
 
   // ── SCHEDULE 1: Dropout (WITH retention in last EMI) ──
   const netP1=(loan-advAmt-subvAmt-retAmt)-(intFee<=0?intFee:0);
@@ -508,9 +513,19 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // Pending POS
-  const pos1=ep>0&&ep<=S1.length?S1[ep-1].cl:(ep===0?netP1:0);
-  const pos2=ep>0&&ep<=S2.length?S2[ep-1].cl:(ep===0?netP2:0);
+  // ── PENDING POS = Net Principal − Amount Paid (PURE AMOUNT LOGIC) ──
+  const pos1 = Math.max(0, netP1 - amtPaid);
+  const pos2 = Math.max(0, netP2 - amtPaid);
+
+  // Find which schedule month's closing is closest to POS (for highlighting)
+  const findFCMonth = (sched, pos) => {
+    if(pos<=0) return sched.length;
+    let best=-1, bestDiff=Infinity;
+    sched.forEach((r,i)=>{ const d=Math.abs(r.cl-pos); if(d<bestDiff){bestDiff=d;best=i;} });
+    return best;
+  };
+  const fcIdx1=findFCMonth(S1,pos1);
+  const fcIdx2=findFCMonth(S2,pos2);
 
   // Daily interest (÷360)
   const dInt1=pos1*(apr1/360), dInt2=pos2*(apr2/360);
@@ -544,7 +559,7 @@ function calc(){
 
   document.getElementById('cv').innerHTML=[
     ['Normal EMIs',           ne,''],
-    ['EMIs Paid (Derived)',   ep+' EMIs','blue'],
+    ['Amount Paid by Parent', RR(amtPaid),'blue'],
     ['Tenure (Years)',        (te/12).toFixed(2),''],
     ['Pending POS (Dropout)', RR(pos1),'orange'],
     ['Pending POS (Final FC)',RR(pos2),'teal'],
@@ -554,8 +569,8 @@ function calc(){
   ].map(([l,v,c])=>`<div class="cr"><span class="k">${l}</span><span class="v ${c}">${v}</span></div>`).join('');
 
   // ── SCHEDULES ──
-  renderSched('sched-d', S1, ep, advAmt, netP1, ae, 'Dropout');
-  renderSched('sched-f', S2, ep, advAmt, netP2, ae, 'Final FC');
+  renderSched('sched-d', S1, fcIdx1, advAmt, netP1, ae, 'Dropout');
+  renderSched('sched-f', S2, fcIdx2, advAmt, netP2, ae, 'Final FC');
 
   // ── DUAL CLOSURE BOXES ──
   document.getElementById('fcDual').innerHTML=`
@@ -570,7 +585,7 @@ function calc(){
   `;
 
   // ── PER-MONTH FC TABLE ──
-  renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, ep);
+  renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
 }
 
 function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
@@ -607,14 +622,14 @@ function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounc
     </div>`;
 }
 
-function renderSched(elId, sched, ep, advAmt, netP, ae, label){
+function renderSched(elId, sched, fcIdx, advAmt, netP, ae, label){
   let t=`<table><thead><tr>
     <th>Month</th><th>Opening (₹)</th><th>EMI (₹)</th>
     <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th>
   </tr></thead><tbody>`;
   if(ae>0)t+=`<tr><td>ADV</td><td style="color:var(--muted);text-align:right">—</td><td>${R2(advAmt)}</td><td style="text-align:right">—</td><td>${R2(advAmt)}</td><td>${R2(netP)}</td><td><span class="tag ta">Advance</span></td></tr>`;
   sched.forEach((row,idx)=>{
-    const paid=ep>0&&idx<ep-1, fc=ep>0&&idx===ep-1;
+    const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
     const cls=paid?'rp':fc?'rf':'';
     const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
     t+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td><td style="color:var(--red)">${R2(row.int)}</td><td style="color:var(--green)">${R2(row.pr)}</td><td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
@@ -623,7 +638,7 @@ function renderSched(elId, sched, ep, advAmt, netP, ae, label){
 }
 
 // ── PER-MONTH FC CHARGE TABLE ─────────────────────────────
-function renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, ep){
+function renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx){
   let t=`<table><thead><tr>
     <th>Month</th>
     <th>POS Dropout (₹)</th><th>FC Charge Dropout (₹)</th><th>🎓 Total Dropout (₹)</th>
@@ -638,7 +653,7 @@ function renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, ep){
     const pInt1=pos1*(apr1/360)*dm, pInt2=pos2*(apr2/360)*dm;
     const fc1=pos1+pInt1, chg1=0.0295*fc1, total1=fc1+chg1+bounce;
     const fc2=pos2+pInt2, chg2=0.0295*fc2, total2=fc2+chg2+bounce;
-    const isFC=i===ep-1;
+    const isFC=i===fcIdx;
     t+=`<tr style="${isFC?'background:#fffbeb;font-weight:700;':i<ep-1?'background:#f0fdf4;':''}">
       <td style="font-weight:700;color:var(--blue)">${t1}</td>
       <td>${R2(pos1)}</td><td style="color:var(--orange)">${R2(chg1)}</td><td style="color:var(--gold)">${R2(total1)}</td>
@@ -653,7 +668,7 @@ function ss(t,m){const e=document.getElementById('sb');e.className=t;e.innerHTML
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 function clearAll(){
   document.getElementById('aid').value='';
-  document.getElementById('ep').dataset.autoSet='';
+  document.getElementById('amtPaid').dataset.autoSet='';
   document.getElementById('bc').dataset.autoSet='';
   document.getElementById('ep-tag').style.display='none';
   document.getElementById('bc-tag').style.display='none';
