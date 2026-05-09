@@ -516,11 +516,15 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── PENDING POS from Sheet2 Col Q (Total Outstanding Amount) directly ──
-  // Dropout: POS from sheet (retention already deducted in lender's books)
-  // Final FC: same base POS (retention NOT deducted)
-  const pos1 = sheetPOS > 0 ? sheetPOS : Math.max(0, netP1 - amtPaid);
-  const pos2 = sheetPOS > 0 ? sheetPOS : Math.max(0, netP2 - amtPaid);
+  // ── PENDING POS from Sheet2 Col Q (Total Outstanding Amount) ──
+  // 🎓 Dropout Closure: POS − Retention Amount (lender returns retention)
+  // ⚡ Final Foreclosure: POS as-is (retention NOT deducted)
+  const pos1 = sheetPOS > 0
+    ? Math.max(0, sheetPOS - retAmt)          // Dropout: minus retention
+    : Math.max(0, netP1 - amtPaid);
+  const pos2 = sheetPOS > 0
+    ? sheetPOS                                  // Final FC: full outstanding
+    : Math.max(0, netP2 - amtPaid);
 
   // Find which schedule month's closing is closest to POS (for highlighting)
   const findFCMonth = (sched, pos) => {
