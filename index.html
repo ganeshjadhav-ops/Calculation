@@ -389,15 +389,16 @@ async function fetchAll(){
           if(v!==null&&v!=='')return parseFloat(v)||0;
           return parseFloat(pmtRec._raw?.[idx]?.v)||0;
         };
-        const totalPaid  = cv(['Total Payment made till date','Total Payment Made Till Date','TotalPaymentmadeTillDate','totalpaymentmadetilldate'], 11);
-        const totalChg   = cv(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid'], 17);
-        const outstanding= cv(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount'], 18);
-        console.log('[Sheet2 matched]', {totalPaid, totalChg, outstanding});
-        const netPaid=totalPaid-totalChg;
-        REC._netPaid   = netPaid>0?netPaid:0;  // stored for amtPaid auto-fill
-        REC._bounce    = outstanding>0?outstanding:0;
-        REC._totalPaid = totalPaid;
-        REC._totalChg  = totalChg;
+        const totalPaid    = cv(['Total Payment made till date','Total Payment Made Till Date','totalpaymentmadetilldate'], 11);
+        const totalChg     = cv(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid'], 17);
+        const totalOutstanding = cv(['Total Outstanding Amount','Total outstanding amount','totaloutstandingamount'], 16); // Col Q = idx 16
+        const chargesOutstanding = cv(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount'], 18); // Col S = idx 18
+        console.log('[Sheet2 matched]', {totalPaid, totalChg, totalOutstanding, chargesOutstanding});
+        REC._netPaid         = totalPaid>0?totalPaid:0;        // amtPaid field (Col L)
+        REC._totalOutstanding= totalOutstanding>0?totalOutstanding:0;  // POS directly (Col Q)
+        REC._bounce          = chargesOutstanding>0?chargesOutstanding:0; // bounce (Col S)
+        REC._totalPaid       = totalPaid;
+        REC._totalChg        = totalChg;
       } else {
         // Debug: log available cols & first ID
         const rows2d=parseGviz(t2);
@@ -432,7 +433,7 @@ function parseRec(row){
     grp:   g('Group Name','groupname')||'—',
     nbfc:  g('NBFC','nbfc')||'—',
     dateStr:parseSheetDate(g('Loan Live Date','loan live date','Start Date','disbursement date')),
-    _netPaid:0,_bounce:0,_totalPaid:0,_totalChg:0
+    _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0
   };
 }
 
@@ -486,7 +487,7 @@ function calc(){
   const retAmt  = retP*netLoan;
   const netDisb = netLoan-retAmt;
 
-  // ── Auto-fill Amount Paid from sheet2 (first load only) ──
+  // ── Auto-fill fields from sheet2 (first load only) ──
   if(r._netPaid>0 && document.getElementById('amtPaid').dataset.autoSet!=='1'){
     document.getElementById('amtPaid').value = r._netPaid.toFixed(2);
     document.getElementById('amtPaid').dataset.autoSet='1';
@@ -498,8 +499,10 @@ function calc(){
     document.getElementById('bc-tag').style.display='';
   }
 
-  // ── Amount paid by parent — direct input ──
+  // ── POS: use Total Outstanding Amount from sheet2 directly (Col Q) ──
+  // If not available, fallback: netP - amtPaid
   const amtPaid = parseFloat(document.getElementById('amtPaid').value)||0;
+  const sheetPOS = r._totalOutstanding || 0;
 
   // ── SCHEDULE 1: Dropout (WITH retention in last EMI) ──
   const netP1=(loan-advAmt-subvAmt-retAmt)-(intFee<=0?intFee:0);
@@ -513,9 +516,11 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── PENDING POS = Net Principal − Amount Paid (PURE AMOUNT LOGIC) ──
-  const pos1 = Math.max(0, netP1 - amtPaid);
-  const pos2 = Math.max(0, netP2 - amtPaid);
+  // ── PENDING POS from Sheet2 Col Q (Total Outstanding Amount) directly ──
+  // Dropout: POS from sheet (retention already deducted in lender's books)
+  // Final FC: same base POS (retention NOT deducted)
+  const pos1 = sheetPOS > 0 ? sheetPOS : Math.max(0, netP1 - amtPaid);
+  const pos2 = sheetPOS > 0 ? sheetPOS : Math.max(0, netP2 - amtPaid);
 
   // Find which schedule month's closing is closest to POS (for highlighting)
   const findFCMonth = (sched, pos) => {
@@ -654,7 +659,7 @@ function renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx){
     const fc1=pos1+pInt1, chg1=0.0295*fc1, total1=fc1+chg1+bounce;
     const fc2=pos2+pInt2, chg2=0.0295*fc2, total2=fc2+chg2+bounce;
     const isFC=i===fcIdx;
-    t+=`<tr style="${isFC?'background:#fffbeb;font-weight:700;':i<ep-1?'background:#f0fdf4;':''}">
+    t+=`<tr style="${isFC?'background:#fffbeb;font-weight:700;':i<fcIdx?'background:#f0fdf4;':''}">
       <td style="font-weight:700;color:var(--blue)">${t1}</td>
       <td>${R2(pos1)}</td><td style="color:var(--orange)">${R2(chg1)}</td><td style="color:var(--gold)">${R2(total1)}</td>
       <td>${R2(pos2)}</td><td style="color:var(--teal)">${R2(chg2)}</td><td style="color:var(--tdark)">${R2(total2)}</td>
