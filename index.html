@@ -514,8 +514,7 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── EMIs Paid = Amount Paid ÷ EMI (simple floor division) ──
-  // No advance EMI exclusion — just pure amount / emi count
+  // ── EMIs Paid = Amount Paid ÷ EMI (pure amount, no advance deduction) ──
   const emisPaid = emi > 0 ? Math.min(Math.floor(amtPaid / emi), ne) : 0;
 
   // ── PENDING POS = closing balance from schedule at emisPaid month ──
