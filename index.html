@@ -514,21 +514,11 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── EMIs Paid = Amount Paid ÷ EMI (pure amount, no advance deduction) ──
+  // ── PENDING POS — Excel exact: J32=SUMIF(C,D22,G) ──
+  // D22 = floor(amtPaid ÷ emi) → find closing balance at that month
   const emisPaid = emi > 0 ? Math.min(Math.floor(amtPaid / emi), ne) : 0;
-
-  // ── PENDING POS = closing balance from schedule at emisPaid month ──
-  // Exactly as Excel: J32 = SUMIF(C_col, emisPaid, G_col) = closing at that tenure
-  // 🎓 Dropout:    S1 schedule (retention in last EMI)
-  // ⚡ Final FC:   S2 schedule (no retention)
-  const pos1 = emisPaid > 0 && emisPaid <= S1.length
-    ? S1[emisPaid - 1].cl
-    : netP1;
-  const pos2 = emisPaid > 0 && emisPaid <= S2.length
-    ? S2[emisPaid - 1].cl
-    : netP2;
-
-  // Foreclosure highlight = emisPaid month (0-indexed)
+  const pos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
+  const pos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
   const fcIdx1 = emisPaid > 0 ? emisPaid - 1 : -1;
   const fcIdx2 = emisPaid > 0 ? emisPaid - 1 : -1;
 
