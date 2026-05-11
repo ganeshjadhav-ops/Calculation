@@ -278,7 +278,17 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
   <!-- CLOSURE -->
   <div id="tab-closure" style="display:none">
-    <div class="fc-dual" id="fcDual"></div>
+    <!-- Sub-tabs like Schedule -->
+    <div class="tw" style="margin-bottom:14px;">
+      <div class="sched-tabs">
+        <button class="st active" onclick="switchClosure('d',this)">🎓 Dropout Closure</button>
+        <button class="st" onclick="switchClosure('f',this)">⚡ Final Foreclosure</button>
+      </div>
+      <!-- Dropout Closure detail -->
+      <div id="closure-d" style="padding:20px"></div>
+      <!-- Final FC detail -->
+      <div id="closure-f" style="display:none;padding:20px"></div>
+    </div>
     <!-- Per-month FC charges table -->
     <div class="card" style="margin-bottom:0">
       <div class="sh">📊 Foreclosure Charges — Month-wise Breakup (if closed at each month)</div>
@@ -295,6 +305,15 @@ const SID2='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
 const GID2='491266174';
 
 let REC=null,S1=[],S2=[];
+// Cache sheet rows — fetch once, reuse
+let _cache1=null,_cache2=null;
+
+async function getRows(sid,gid){
+  const url=`https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json${gid?'&gid='+gid:''}`;
+  const res=await fetch(url);
+  const txt=await res.text();
+  return parseGviz(txt,true);
+}
 
 // ── IRR ──────────────────────────────────────────────────
 function irr(cf){
@@ -374,7 +393,7 @@ async function fetchAll(){
 
     // Sheet 2 — PD Dump: Col A=GQ Application ID, L(idx11)=Total Payment, R(idx17)=Total Charges Paid, S(idx18)=Outstanding
     try{
-      const rows2=parseGviz(t2, true); // keepRaw=true for index fallback
+      const rows2=_cache2;
       const pmtRec=rows2.find(r=>{
         const id=gv(r,
           'GQ Application ID','GQ App ID','gqapplicationid',
@@ -570,51 +589,56 @@ function calc(){
   renderSched('sched-d', S1, fcIdx1, advAmt, netP1, ae, 'Dropout');
   renderSched('sched-f', S2, fcIdx2, advAmt, netP2, ae, 'Final FC');
 
-  // ── DUAL CLOSURE BOXES ──
-  document.getElementById('fcDual').innerHTML=`
-    ${mkFCBox('dropout',
-      'Dropout','🎓 Loan Closure — as per Dropout',
-      pos1,dInt1,dm,pInt1,fcAmt1,fcChg1,retAmt,bounce,final1,today,true
-    )}
-    ${mkFCBox('final',
-      'final','⚡ Final Foreclosure Amount',
-      pos2,dInt2,dm,pInt2,fcAmt2,fcChg2,0,bounce,final2,today,false
-    )}
-  `;
+  // ── CLOSURE DETAIL BOXES — separate sub-tabs ──
+  document.getElementById('closure-d').innerHTML=mkClosureDetail(
+    'dropout', '🎓 Loan Closure — as per Dropout',
+    pos1, dInt1, dm, pInt1, fcAmt1, fcChg1, retAmt, bounce, final1, today, true
+  );
+  document.getElementById('closure-f').innerHTML=mkClosureDetail(
+    'final', '⚡ Final Foreclosure Amount',
+    pos2, dInt2, dm, pInt2, fcAmt2, fcChg2, 0, bounce, final2, today, false
+  );
 
   // ── PER-MONTH FC TABLE ──
   renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
 }
 
-function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
+function mkClosureDetail(cls, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
   const bc=isDropout?'fc-dropout':'fc-final';
-  const fc=isDropout?'fi-d':'fi-n';
-  const mkRow=(k,v,hl='')=>`
-    <div class="fc-row ${hl}">
-      <span class="fc-row-k">${k}</span>
-      <span class="fc-row-v">${v}</span>
+  const ac=isDropout?'#92400e':'#0e7490';
+  const hc=isDropout?'rgba(245,158,11,.12)':'rgba(34,211,238,.12)';
+  const bc2=isDropout?'rgba(245,158,11,.3)':'rgba(34,211,238,.3)';
+  const mkRow=(k,v,bold=false,bg='')=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-radius:8px;margin-bottom:6px;background:${bg||'rgba(255,255,255,.5)'};border:1px solid ${bc2};">
+      <span style="font-size:.8rem;color:#475569;font-weight:${bold?'700':'500'}">${k}</span>
+      <span style="font-size:${bold?'.95':'0.85'}rem;font-weight:700;color:${bold?ac:'#1e293b'}">${v}</span>
     </div>`;
   return `
-    <div class="fc-box ${bc}">
-      <div class="fc-title">${title}</div>
-      <div class="fc-rows">
-        ${mkRow('Pending POS',RR(pos))}
-        ${mkRow('No. of Days',dm+' days')}
-        ${mkRow('Prorated Interest',RR(pInt))}
-        ${mkRow('Foreclosure Amount (POS + Prorated)',RR(fcAmt),'highlight-'+(isDropout?'d':'n'))}
-        ${mkRow('FC Charge @2.95% of FC Amt',RR(fcChg))}
-        ${isDropout?mkRow('Retention Deducted',RR(ret)):''}
-        ${mkRow('Bounce / Mandate Charges',RR(bounce))}
-      </div>
-      <div class="fc-div"></div>
-      <div class="fc-total-row">
+    <div class="fc-box ${bc}" style="border-radius:0;border:none;background:transparent;padding:0;">
+      <div style="font-size:.68rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:${ac};margin-bottom:14px;">${title}</div>
+
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${ac};margin:0 0 8px;opacity:.7;">Step 1 — Pending POS</div>
+      ${mkRow('Pending POS (Outstanding Balance)',RR(pos),true,hc)}
+
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${ac};margin:12px 0 8px;opacity:.7;">Step 2 — Prorated Interest</div>
+      ${mkRow('No. of Days in Current Month',dm+' days')}
+      ${mkRow('Prorated Interest (POS × APR/360 × Days)',RR(pInt),false,pInt>0?hc:'')}
+
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${ac};margin:12px 0 8px;opacity:.7;">Step 3 — Foreclosure Amount</div>
+      ${mkRow('Foreclosure Amount (POS + Prorated Interest)',RR(fcAmt),true,hc)}
+      ${mkRow('FC Charge @2.95% of Foreclosure Amount',RR(fcChg))}
+      ${isDropout ? mkRow('Retention Amount Deducted',RR(ret)) : ''}
+      ${mkRow('Bounce / Mandate Charges',RR(bounce))}
+
+      <div style="height:1px;background:${isDropout?'#f59e0b':'#22d3ee'};margin:14px 0;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <div class="fc-total-label">${isDropout?'Total Loan Closure Amount':'Total Final Foreclosure'}</div>
-          <div class="fc-total-amt">${RR(final)}</div>
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${ac};margin-bottom:4px;">${isDropout?'Total Loan Closure Amount':'Total Final Foreclosure'}</div>
+          <div style="font-size:1.5rem;font-weight:800;color:${isDropout?'#b45309':'#0891b2'}">${RR(final)}</div>
         </div>
-        <div class="fc-date-chip">
-          <div class="fc-date-l">Date</div>
-          <div class="fc-date-v">${today}</div>
+        <div style="text-align:right;background:rgba(255,255,255,.7);border:1px solid ${bc2};border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${ac};margin-bottom:2px;">Date</div>
+          <div style="font-size:.9rem;font-weight:700;color:${ac}">${today}</div>
         </div>
       </div>
     </div>`;
@@ -667,6 +691,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 function clearAll(){
   document.getElementById('aid').value='';
   document.getElementById('amtPaid').dataset.autoSet='';
+  // Keep _cache1/_cache2 — no need to re-fetch same sheets
   document.getElementById('bc').dataset.autoSet='';
   document.getElementById('ep-tag').style.display='none';
   document.getElementById('bc-tag').style.display='none';
@@ -679,6 +704,12 @@ function switchTab(id,btn){
   document.querySelectorAll('[id^="tab-"]').forEach(e=>e.style.display='none');
   document.getElementById('tab-'+id).style.display='block';
   document.querySelectorAll('.tabs .tb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function switchClosure(id,btn){
+  document.getElementById('closure-d').style.display=id==='d'?'block':'none';
+  document.getElementById('closure-f').style.display=id==='f'?'block':'none';
+  document.querySelectorAll('#tab-closure .st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
 function switchSched(id,btn){
