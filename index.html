@@ -514,9 +514,11 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── PENDING POS — Excel exact: J32=SUMIF(C,D22,G) ──
-  // D22 = floor(amtPaid ÷ emi) → find closing balance at that month
-  const emisPaid = emi > 0 ? Math.min(Math.floor(amtPaid / emi), ne) : 0;
+  // ── PENDING POS — Amount field shows full amount (incl. advance) ──
+  // Internally subtract advance EMI to get only normal EMIs paid
+  // User types 37,600 → internal: 37,600 - 9,400 = 28,200 → 3 EMIs → correct POS
+  const normalPaid = Math.max(0, amtPaid - advAmt);
+  const emisPaid = emi > 0 ? Math.min(Math.floor(normalPaid / emi), ne) : 0;
   const pos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
   const pos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
   const fcIdx1 = emisPaid > 0 ? emisPaid - 1 : -1;
