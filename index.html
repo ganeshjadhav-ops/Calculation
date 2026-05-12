@@ -270,9 +270,11 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
       <div class="sched-tabs">
         <button class="st active" onclick="switchSched('d',this)">🎓 Dropout Schedule</button>
         <button class="st" onclick="switchSched('f',this)">⚡ Final FC Schedule</button>
+        <button class="st" onclick="switchSched('rbi',this)">📋 RBI Repayment Table</button>
       </div>
       <div id="sched-d"></div>
       <div id="sched-f" style="display:none"></div>
+      <div id="sched-rbi" style="display:none"></div>
     </div>
   </div>
 
@@ -520,8 +522,9 @@ function calc(){
   // ── PENDING POS — works for ANY amount (partial payments too) ──
   // Step 1: subtract advance internally
   const normalPaid = Math.max(0, amtPaid - advAmt);
-  // Step 2: how many full EMIs?
-  const emisPaid = emi > 0 ? Math.min(Math.floor(normalPaid / emi), ne) : 0;
+  // Step 2: how many full EMIs? (add tiny epsilon to fix floating point: 3.9997 → 4)
+  const rawCount = emi > 0 ? normalPaid / emi : 0;
+  const emisPaid = Math.min(Math.floor(rawCount + 0.0001), ne);
   // Step 3: extra paid beyond full EMIs = direct principal reduction
   const extraPaid = Math.max(0, normalPaid - emisPaid * emi);
   // Step 4: POS = schedule closing at full EMIs - extra principal paid
@@ -529,8 +532,10 @@ function calc(){
   const basePOS2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
   const pos1 = Math.max(0, basePOS1 - extraPaid);
   const pos2 = Math.max(0, basePOS2 - extraPaid);
-  const fcIdx1 = emisPaid > 0 ? emisPaid - 1 : -1;
-  const fcIdx2 = emisPaid > 0 ? emisPaid - 1 : -1;
+  // Step 5: fcIdx — if extra paid exists, foreclosure is NEXT month (emisPaid)
+  //          if exact full EMIs, foreclosure is LAST paid month (emisPaid-1)
+  const fcIdx1 = extraPaid > 0.01 ? emisPaid : (emisPaid > 0 ? emisPaid - 1 : -1);
+  const fcIdx2 = extraPaid > 0.01 ? emisPaid : (emisPaid > 0 ? emisPaid - 1 : -1);
 
   // Daily interest (÷360)
   const dInt1=pos1*(apr1/360), dInt2=pos2*(apr2/360);
@@ -579,6 +584,7 @@ function calc(){
   // ── SCHEDULES ──
   renderSched('sched-d', S1, fcIdx1, advAmt, netP1, ae, 'Dropout');
   renderSched('sched-f', S2, fcIdx2, advAmt, netP2, ae, 'Final FC');
+  renderRBITable(S1, emi, advAmt, netP1, ae, loan, subvAmt, retAmt, intFee, netDisb, amtPaid, emisPaid, extraPaid, apr1);
 
   // ── CLOSURE DETAIL — schedule table + summary matching final amount ──
   renderClosureDetail('closure-d', S1, fcIdx1, advAmt, netP1, ae,
@@ -715,7 +721,123 @@ function switchClosure(id,btn){
   btn.classList.add('active');
 }
 
-// ── SCHEDULE RENDER ──────────────────────────────────────
+// ── RBI REPAYMENT TABLE ──────────────────────────────────
+function renderRBITable(sched, emi, advAmt, netP, ae, loan, subvAmt, retAmt, intFee, netDisb, amtPaid, emisPaid, extraPaid, apr){
+  const annualRate = apr * 100;
+  const monthlyRate = apr / 12 * 100;
+  const totalPayable = advAmt + emi * sched.length;
+  const totalInterest = sched.reduce((s,r)=>s+r.int, 0);
+
+  // Loan info header
+  const infoRows = [
+    ['Loan/Tranche Amount',         '₹'+R2(loan)],
+    ['Subvention / Discount Amount','₹'+R2(subvAmt)],
+    ['Retention Amount',            '₹'+R2(retAmt)],
+    ['Interest / Processing Fee',   '₹'+R2(intFee)],
+    ['Net Disbursal Amount',        '₹'+R2(netDisb)],
+    ['Advance EMI Amount',          '₹'+R2(advAmt)],
+    ['Net Principal Outstanding',   '₹'+R2(netP)],
+    ['EMI Amount',                  '₹'+R2(emi)],
+    ['No. of Normal EMIs',          sched.length],
+    ['Annual Interest Rate (APR)',  annualRate.toFixed(4)+'%'],
+    ['Monthly Interest Rate',       monthlyRate.toFixed(4)+'%'],
+    ['Total Amount Payable',        '₹'+R2(totalPayable)],
+    ['Total Interest Payable',      '₹'+R2(totalInterest)],
+  ];
+
+  let info = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;margin:16px 0;">`;
+  infoRows.forEach(([k,v],i)=>{
+    info += `<div style="padding:9px 14px;background:${i%2===0?'#f8fafc':'white'};border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
+      <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px;">${k}</div>
+      <div style="font-size:.85rem;font-weight:700;color:var(--text)">${v}</div>
+    </div>`;
+  });
+  info += `</div>`;
+
+  // RBI Schedule Table
+  let cumInterest = 0, cumPrincipal = 0;
+  let tbl = `
+    <div style="padding:0 16px 4px;margin-top:4px;">
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 8px;">
+        📋 Loan Repayment Schedule — as per RBI Guidelines
+      </div>
+    </div>
+    <table>
+    <thead><tr>
+      <th style="text-align:center">EMI No.</th>
+      <th>Opening Balance (₹)</th>
+      <th>EMI Amount (₹)</th>
+      <th>Interest Component (₹)</th>
+      <th>Principal Component (₹)</th>
+      <th>Cumulative Interest (₹)</th>
+      <th>Cumulative Principal (₹)</th>
+      <th>Closing Balance (₹)</th>
+      <th>Status</th>
+    </tr></thead><tbody>`;
+
+  // Advance EMI row
+  if(ae>0){
+    tbl += `<tr style="background:var(--plight)">
+      <td style="text-align:center;color:var(--purple);font-weight:700">ADV</td>
+      <td style="color:var(--muted)">—</td>
+      <td>${R2(advAmt)}</td>
+      <td style="color:var(--muted)">—</td>
+      <td>${R2(advAmt)}</td>
+      <td style="color:var(--muted)">—</td>
+      <td>${R2(advAmt)}</td>
+      <td>${R2(netP)}</td>
+      <td><span class="tag ta">Advance</span></td>
+    </tr>`;
+  }
+
+  sched.forEach((row,idx)=>{
+    cumInterest += row.int;
+    cumPrincipal += row.pr;
+    const isPaid = idx < emisPaid - (extraPaid>0.01?0:1);
+    const isFc   = idx === fcIdx1;
+    const rowBg  = isPaid?'#f0fdf4': isFc?'#fffbeb':'white';
+    const tag    = isPaid
+      ? '<span class="tag tp">✓ Paid</span>'
+      : isFc
+        ? '<span class="tag tfc">⚡ Foreclosure</span>'
+        : '<span class="tag tpn">Pending</span>';
+    tbl += `<tr style="background:${rowBg}">
+      <td style="text-align:center;font-weight:700;color:var(--blue)">${row.t}</td>
+      <td>${R2(row.op)}</td>
+      <td>${R2(row.emi)}</td>
+      <td style="color:var(--red)">${R2(row.int)}</td>
+      <td style="color:var(--green)">${R2(row.pr)}</td>
+      <td style="color:var(--orange)">${R2(cumInterest)}</td>
+      <td style="color:var(--teal)">${R2(cumPrincipal)}</td>
+      <td><strong>${R2(row.cl)}</strong></td>
+      <td>${tag}</td>
+    </tr>`;
+  });
+
+  // Totals row
+  tbl += `<tr style="background:#f1f5f9;font-weight:700;border-top:2px solid var(--border)">
+    <td style="text-align:center;color:var(--text)">Total</td>
+    <td style="color:var(--muted)">—</td>
+    <td style="color:var(--blue)">₹${R2(advAmt + emi * sched.length)}</td>
+    <td style="color:var(--red)">₹${R2(totalInterest)}</td>
+    <td style="color:var(--green)">₹${R2(sched.reduce((s,r)=>s+r.pr,0))}</td>
+    <td style="color:var(--orange)">₹${R2(totalInterest)}</td>
+    <td style="color:var(--teal)">₹${R2(sched.reduce((s,r)=>s+r.pr,0))}</td>
+    <td style="color:var(--green)">₹0.00</td>
+    <td>—</td>
+  </tr>`;
+  tbl += '</tbody></table>';
+
+  // RBI disclaimer
+  const disclaimer = `<div style="margin:12px 16px;padding:10px 14px;background:#f8fafc;border-left:3px solid var(--blue);border-radius:0 8px 8px 0;font-size:.72rem;color:var(--t2);line-height:1.6;">
+    <strong>📌 Disclosure as per RBI Fair Practices Code:</strong><br>
+    This repayment schedule is provided as per Reserve Bank of India guidelines. The EMI comprises interest and principal components.
+    Interest is calculated on the reducing outstanding balance at the rate of <strong>${annualRate.toFixed(4)}% per annum</strong> (${monthlyRate.toFixed(4)}% per month).
+    Any prepayment or foreclosure will be calculated on the outstanding principal balance on the date of closure.
+  </div>`;
+
+  document.getElementById('sched-rbi').innerHTML = `<div style="padding:0 0 16px">${info}${tbl}</div>${disclaimer}`;
+}
 function renderSched(elId, sched, fcIdx, advAmt, netP, ae, label){
   let t=`<table><thead><tr>
     <th>Month</th><th>Opening (₹)</th><th>EMI (₹)</th>
@@ -780,6 +902,7 @@ function switchTab(id,btn){
 function switchSched(id,btn){
   document.getElementById('sched-d').style.display=id==='d'?'':'none';
   document.getElementById('sched-f').style.display=id==='f'?'':'none';
+  document.getElementById('sched-rbi').style.display=id==='rbi'?'':'none';
   document.querySelectorAll('.st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
