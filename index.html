@@ -287,7 +287,11 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
       <div id="closure-d"></div>
       <div id="closure-f" style="display:none"></div>
     </div>
-
+    <!-- Per-month FC charges table -->
+    <div class="card" style="margin-bottom:0">
+      <div class="sh">📊 Foreclosure Charges — Month-wise Breakup (if closed at each month)</div>
+      <div class="tw" style="margin-bottom:0" id="fcMonthTable"></div>
+    </div>
   </div>
 </div>
 </main>
@@ -298,7 +302,7 @@ const SID1='1FvGTH4IOzoDr6PNBKLfWVENBhevuQDrt2uy8yOwNsZ8';
 const SID2='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
 const GID2='491266174';
 
-let REC=null,S1=[],S2=[],_c1=null,_c2=null;
+let REC=null,S1=[],S2=[];
 
 // ── IRR ──────────────────────────────────────────────────
 function irr(cf){
@@ -378,7 +382,7 @@ async function fetchAll(){
 
     // Sheet 2 — PD Dump: Col A=GQ Application ID, L(idx11)=Total Payment, R(idx17)=Total Charges Paid, S(idx18)=Outstanding
     try{
-      const rows2=_c2;
+      const rows2=parseGviz(t2, true); // keepRaw=true for index fallback
       const pmtRec=rows2.find(r=>{
         const id=gv(r,
           'GQ Application ID','GQ App ID','gqapplicationid',
@@ -393,20 +397,21 @@ async function fetchAll(){
           if(v!==null&&v!=='')return parseFloat(v)||0;
           return parseFloat(pmtRec._raw?.[idx]?.v)||0;
         };
-        const totalPaid    = cv(['Total Payment made till date','Total Payment Made Till Date',
-          'totalpaymentmadetilldate','total payment','Total EMI Paid','totalemipaid'], 11);
-        const totalChg     = cv(['Total Charges Paid','Total charges paid','TotalChargesPaid',
-          'totalchargespaid','charges paid','Total Charge paid'], 17);
-        const chargesOutstanding = cv(['Total Charges Outstanding Amount','Total Charges Outstanding',
-          'ChargesOutstandingAmount','totalchargesoutstandingamount',
-          'charges outstanding','Charges Outstanding'], 18);
-        console.log('[Sheet2 ✅]', {totalPaid, totalChg, chargesOutstanding,
-          cols: Object.keys(pmtRec).filter(k=>!k.startsWith('_')).join('|')});
-        REC._netPaid  = totalPaid>0?totalPaid:0;
-        REC._bounce   = chargesOutstanding>0?chargesOutstanding:0;
+        const totalPaid    = cv(['Total Payment made till date','Total Payment Made Till Date','totalpaymentmadetilldate'], 11);
+        const totalChg     = cv(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid'], 17);
+        const totalOutstanding = cv(['Total Outstanding Amount','Total outstanding amount','totaloutstandingamount'], 16); // Col Q = idx 16
+        const chargesOutstanding = cv(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount'], 18); // Col S = idx 18
+        console.log('[Sheet2 matched]', {totalPaid, totalChg, totalOutstanding, chargesOutstanding});
+        REC._netPaid         = totalPaid>0?totalPaid:0;        // amtPaid field (Col L)
+        REC._totalOutstanding= totalOutstanding>0?totalOutstanding:0;  // POS directly (Col Q)
+        REC._bounce          = chargesOutstanding>0?chargesOutstanding:0; // bounce (Col S)
+        REC._totalPaid       = totalPaid;
+        REC._totalChg        = totalChg;
       } else {
-        // Debug: log available cols & first ID from cache
-        if(_c2&&_c2[0]) console.log('[Sheet2 not matched] cols:', Object.keys(_c2[0]).join(' | '));
+        // Debug: log available cols & first ID
+        const rows2d=parseGviz(t2);
+        console.log('[Sheet2 not matched] cols:', Object.keys(rows2d[0]||{}).join(' | '));
+        console.log('[Sheet2 first row col A]:', rows2d[0]?.[Object.keys(rows2d[0])[0]]);
       }
     }catch(e){console.log('[Sheet2 error]',e.message);}
 
@@ -436,7 +441,7 @@ function parseRec(row){
     grp:   g('Group Name','groupname')||'—',
     nbfc:  g('NBFC','nbfc')||'—',
     dateStr:parseSheetDate(g('Loan Live Date','loan live date','Start Date','disbursement date')),
-    _netPaid:0,_bounce:0
+    _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0
   };
 }
 
@@ -517,18 +522,13 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── PENDING POS — works for ANY amount (partial payments too) ──
-  // Step 1: subtract advance internally
+  // ── PENDING POS — Amount field shows full amount (incl. advance) ──
+  // Internally subtract advance EMI to get only normal EMIs paid
+  // User types 37,600 → internal: 37,600 - 9,400 = 28,200 → 3 EMIs → correct POS
   const normalPaid = Math.max(0, amtPaid - advAmt);
-  // Step 2: how many full EMIs?
   const emisPaid = emi > 0 ? Math.min(Math.floor(normalPaid / emi), ne) : 0;
-  // Step 3: extra paid beyond full EMIs = direct principal reduction
-  const extraPaid = Math.max(0, normalPaid - emisPaid * emi);
-  // Step 4: POS = schedule closing at full EMIs - extra principal paid
-  const basePOS1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
-  const basePOS2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
-  const pos1 = Math.max(0, basePOS1 - extraPaid);
-  const pos2 = Math.max(0, basePOS2 - extraPaid);
+  const pos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
+  const pos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
   const fcIdx1 = emisPaid > 0 ? emisPaid - 1 : -1;
   const fcIdx2 = emisPaid > 0 ? emisPaid - 1 : -1;
 
@@ -540,9 +540,7 @@ function calc(){
   const fcAmt1=pos1+pInt1, fcChg1=0.0295*fcAmt1, final1=fcAmt1+fcChg1+bounce;
   const fcAmt2=pos2+pInt2, fcChg2=0.0295*fcAmt2, final2=fcAmt2+fcChg2+bounce;
 
-  const closureDate=new Date();
-  closureDate.setDate(closureDate.getDate()+(dm||0));
-  const today=closureDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 
   // ── QUICK STATS ──
   document.getElementById('qstats').innerHTML=`
@@ -587,7 +585,7 @@ function calc(){
     pos2, dm, pInt2, fcAmt2, fcChg2, 0, bounce, final2, today, false);
 
   // ── PER-MONTH FC TABLE ──
-
+  renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
 }
 
 function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
@@ -627,85 +625,69 @@ function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounc
 function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
     pos, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
 
-  const gc  = isDropout ? '#92400e' : '#0e7490';
-  const ac  = isDropout ? '#b45309' : '#0891b2';
-  const brc = isDropout ? '#f59e0b' : '#22d3ee';
-  const bgr = isDropout ? 'rgba(245,158,11,.06)' : 'rgba(34,211,238,.06)';
-  const title    = isDropout ? '🎓 Loan Closure — as per Dropout' : '⚡ Final Foreclosure';
-  const totalLbl = isDropout ? 'Total Loan Closure Amount' : 'Total Final Foreclosure';
+  const gc = isDropout ? '#92400e' : '#0e7490';
+  const bg = isDropout ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#ecfeff,#cffafe)';
+  const br = isDropout ? '#f59e0b' : '#22d3ee';
+  const title = isDropout ? '🎓 Loan Closure — as per Dropout' : '⚡ Final Foreclosure Amount';
+  const totalLabel = isDropout ? 'Total Loan Closure Amount' : 'Total Final Foreclosure';
+  const totalColor = isDropout ? '#b45309' : '#0891b2';
 
-  // ── TABLE with FC Charge column inline ──────────────────
+  // Schedule table (same as Schedule tab)
   let tbl = `<table><thead><tr>
     <th>Month</th><th>Opening (₹)</th><th>EMI (₹)</th>
-    <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th>
-    <th style="color:${gc}">FC Charge (₹)</th><th>Status</th>
+    <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th>
   </tr></thead><tbody>`;
-
   if(ae>0) tbl+=`<tr>
     <td>ADV</td><td style="color:var(--muted);text-align:right">—</td>
     <td>${R2(advAmt)}</td><td style="text-align:right">—</td>
     <td>${R2(advAmt)}</td><td>${R2(netP)}</td>
-    <td style="text-align:right;color:var(--muted)">—</td>
     <td><span class="tag ta">Advance</span></td>
   </tr>`;
-
   sched.forEach((row,idx)=>{
     const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
     const cls=paid?'rp':fc?'rf':'';
     const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
-    // Per-row FC charge (if foreclosed at this row)
-    const rowFCAmt = row.cl + pInt;
-    const rowFCChg = 0.0295 * rowFCAmt;
-    const rowFCTotal = rowFCAmt + rowFCChg + bounce;
-    const fcChgDisplay = fc
-      ? `<strong style="color:${gc}">${R2(rowFCChg)}</strong>`
-      : `<span style="color:var(--muted);font-size:.75rem">${R2(rowFCChg)}</span>`;
-    tbl+=`<tr class="${cls}"><td>${row.t}</td>
-      <td>${R2(row.op)}</td><td>${R2(row.emi)}</td>
+    tbl+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td>
       <td style="color:var(--red)">${R2(row.int)}</td>
       <td style="color:var(--green)">${R2(row.pr)}</td>
-      <td><strong>${R2(row.cl)}</strong></td>
-      <td style="text-align:right">${fcChgDisplay}</td>
-      <td>${tag}</td></tr>`;
+      <td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
   });
   tbl += '</tbody></table>';
 
-  // ── STEP-BY-STEP VISUAL — easy to explain to parents ────
-  const step=(n,icon,label,val,valColor,sub='',isBig=false)=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:9px;background:${isBig?bgr:'rgba(255,255,255,.5)'};border:1px solid ${isBig?brc:'rgba(0,0,0,.06)'};margin-bottom:6px;">
-      <div style="width:28px;height:28px;border-radius:50%;background:${gc};color:white;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">${n}</div>
-      <div style="flex:1">
-        <div style="font-size:.75rem;font-weight:600;color:var(--t2)">${icon} ${label}</div>
-        ${sub?`<div style="font-size:.68rem;color:var(--muted);margin-top:1px">${sub}</div>`:''}
-      </div>
-      <div style="font-size:${isBig?'1.05rem':'.88rem'};font-weight:${isBig?800:700};color:${valColor}">${val}</div>
+  // Summary box matching final amount
+  const mkRow=(k,v,bold=false)=>`
+    <div class="fc-row${bold?' highlight-'+(isDropout?'d':'n'):''}">
+      <span class="fc-row-k" style="font-weight:${bold?700:500}">${k}</span>
+      <span class="fc-row-v" style="font-size:${bold?'.9rem':'.83rem'}">${v}</span>
     </div>`;
 
-  const arrow=`<div style="text-align:center;color:var(--muted);font-size:.9rem;margin:2px 0">↓ add</div>`;
-  const minus=`<div style="text-align:center;color:var(--muted);font-size:.9rem;margin:2px 0">↓ minus</div>`;
-  const equals=`<div style="height:1px;background:${brc};margin:10px 0 8px;"></div>`;
-
-  const summary=`
-    <div style="padding:18px 20px;background:${isDropout?'linear-gradient(135deg,#fffbeb,#fef3c7)':'linear-gradient(135deg,#ecfeff,#cffafe)'};border-radius:0 0 12px 12px;border-top:2px solid ${brc};">
-      <div style="font-size:.65rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:${gc};margin-bottom:14px;">${title} — Step by Step</div>
-      ${step(1,'📊','Pending POS (Closing Balance at Foreclosure Month)',RR(pos),'#1e293b','From schedule closing balance',true)}
-      ${arrow}
-      ${step(2,'📅','Prorated Interest',RR(pInt),'var(--orange)',``)}
-      ${equals}
-      ${step('=','🔢','Foreclosure Amount (POS + Prorated)',RR(fcAmt),gc,'',true)}
-      ${arrow}
-      ${step(3,'%','FC Charge @2.95% (With GST)',RR(fcChg),'var(--red)','2.95% of Foreclosure Amount')}
-      ${isDropout && ret>0 ? arrow+step(4,'🔄','Retention Amount Deducted','-'+RR(ret),'var(--green)','Returned from lender') : ''}
-      ${bounce>0 ? arrow+step(5,'⚠️','Bounce / Mandate Charges',RR(bounce),'var(--red)') : ''}
-      ${equals}
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:9px;background:${isDropout?'rgba(245,158,11,.15)':'rgba(34,211,238,.15)'};border:2px solid ${brc};">
-        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${gc}">${totalLbl}</div>
-        <div style="font-size:1.5rem;font-weight:800;color:${ac}">${RR(final)}</div>
+  const summary = `
+    <div class="fc-box ${isDropout?'fc-dropout':'fc-final'}" style="margin-top:16px;">
+      <div class="fc-title">${title}</div>
+      <div class="fc-rows">
+        ${mkRow('Pending POS (Closing Balance at Foreclosure Month)', RR(pos), true)}
+        ${mkRow('No. of Days (Current Month)', dm+' days')}
+        ${mkRow('Prorated Interest (POS × APR/360 × Days)', RR(pInt))}
+        ${mkRow('Foreclosure Amount (POS + Prorated Interest)', RR(fcAmt), true)}
+        ${mkRow('FC Charge @2.95% of Foreclosure Amount', RR(fcChg))}
+        ${isDropout ? mkRow('Retention Amount Deducted', RR(ret)) : ''}
+        ${mkRow('Bounce / Mandate Charges', RR(bounce))}
       </div>
-      <div style="text-align:right;margin-top:8px;font-size:.7rem;color:${gc};font-weight:600;">Date: ${today}</div>
+      <div class="fc-div"></div>
+      <div class="fc-total-row">
+        <div>
+          <div class="fc-total-label">${totalLabel}</div>
+          <div class="fc-total-amt" style="color:${totalColor}">${RR(final)}</div>
+        </div>
+        <div class="fc-date-chip">
+          <div class="fc-date-l">Date</div>
+          <div class="fc-date-v">${today}</div>
+        </div>
+      </div>
     </div>`;
 
-  document.getElementById(elId).innerHTML = tbl + summary;
+  document.getElementById(elId).innerHTML =
+    `<div style="padding:0">${tbl}</div>${summary}`;
 }
 
 function switchClosure(id,btn){
