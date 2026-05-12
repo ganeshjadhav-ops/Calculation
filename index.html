@@ -278,7 +278,15 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
   <!-- CLOSURE -->
   <div id="tab-closure" style="display:none">
-    <div class="fc-dual" id="fcDual"></div>
+    <!-- Sub-tabs like Schedule -->
+    <div class="tw" style="margin-bottom:14px;">
+      <div class="sched-tabs">
+        <button class="st active" onclick="switchClosure('d',this)">🎓 Dropout Closure</button>
+        <button class="st" onclick="switchClosure('f',this)">⚡ Final Foreclosure</button>
+      </div>
+      <div id="closure-d"></div>
+      <div id="closure-f" style="display:none"></div>
+    </div>
     <!-- Per-month FC charges table -->
     <div class="card" style="margin-bottom:0">
       <div class="sh">📊 Foreclosure Charges — Month-wise Breakup (if closed at each month)</div>
@@ -570,17 +578,11 @@ function calc(){
   renderSched('sched-d', S1, fcIdx1, advAmt, netP1, ae, 'Dropout');
   renderSched('sched-f', S2, fcIdx2, advAmt, netP2, ae, 'Final FC');
 
-  // ── DUAL CLOSURE BOXES ──
-  document.getElementById('fcDual').innerHTML=`
-    ${mkFCBox('dropout',
-      'Dropout','🎓 Loan Closure — as per Dropout',
-      pos1,dInt1,dm,pInt1,fcAmt1,fcChg1,retAmt,bounce,final1,today,true
-    )}
-    ${mkFCBox('final',
-      'final','⚡ Final Foreclosure Amount',
-      pos2,dInt2,dm,pInt2,fcAmt2,fcChg2,0,bounce,final2,today,false
-    )}
-  `;
+  // ── CLOSURE DETAIL — schedule table + summary matching final amount ──
+  renderClosureDetail('closure-d', S1, fcIdx1, advAmt, netP1, ae,
+    pos1, dm, pInt1, fcAmt1, fcChg1, retAmt, bounce, final1, today, true);
+  renderClosureDetail('closure-f', S2, fcIdx2, advAmt, netP2, ae,
+    pos2, dm, pInt2, fcAmt2, fcChg2, 0, bounce, final2, today, false);
 
   // ── PER-MONTH FC TABLE ──
   renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
@@ -620,7 +622,80 @@ function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounc
     </div>`;
 }
 
-function renderSched(elId, sched, fcIdx, advAmt, netP, ae, label){
+function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
+    pos, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
+
+  const gc = isDropout ? '#92400e' : '#0e7490';
+  const bg = isDropout ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#ecfeff,#cffafe)';
+  const br = isDropout ? '#f59e0b' : '#22d3ee';
+  const title = isDropout ? '🎓 Loan Closure — as per Dropout' : '⚡ Final Foreclosure Amount';
+  const totalLabel = isDropout ? 'Total Loan Closure Amount' : 'Total Final Foreclosure';
+  const totalColor = isDropout ? '#b45309' : '#0891b2';
+
+  // Schedule table (same as Schedule tab)
+  let tbl = `<table><thead><tr>
+    <th>Month</th><th>Opening (₹)</th><th>EMI (₹)</th>
+    <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th>
+  </tr></thead><tbody>`;
+  if(ae>0) tbl+=`<tr>
+    <td>ADV</td><td style="color:var(--muted);text-align:right">—</td>
+    <td>${R2(advAmt)}</td><td style="text-align:right">—</td>
+    <td>${R2(advAmt)}</td><td>${R2(netP)}</td>
+    <td><span class="tag ta">Advance</span></td>
+  </tr>`;
+  sched.forEach((row,idx)=>{
+    const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
+    const cls=paid?'rp':fc?'rf':'';
+    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
+    tbl+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td>
+      <td style="color:var(--red)">${R2(row.int)}</td>
+      <td style="color:var(--green)">${R2(row.pr)}</td>
+      <td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
+  });
+  tbl += '</tbody></table>';
+
+  // Summary box matching final amount
+  const mkRow=(k,v,bold=false)=>`
+    <div class="fc-row${bold?' highlight-'+(isDropout?'d':'n'):''}">
+      <span class="fc-row-k" style="font-weight:${bold?700:500}">${k}</span>
+      <span class="fc-row-v" style="font-size:${bold?'.9rem':'.83rem'}">${v}</span>
+    </div>`;
+
+  const summary = `
+    <div class="fc-box ${isDropout?'fc-dropout':'fc-final'}" style="margin-top:16px;">
+      <div class="fc-title">${title}</div>
+      <div class="fc-rows">
+        ${mkRow('Pending POS (Closing Balance at Foreclosure Month)', RR(pos), true)}
+        ${mkRow('No. of Days (Current Month)', dm+' days')}
+        ${mkRow('Prorated Interest (POS × APR/360 × Days)', RR(pInt))}
+        ${mkRow('Foreclosure Amount (POS + Prorated Interest)', RR(fcAmt), true)}
+        ${mkRow('FC Charge @2.95% of Foreclosure Amount', RR(fcChg))}
+        ${isDropout ? mkRow('Retention Amount Deducted', RR(ret)) : ''}
+        ${mkRow('Bounce / Mandate Charges', RR(bounce))}
+      </div>
+      <div class="fc-div"></div>
+      <div class="fc-total-row">
+        <div>
+          <div class="fc-total-label">${totalLabel}</div>
+          <div class="fc-total-amt" style="color:${totalColor}">${RR(final)}</div>
+        </div>
+        <div class="fc-date-chip">
+          <div class="fc-date-l">Date</div>
+          <div class="fc-date-v">${today}</div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById(elId).innerHTML =
+    `<div style="padding:0">${tbl}</div>${summary}`;
+}
+
+function switchClosure(id,btn){
+  document.getElementById('closure-d').style.display=id==='d'?'block':'none';
+  document.getElementById('closure-f').style.display=id==='f'?'block':'none';
+  document.querySelectorAll('#tab-closure .sched-tabs .st').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
   let t=`<table><thead><tr>
     <th>Month</th><th>Opening (₹)</th><th>EMI (₹)</th>
     <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th>
