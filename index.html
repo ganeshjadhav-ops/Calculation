@@ -696,19 +696,6 @@ function switchClosure(id,btn){
   document.querySelectorAll('#tab-closure .sched-tabs .st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-  let t=`<table><thead><tr>
-    <th>Month</th><th>Opening (₹)</th><th>EMI (₹)</th>
-    <th>Interest (₹)</th><th>Principal (₹)</th><th>Closing (₹)</th><th>Status</th>
-  </tr></thead><tbody>`;
-  if(ae>0)t+=`<tr><td>ADV</td><td style="color:var(--muted);text-align:right">—</td><td>${R2(advAmt)}</td><td style="text-align:right">—</td><td>${R2(advAmt)}</td><td>${R2(netP)}</td><td><span class="tag ta">Advance</span></td></tr>`;
-  sched.forEach((row,idx)=>{
-    const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
-    const cls=paid?'rp':fc?'rf':'';
-    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
-    t+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td><td style="color:var(--red)">${R2(row.int)}</td><td style="color:var(--green)">${R2(row.pr)}</td><td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
-  });
-  document.getElementById(elId).innerHTML=t+'</tbody></table>';
-}
 
 // ── PER-MONTH FC CHARGE TABLE ─────────────────────────────
 function renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx){
