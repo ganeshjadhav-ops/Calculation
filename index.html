@@ -8,6 +8,7 @@
 <style>
 :root{
   --bg:#f0f4f8;--white:#fff;
+  --gq1:#1a3c5e;--gq2:#0891b2;--gq3:#06b6d4;
   --blue:#2563eb;--blight:#eff6ff;--bmid:#dbeafe;--bdark:#1d4ed8;
   --green:#059669;--glight:#ecfdf5;
   --orange:#d97706;--olight:#fffbeb;
@@ -19,28 +20,32 @@
   --border:#e2e8f0;--b2:#cbd5e1;
   --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
   --shm:0 4px 16px rgba(0,0,0,.08);
-  --shl:0 10px 30px rgba(0,0,0,.1);
+  --shl:0 10px 30px rgba(0,0,0,.12);
   --r:14px;--rs:9px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* ── HEADER ── */
-header{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;box-shadow:var(--sh);}
-.logo{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;}
-header h1{font-family:'Sora',sans-serif;font-size:.95rem;color:var(--text);letter-spacing:-.01em;}
-header h1 span{color:var(--muted);font-size:.7rem;font-family:'Inter',sans-serif;font-weight:400;margin-left:6px;}
-.hbadges{margin-left:auto;display:flex;gap:6px;}
-.badge{padding:3px 9px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.02em;}
-.b-blue{background:var(--bmid);color:var(--blue);}
-.b-green{background:#d1fae5;color:#065f46;}
-.b-orange{background:#fef3c7;color:#92400e;}
+header{background:linear-gradient(135deg,#1a3c5e,#0e7490);border-bottom:1px solid rgba(255,255,255,.1);padding:0 28px;height:58px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(26,60,94,.35);}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo{width:36px;height:36px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px;backdrop-filter:blur(4px);}
+.logo-text{display:flex;flex-direction:column;}
+.logo-text .brand{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.1;}
+.logo-text .sub{font-size:.62rem;color:rgba(255,255,255,.65);font-weight:400;letter-spacing:.04em;}
+.divider{width:1px;height:28px;background:rgba(255,255,255,.2);margin:0 4px;}
+.tool-name{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.85);letter-spacing:.01em;}
+.hbadges{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.badge{padding:3px 9px;border-radius:20px;font-size:.63rem;font-weight:700;letter-spacing:.03em;}
+.b-white{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.b-green{background:rgba(5,150,105,.25);color:#6ee7b7;border:1px solid rgba(110,231,183,.2);}
+.b-orange{background:rgba(217,119,6,.25);color:#fcd34d;border:1px solid rgba(252,211,77,.2);}
 
-main{max-width:1440px;margin:0 auto;padding:20px 24px;}
+main{max-width:1200px;margin:0 auto;padding:20px 22px;}
 
 /* ── CARD ── */
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;box-shadow:var(--sh);margin-bottom:14px;}
-.sh{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sh{font-size:.61rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .sh::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* ── SEARCH ── */
@@ -48,22 +53,22 @@ main{max-width:1440px;margin:0 auto;padding:20px 24px;}
 .sf{flex:1;min-width:200px;}
 .sf label{display:block;font-size:.74rem;font-weight:600;color:var(--t2);margin-bottom:4px;}
 .big-inp{width:100%;padding:10px 14px;border:2px solid var(--b2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:.95rem;font-weight:600;color:var(--text);background:var(--white);outline:none;transition:all .15s;}
-.big-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.big-inp:focus{border-color:var(--gq2);box-shadow:0 0 0 3px rgba(8,145,178,.12);}
 .btn{padding:10px 20px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;letter-spacing:.01em;}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3);}
-.btn-blue:hover{background:var(--bdark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,99,235,.35);}
+.btn-blue{background:linear-gradient(135deg,#1a3c5e,#0891b2);color:#fff;box-shadow:0 2px 10px rgba(8,145,178,.35);}
+.btn-blue:hover{background:linear-gradient(135deg,#0e2a45,#0369a1);transform:translateY(-1px);box-shadow:0 4px 14px rgba(8,145,178,.4);}
 .btn-blue:disabled{background:var(--muted);cursor:not-allowed;transform:none;box-shadow:none;}
 .btn-ghost{background:var(--bg);border:1.5px solid var(--b2);color:var(--t2);}
 .btn-ghost:hover{background:var(--border);color:var(--text);}
 #sb{display:none;padding:10px 14px;border-radius:var(--rs);font-size:.8rem;font-weight:500;margin-top:10px;border:1px solid;}
 #sb.loading{background:var(--blight);border-color:var(--bmid);color:var(--blue);}
-#sb.success{background:var(--glight);border-color:#a7f3d0;color:var(--green);}
+#sb.success{background:#ecfdf5;border-color:#a7f3d0;color:var(--green);}
 #sb.error{background:var(--rlight);border-color:#fecaca;color:var(--red);}
 
 /* ── INFO STRIP ── */
 #strip{display:none;}
 .info-grid{display:grid;grid-template-columns:repeat(10,1fr);border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;}
-.ibox{padding:10px 12px;border-right:1px solid var(--border);background:var(--white);transition:background .12s;}
+.ibox{padding:10px 12px;border-right:1px solid var(--border);background:var(--white);}
 .ibox:last-child{border-right:none;}
 .ibox:hover{background:#f8fafc;}
 .ib-l{font-size:.57rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
@@ -71,30 +76,36 @@ main{max-width:1440px;margin:0 auto;padding:20px 24px;}
 .ib-v.blue{color:var(--blue);}.ib-v.green{color:var(--green);}.ib-v.orange{color:var(--orange);}.ib-v.red{color:var(--red);}.ib-v.teal{color:var(--teal);}
 @media(max-width:1000px){.info-grid{grid-template-columns:repeat(5,1fr);}.ibox{border-bottom:1px solid var(--border);}}
 
-/* ── INPUTS SECTION ── */
+/* ── INPUTS ── */
 #ms{display:none;}
 .inp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .fl-wrap{position:relative;}
 .fl-wrap label{display:block;font-size:.74rem;font-weight:700;color:var(--t2);margin-bottom:2px;}
-.fl-hint{font-size:.64rem;color:var(--muted);margin-bottom:5px;}
-.fl-inp{width:100%;padding:10px 14px;border:2px solid var(--blue);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:var(--blue);background:var(--blight);outline:none;transition:all .18s;}
-.fl-inp:focus{border-color:var(--bdark);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.fl-hint{font-size:.63rem;color:var(--muted);margin-bottom:5px;}
+.fl-inp{width:100%;padding:10px 14px;border:2px solid var(--gq2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:var(--gq1);background:#f0fdfe;outline:none;transition:all .18s;}
+.fl-inp:focus{border-color:var(--gq1);box-shadow:0 0 0 3px rgba(8,145,178,.12);}
 .auto-tag{position:absolute;right:10px;bottom:11px;font-size:.58rem;font-weight:700;background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;}
+.emi-derived{font-size:.68rem;color:var(--teal);font-weight:700;margin-top:4px;min-height:16px;}
 
-/* ── QUICK STATS ROW ── */
+/* ── QUICK STATS ── */
 .qstats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
-.qs{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);transition:transform .13s,box-shadow .13s;}
+.qs{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);transition:transform .13s,box-shadow .13s;position:relative;overflow:hidden;}
+.qs::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.qs.q-blue::before{background:linear-gradient(90deg,#2563eb,#06b6d4);}
+.qs.q-green::before{background:linear-gradient(90deg,#059669,#34d399);}
+.qs.q-gold::before{background:linear-gradient(90deg,#d97706,#f59e0b);}
+.qs.q-teal::before{background:linear-gradient(90deg,#0891b2,#22d3ee);}
 .qs:hover{transform:translateY(-2px);box-shadow:var(--shm);}
-.qs-l{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px;}
-.qs-v{font-size:1.35rem;font-weight:800;line-height:1.1;}
+.qs-l{font-size:.61rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px;}
+.qs-v{font-size:1.3rem;font-weight:800;line-height:1.1;}
 .qs-v.blue{color:var(--blue);}.qs-v.green{color:var(--green);}.qs-v.gold{color:var(--gold);}.qs-v.teal{color:var(--teal);}
-.qs-s{font-size:.68rem;color:var(--muted);margin-top:3px;}
+.qs-s{font-size:.67rem;color:var(--muted);margin-top:3px;}
 @media(max-width:900px){.qstats{grid-template-columns:repeat(2,1fr);}}
 
 /* ── TABS ── */
 .tabs{display:flex;gap:2px;margin-bottom:14px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);padding:3px;width:fit-content;box-shadow:var(--sh);}
-.tb{padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .13s;}
-.tb.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3);}
+.tb{padding:7px 18px;border:none;border-radius:7px;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .13s;}
+.tb.active{background:linear-gradient(135deg,#1a3c5e,#0891b2);color:#fff;box-shadow:0 2px 8px rgba(8,145,178,.3);}
 
 /* ── SUMMARY GRID ── */
 .sum-g{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
@@ -105,91 +116,73 @@ main{max-width:1440px;margin:0 auto;padding:20px 24px;}
 .v{font-size:.83rem;font-weight:700;}
 .v.blue{color:var(--blue);}.v.green{color:var(--green);}.v.orange{color:var(--orange);}.v.red{color:var(--red);}.v.purple{color:var(--purple);}.v.teal{color:var(--teal);}
 
-/* ── SCHEDULE TABLE ── */
+/* ── CLOSURE TABS ── */
 .tw{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;}
 .sched-tabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);}
-.st{padding:9px 18px;border:none;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .13s;margin-bottom:-2px;}
-.st.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blight);}
+.st{padding:9px 20px;border:none;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.79rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .13s;margin-bottom:-2px;}
+.st.active{color:var(--gq1);border-bottom-color:var(--gq2);background:var(--tlight);}
 table{width:100%;border-collapse:collapse;font-size:.78rem;}
 thead th{padding:9px 12px;text-align:right;background:#f8fafc;border-bottom:2px solid var(--border);font-size:.61rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t2);white-space:nowrap;}
 thead th:first-child{text-align:center;}
 tbody tr{border-top:1px solid #f1f5f9;transition:background .1s;}
 tbody tr:hover{background:var(--blight);}
 tbody tr.rp{background:#f0fdf4;}
-tbody tr.rf{background:#fffbeb;}
 td{padding:8px 12px;text-align:right;}
 td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 .tag{padding:2px 7px;border-radius:5px;font-size:.62rem;font-weight:700;}
 .tp{background:#d1fae5;color:#065f46;}
 .tpn{background:#fef3c7;color:#92400e;}
 .ta{background:var(--plight);color:var(--purple);}
-.tfc{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
 
-/* ── FC DUAL BOXES ── */
-.fc-dual{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-@media(max-width:800px){.fc-dual{grid-template-columns:1fr;}}
-
-.fc-box{border-radius:var(--r);padding:18px 20px;}
-.fc-dropout{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;}
-.fc-final{background:linear-gradient(135deg,#ecfeff,#cffafe);border:2px solid #22d3ee;}
-
-.fc-title{font-size:.65rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.fc-dropout .fc-title{color:#92400e;}
-.fc-final .fc-title{color:var(--tdark);}
-
-/* FC rows */
-.fc-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-.fc-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:7px;}
-.fc-dropout .fc-row{background:rgba(255,255,255,.6);border:1px solid rgba(245,158,11,.2);}
-.fc-final .fc-row{background:rgba(255,255,255,.6);border:1px solid rgba(34,211,238,.2);}
-.fc-row-k{font-size:.72rem;color:var(--t2);}
-.fc-row-v{font-size:.82rem;font-weight:700;}
-.fc-dropout .fc-row-v{color:#92400e;}
-.fc-final .fc-row-v{color:var(--tdark);}
-.fc-row.highlight-d{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.4);}
-.fc-row.highlight-n{background:rgba(34,211,238,.1);border-color:rgba(34,211,238,.4);}
-
-/* FC divider */
-.fc-div{height:1px;margin:10px 0;}
-.fc-dropout .fc-div{background:#f59e0b;}
-.fc-final .fc-div{background:#22d3ee;}
-
-/* FC total */
-.fc-total-row{display:flex;justify-content:space-between;align-items:center;}
-.fc-total-label{font-size:.61rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
-.fc-dropout .fc-total-label{color:#92400e;}
-.fc-final .fc-total-label{color:var(--tdark);}
-.fc-total-amt{font-size:1.45rem;font-weight:800;}
-.fc-dropout .fc-total-amt{color:var(--gold);}
-.fc-final .fc-total-amt{color:var(--teal);}
-.fc-date-chip{border-radius:var(--rs);padding:8px 12px;text-align:right;}
-.fc-dropout .fc-date-chip{background:rgba(255,255,255,.7);border:1px solid rgba(245,158,11,.3);}
-.fc-final .fc-date-chip{background:rgba(255,255,255,.7);border:1px solid rgba(34,211,238,.3);}
-.fc-date-l{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
-.fc-dropout .fc-date-l{color:#92400e;}
-.fc-final .fc-date-l{color:var(--tdark);}
-.fc-date-v{font-size:.85rem;font-weight:700;}
-.fc-dropout .fc-date-v{color:#92400e;}
-.fc-final .fc-date-v{color:var(--tdark);}
-
-/* FC per-month table */
-.fc-month-table{margin-top:14px;}
-.fc-month-table .sh{margin-bottom:8px;}
+/* ── STEP-BY-STEP CLOSURE BOX ── */
+.steps-wrap{padding:18px 22px 22px;}
+.steps-title{font-size:.65rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.steps-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.step-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px;}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:800;flex-shrink:0;margin-top:1px;}
+.step-d .step-num{background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;}
+.step-f .step-num{background:linear-gradient(135deg,#0891b2,#22d3ee);color:#fff;}
+.step-body{flex:1;background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:10px 14px;}
+.step-label{font-size:.71rem;font-weight:700;color:var(--t2);margin-bottom:3px;}
+.step-calc{font-size:.67rem;color:var(--muted);margin-bottom:4px;}
+.step-val{font-size:.95rem;font-weight:800;}
+.step-d .step-val{color:var(--gold);}
+.step-f .step-val{color:var(--teal);}
+.step-connector{text-align:center;font-size:1rem;color:var(--muted);margin:-4px 0 -4px 21px;}
+.steps-divider{border:none;border-top:2px dashed var(--border);margin:14px 0;}
+.steps-total{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:11px;padding:14px 18px;margin-top:4px;}
+.steps-total-f{background:linear-gradient(135deg,#ecfeff,#cffafe);border-color:#22d3ee;}
+.steps-total-label{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#92400e;margin-bottom:4px;}
+.steps-total-f .steps-total-label{color:var(--tdark);}
+.steps-total-amt{font-size:1.55rem;font-weight:800;color:var(--gold);}
+.steps-total-f .steps-total-amt{color:var(--teal);}
+.steps-date{text-align:right;}
+.steps-date-l{font-size:.58rem;font-weight:700;text-transform:uppercase;color:#92400e;}
+.steps-total-f .steps-date-l{color:var(--tdark);}
+.steps-date-v{font-size:.85rem;font-weight:700;color:#92400e;}
+.steps-total-f .steps-date-v{color:var(--tdark);}
 
 /* TOAST */
-#toast{position:fixed;bottom:16px;right:16px;background:var(--text);color:#fff;padding:10px 16px;border-radius:var(--rs);font-size:.78rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all .22s;z-index:9999;box-shadow:var(--shl);}
+#toast{position:fixed;bottom:16px;right:16px;background:var(--gq1);color:#fff;padding:10px 16px;border-radius:var(--rs);font-size:.78rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all .22s;z-index:9999;box-shadow:var(--shl);}
 #toast.show{transform:translateY(0);opacity:1;}
-.spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(37,99,235,.2);border-top-color:var(--blue);border-radius:50%;animation:sp .5s linear infinite;vertical-align:middle;}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(8,145,178,.2);border-top-color:var(--gq2);border-radius:50%;animation:sp .5s linear infinite;vertical-align:middle;}
 @keyframes sp{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">D</div>
-  <h1>Dropout Repayment Calculator <span>Auto-Fetch · Live Data</span></h1>
+  <div class="logo-wrap">
+    <div class="logo">GQ</div>
+    <div class="logo-text">
+      <span class="brand">GrayQuest</span>
+      <span class="sub">Finance Pvt. Ltd.</span>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <span class="tool-name">Dropout Repayment Calculator</span>
   <div class="hbadges">
-    <span class="badge b-blue">⚡ 2-Sheet Fetch</span>
-    <span class="badge b-green">3 Inputs</span>
+    <span class="badge b-white">&#9889; Live Data</span>
+    <span class="badge b-green">Auto-Fetch</span>
     <span class="badge b-orange">Dual Closure</span>
   </div>
 </header>
@@ -224,7 +217,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
         <label>📌 Amount Paid by Parent / Institute (₹)</label>
         <div class="fl-hint">Auto-fetched from Sheet 2 (Col L − R) · Manual edit OK</div>
         <input class="fl-inp" type="number" id="amtPaid" value="0" min="0" step="0.01" oninput="calc()">
-        <span class="auto-tag" id="ep-tag" style="display:none">Auto ✓</span>
+        <span class="auto-tag" id="ep-tag" style="display:none">Auto &#10003;</span>
+        <div class="emi-derived" id="emi-derived-info"></div>
       </div>
       <div class="fl-wrap">
         <label>📌 No. of Days — Current Month</label>
@@ -245,10 +239,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tb active" onclick="switchTab('summary',this)">📊 Summary</button>
-    <button class="tb" onclick="switchTab('schedule',this)">📅 Schedule</button>
-    <button class="tb" onclick="switchTab('closure',this)">FC Closure Details</button>
-    <button class="tb" onclick="switchTab('rbi',this)">&#128203; RBI Schedule</button>
+    <button class="tb active" onclick="switchTab('summary',this)">&#128202; Summary</button>
+    <button class="tb" onclick="switchTab('closure',this)">&#9889; FC Closure Details</button>
   </div>
 
   <!-- SUMMARY -->
@@ -265,45 +257,17 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
     </div>
   </div>
 
-  <!-- SCHEDULE -->
-  <div id="tab-schedule" style="display:none">
-    <div class="tw">
-      <div class="sched-tabs">
-        <button class="st active" onclick="switchSched('d',this)">🎓 Dropout Schedule</button>
-        <button class="st" onclick="switchSched('f',this)">⚡ Final FC Schedule</button>
-      </div>
-      <div id="sched-d"></div>
-      <div id="sched-f" style="display:none"></div>
-    </div>
-  </div>
 
-  <!-- RBI SCHEDULE TAB -->
-  <div id="tab-rbi" style="display:none">
-    <div class="card" style="margin-bottom:14px">
-      <div class="sh">&#128203; Key Fact Statement (KFS) &mdash; RBI Digital Lending Guidelines 2022</div>
-      <div id="rbi-kfs"></div>
-    </div>
-    <div class="tw" style="margin-bottom:0">
-      <div style="padding:12px 16px 0"><div class="sh">&#128197; Full Amortisation Schedule &mdash; Month-wise Breakup</div></div>
-      <div id="rbi-table"></div>
-    </div>
-  </div>
 
   <!-- CLOSURE -->
   <div id="tab-closure" style="display:none">
-    <!-- Sub-tabs like Schedule -->
-    <div class="tw" style="margin-bottom:14px;">
+    <div class="tw" style="margin-bottom:0;">
       <div class="sched-tabs">
-        <button class="st active" onclick="switchClosure('d',this)">🎓 Dropout Closure</button>
-        <button class="st" onclick="switchClosure('f',this)">⚡ Final Foreclosure</button>
+        <button class="st active" onclick="switchClosure('d',this)">&#127891; Dropout Closure</button>
+        <button class="st" onclick="switchClosure('f',this)">&#9889; Final Foreclosure</button>
       </div>
       <div id="closure-d"></div>
       <div id="closure-f" style="display:none"></div>
-    </div>
-    <!-- Per-month FC charges table -->
-    <div class="card" style="margin-bottom:0">
-      <div class="sh">📊 Foreclosure Charges — Month-wise Breakup (if closed at each month)</div>
-      <div class="tw" style="margin-bottom:0" id="fcMonthTable"></div>
     </div>
   </div>
 </div>
@@ -406,20 +370,42 @@ async function fetchAll(){
       if(pmtRec){
         // Helper: try column name first, then raw index
         const cv=(names,idx)=>{
+          // Try column name first (multiple variants for resilience)
           const v=gv(pmtRec,...names);
           if(v!==null&&v!=='')return parseFloat(v)||0;
+          // Fallback to raw index position
           return parseFloat(pmtRec._raw?.[idx]?.v)||0;
         };
-        const totalPaid    = cv(['Total Payment made till date','Total Payment Made Till Date','totalpaymentmadetilldate'], 11);
-        const totalChg     = cv(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid'], 17);
-        const totalOutstanding = cv(['Total Outstanding Amount','Total outstanding amount','totaloutstandingamount'], 16); // Col Q = idx 16
-        const chargesOutstanding = cv(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount'], 18); // Col S = idx 18
-        console.log('[Sheet2 matched]', {totalPaid, totalChg, totalOutstanding, chargesOutstanding});
-        REC._netPaid         = totalPaid>0?totalPaid:0;        // amtPaid field (Col L)
-        REC._totalOutstanding= totalOutstanding>0?totalOutstanding:0;  // POS directly (Col Q)
-        REC._bounce          = chargesOutstanding>0?chargesOutstanding:0; // bounce (Col S)
-        REC._totalPaid       = totalPaid;
-        REC._totalChg        = totalChg;
+        // Col L (idx 11) — Total Payment made till date
+        const totalPaid = cv([
+          'Total Payment made till date','Total Payment Made Till Date',
+          'totalpaymentmadetilldate','Total Payments Made','TotalPaymentMade',
+          'total payment','Total EMI Paid','TotalEMIPaid'
+        ], 11);
+        // Col R (idx 17) — Total Charges Paid
+        const totalChg = cv([
+          'Total Charges Paid','Total charges paid','TotalChargesPaid',
+          'totalchargespaid','Charges Paid','Total Charge Paid'
+        ], 17);
+        // Col Q (idx 16) — Total Outstanding
+        const totalOutstanding = cv([
+          'Total Outstanding Amount','Total outstanding amount','totaloutstandingamount',
+          'Outstanding Amount','TotalOutstanding'
+        ], 16);
+        // Col S (idx 18) — Charges Outstanding (Bounce/Mandate)
+        const chargesOutstanding = cv([
+          'Total Charges Outstanding Amount','Total Charges Outstanding',
+          'ChargesOutstandingAmount','totalchargesoutstandingamount',
+          'Charges Outstanding','Outstanding Charges'
+        ], 18);
+        // NET PAID = Col L − Col R (payment received minus charges already paid)
+        const netPaid = Math.max(0, totalPaid - totalChg);
+        console.log('[Sheet2]', {totalPaid, totalChg, netPaid, chargesOutstanding});
+        REC._netPaid          = netPaid;          // L − R → Amount Paid field
+        REC._totalOutstanding = totalOutstanding > 0 ? totalOutstanding : 0;
+        REC._bounce           = chargesOutstanding > 0 ? chargesOutstanding : 0;
+        REC._totalPaid        = totalPaid;
+        REC._totalChg         = totalChg;
       } else {
         // Debug: log available cols & first ID
         const rows2d=parseGviz(t2);
@@ -508,6 +494,13 @@ function calc(){
   const retAmt  = retP*netLoan;
   const netDisb = netLoan-retAmt;
 
+  // ── EMI derived display ──
+  const _nd = parseFloat(document.getElementById('amtPaid').value)||0;
+  const _ne2 = emi>0?Math.min(Math.floor(Math.max(0,_nd-advAmt)/emi),ne):0;
+  const _ex2 = Math.max(0,Math.max(0,_nd-advAmt)-_ne2*emi);
+  document.getElementById('emi-derived-info').textContent =
+    _nd>0 ? `= ${_ne2} EMI(s) paid${_ex2>0?' + ₹'+R2(_ex2)+' excess':''}` : '';
+
   // ── Auto-fill from Sheet2 (first load only — manual override works) ──
   if(r._netPaid>0 && document.getElementById('amtPaid').dataset.autoSet!=='1'){
     document.getElementById('amtPaid').value = r._netPaid.toFixed(2);
@@ -535,15 +528,13 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── PENDING POS ──────────────────────────────────────────────────────────
+  // ── PENDING POS ──────────────────────────────────────────────────
   const normalPaid = Math.max(0, amtPaid - advAmt);
   const emisPaid   = emi > 0 ? Math.min(Math.floor(normalPaid / emi), ne) : 0;
-  // Base POS = closing balance after last complete EMI in amortisation schedule
+  // Base POS = schedule closing after last complete EMI
   const basePos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
   const basePos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
-  // Excess payment (beyond complete EMIs) reduces the outstanding principal directly
-  // e.g. paid Rs.260,105 = 3 full EMIs + Rs.50,423 excess  => POS = basePos - Rs.50,423
-  // e.g. paid Rs.258,105 = 3 full EMIs + Rs.48,423 excess  => POS = basePos - Rs.48,423 (Rs.2,000 MORE)
+  // Excess beyond complete EMIs directly reduces outstanding principal
   const excessPmt = Math.max(0, normalPaid - emisPaid * emi);
   const pos1 = Math.max(0, basePos1 - excessPmt);
   const pos2 = Math.max(0, basePos2 - excessPmt);
@@ -562,10 +553,10 @@ function calc(){
 
   // ── QUICK STATS ──
   document.getElementById('qstats').innerHTML=`
-    <div class="qs"><div class="qs-l">EMI Amount</div><div class="qs-v blue">₹${R2(emi)}</div><div class="qs-s">${ne} normal + ${ae} advance</div></div>
-    <div class="qs"><div class="qs-l">Net Principal O/S</div><div class="qs-v green">₹${R2(netP1)}</div><div class="qs-s">After deductions</div></div>
-    <div class="qs"><div class="qs-l">🎓 Dropout Closure</div><div class="qs-v gold">₹${R2(final1)}</div><div class="qs-s">With retention</div></div>
-    <div class="qs"><div class="qs-l">⚡ Final Foreclosure</div><div class="qs-v teal">₹${R2(final2)}</div><div class="qs-s">Without retention</div></div>
+    <div class="qs q-blue"><div class="qs-l">EMI Amount</div><div class="qs-v blue">&#8377;${R2(emi)}</div><div class="qs-s">${ne} normal + ${ae} advance</div></div>
+    <div class="qs q-green"><div class="qs-l">Net Principal O/S</div><div class="qs-v green">&#8377;${R2(netP1)}</div><div class="qs-s">After deductions</div></div>
+    <div class="qs q-gold"><div class="qs-l">&#127891; Dropout Closure</div><div class="qs-v gold">&#8377;${R2(final1)}</div><div class="qs-s">With retention</div></div>
+    <div class="qs q-teal"><div class="qs-l">&#9889; Final Foreclosure</div><div class="qs-v teal">&#8377;${R2(final2)}</div><div class="qs-s">Without retention</div></div>
   `;
 
   // ── SUMMARY ──
@@ -581,35 +572,25 @@ function calc(){
   ].map(([l,v,c])=>`<div class="cr"><span class="k">${l}</span><span class="v ${c}">${v}</span></div>`).join('');
 
   document.getElementById('cv').innerHTML=[
-    ['Normal EMIs',           ne,''],
-    ['Amount Paid by Parent', RR(amtPaid),'blue'],
-    ['EMIs Paid (Derived)',    emisPaid+' EMIs','teal'],
-    ['Excess Payment Applied',    RR(excessPmt),'purple'],
-    ['Tenure (Years)',        (te/12).toFixed(2),''],
-    ['Pending POS (Dropout)', RR(pos1),'orange'],
-    ['Pending POS (Final FC)',RR(pos2),'teal'],
-    ['Prorated Int (Dropout)',RR(pInt1),''],
-    ['Prorated Int (Final)',  RR(pInt2),''],
-    ['Bounce Charges',        RR(bounce),'red'],
+    ['Normal EMIs',                 ne,''],
+    ['Amount Paid (L-R)',           RR(amtPaid),'blue'],
+    ['EMIs Paid (Derived)',         emisPaid+' EMIs','teal'],
+    ['Excess Payment Applied',      RR(excessPmt),'purple'],
+    ['Current POS (Dropout)',       RR(pos1),'orange'],
+    ['Current POS (Final FC)',      RR(pos2),'teal'],
+    ['Prorated Interest (Dropout)', RR(pInt1),''],
+    ['Prorated Interest (Final)',   RR(pInt2),''],
+    ['Bounce / Mandate Charges',    RR(bounce),'red'],
   ].map(([l,v,c])=>`<div class="cr"><span class="k">${l}</span><span class="v ${c}">${v}</span></div>`).join('');
 
-  // ── SCHEDULES ──
-  renderSched('sched-d', S1, fcIdx1, advAmt, netP1, ae, 'Dropout');
-  renderSched('sched-f', S2, fcIdx2, advAmt, netP2, ae, 'Final FC');
 
-  // ── CLOSURE DETAIL — schedule table + summary matching final amount ──
+
+  // ── CLOSURE DETAIL ──
   renderClosureDetail('closure-d', S1, fcIdx1, advAmt, netP1, ae,
     pos1, dm, pInt1, fcAmt1, fcChg1, retAmt, bounce, final1, today, true, excessPmt);
   renderClosureDetail('closure-f', S2, fcIdx2, advAmt, netP2, ae,
     pos2, dm, pInt2, fcAmt2, fcChg2, 0, bounce, final2, today, false, excessPmt);
 
-  // ── PER-MONTH FC TABLE ──
-  renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
-
-  // ── RBI KFS + AMORTISATION TABLE ──
-  renderRBISchedule(loan, emi, ne, ae, advAmt, netP1, mR1, apr1,
-    pos1, excessPmt, emisPaid, fcIdx1, bounce, final1, final2,
-    (emi*ne)-netP1, emi*ne+advAmt);
 }
 
 function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
@@ -649,95 +630,121 @@ function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounc
 function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
     pos, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout, excessPmt){
 
-  const title     = isDropout ? 'Loan Closure — Dropout' : 'Final Foreclosure';
-  const totalLabel= isDropout ? 'Total Loan Closure Amount' : 'Total Final Foreclosure';
-  const totalColor= isDropout ? '#b45309' : '#0891b2';
+  const isD = isDropout;
+  const fcLabel  = isD ? '&#127891; Dropout Closure Here' : '&#9889; Final Foreclosure Here';
+  const stepCls  = isD ? 'step-d' : 'step-f';
+  const totalCls = isD ? '' : ' steps-total-f';
 
-  // ── SCHEDULE TABLE WITH CRYSTAL-CLEAR CURRENT POSITION ROW ──────────────
+  // ── AMORTISATION TABLE (with CURRENT POSITION row) ───────────────
   let tbl = `<table><thead><tr>
-    <th>Month</th><th>Opening (Rs.)</th><th>EMI (Rs.)</th>
-    <th>Interest (Rs.)</th><th>Principal (Rs.)</th><th>Closing (Rs.)</th><th>Status</th>
+    <th>Month</th><th>Opening (&#8377;)</th><th>EMI (&#8377;)</th>
+    <th>Interest (&#8377;)</th><th>Principal (&#8377;)</th><th>Closing (&#8377;)</th><th>Status</th>
   </tr></thead><tbody>`;
-  if(ae>0) tbl+=`<tr>
+
+  if(ae>0) tbl += `<tr>
     <td>ADV</td><td style="color:var(--muted);text-align:right">—</td>
     <td>${R2(advAmt)}</td><td style="text-align:right">—</td>
     <td>${R2(advAmt)}</td><td>${R2(netP)}</td>
-    <td><span class="tag ta">Advance</span></td>
-  </tr>`;
+    <td><span class="tag ta">Advance</span></td></tr>`;
 
   sched.forEach((row,idx)=>{
-    // All rows up to and including fcIdx are PAID
     const paid = fcIdx >= 0 && idx <= fcIdx;
     const cls  = paid ? 'rp' : '';
-    const tag  = paid ? '<span class="tag tp">&#10003; Paid</span>' : '<span class="tag tpn">Pending</span>';
+    const tag  = paid
+      ? '<span class="tag tp">&#10003; Paid</span>'
+      : '<span class="tag tpn">Pending</span>';
+
     tbl += `<tr class="${cls}">
       <td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td>
       <td style="color:var(--red)">${R2(row.int)}</td>
       <td style="color:var(--green)">${R2(row.pr)}</td>
       <td><strong>${R2(row.cl)}</strong></td>
-      <td>${tag}</td>
-    </tr>`;
+      <td>${tag}</td></tr>`;
 
-    // ── After last paid row → insert CURRENT POSITION row ──
+    // ── CURRENT POSITION row inserted after last paid EMI ──
     if(paid && idx === fcIdx){
-      const showExcess = excessPmt > 0;
       tbl += `<tr style="background:linear-gradient(90deg,#fef9c3,#fef3c7);border-top:2px dashed #f59e0b;border-bottom:2px dashed #f59e0b;">
-        <td colspan="5" style="text-align:left;padding:9px 14px;font-size:.75rem;">
-          <strong style="color:#92400e;font-size:.78rem;">&#9654; CURRENT POSITION</strong>
+        <td colspan="5" style="text-align:left;padding:9px 14px;font-size:.74rem;">
+          <strong style="color:#92400e;font-size:.77rem;">&#9654; CURRENT POSITION</strong>
           &nbsp;&nbsp;
           <span style="color:#374151;">Schedule closing after EMI ${row.t}:
-            <strong style="color:#dc2626;">Rs.${R2(row.cl)}</strong>
+            <strong style="color:#dc2626;">&#8377;${R2(row.cl)}</strong>
           </span>
-          ${showExcess ? `&nbsp;&nbsp;<span style="background:#d1fae5;color:#065f46;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;">Excess applied: Rs.${R2(excessPmt)}</span>` : ''}
+          ${excessPmt>0 ? `&nbsp;&nbsp;<span style="background:#d1fae5;color:#065f46;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;">Excess applied: &#8377;${R2(excessPmt)}</span>` : ''}
         </td>
         <td style="text-align:right;background:rgba(245,158,11,.15);padding:9px 12px;">
-          <div style="font-size:.95rem;font-weight:800;color:#b45309;">Rs.${R2(pos)}</div>
+          <div style="font-size:.95rem;font-weight:800;color:#b45309;">&#8377;${R2(pos)}</div>
           <div style="font-size:.58rem;color:#92400e;font-weight:700;margin-top:1px;">ACTUAL OUTSTANDING</div>
         </td>
         <td style="text-align:center;">
-          <span style="background:#dc2626;color:#fff;padding:3px 8px;border-radius:5px;font-size:.63rem;font-weight:800;">&#9679; FC HERE</span>
+          <span style="background:#1a3c5e;color:#fff;padding:3px 9px;border-radius:5px;font-size:.62rem;font-weight:800;">${fcLabel}</span>
         </td>
       </tr>`;
     }
   });
   tbl += '</tbody></table>';
 
-  // Summary box matching final amount
-  const mkRow=(k,v,bold=false)=>`
-    <div class="fc-row${bold?' highlight-'+(isDropout?'d':'n'):''}">
-      <span class="fc-row-k" style="font-weight:${bold?700:500}">${k}</span>
-      <span class="fc-row-v" style="font-size:${bold?'.9rem':'.83rem'}">${v}</span>
+  // ── STEP-BY-STEP CALCULATION ──────────────────────────────────────
+  const mkStep = (num, label, calc, val) => `
+    <div class="step-row ${stepCls}">
+      <div class="step-num">${num}</div>
+      <div class="step-body">
+        <div class="step-label">${label}</div>
+        ${calc ? `<div class="step-calc">${calc}</div>` : ''}
+        <div class="step-val">&#8377;${R2(val)}</div>
+      </div>
     </div>`;
 
-  const summary = `
-    <div class="fc-box ${isDropout?'fc-dropout':'fc-final'}" style="margin-top:16px;">
-      <div class="fc-title">${title}</div>
-      <div class="fc-rows">
-        ${excessPmt>0 ? mkRow('Schedule Closing (after EMI '+fcIdx+')','Rs.'+R2(pos+excessPmt)) : ''}
-        ${excessPmt>0 ? mkRow('(-) Excess Payment Already Applied','- Rs.'+R2(excessPmt)) : ''}
-        ${mkRow('Actual Outstanding Principal (Current POS)', RR(pos), true)}
-        ${mkRow('No. of Days (Current Month)', dm+' days')}
-        ${mkRow('Prorated Interest (POS × APR/360 × Days)', RR(pInt))}
-        ${mkRow('Foreclosure Amount (POS + Prorated Interest)', RR(fcAmt), true)}
-        ${mkRow('FC Charge @2.95% of Foreclosure Amount', RR(fcChg))}
-        ${isDropout ? mkRow('Retention Amount Deducted', RR(ret)) : ''}
-        ${mkRow('Bounce / Mandate Charges', RR(bounce))}
-      </div>
-      <div class="fc-div"></div>
-      <div class="fc-total-row">
+  const baseClose = fcIdx >= 0 && fcIdx < sched.length ? sched[fcIdx].cl : pos + excessPmt;
+  const aprPct    = ((pos > 0 ? pInt / (pos * dm / 360) : 0) * 100).toFixed(4);
+
+  const steps = `
+    <div class="steps-wrap">
+      <div class="steps-title">How is this amount calculated?</div>
+
+      ${excessPmt > 0 ? `
+      <div class="step-row ${stepCls}">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-label">Actual Outstanding Principal (POS)</div>
+          <div class="step-calc">Schedule closing after EMI ${fcIdx+1}: &#8377;${R2(baseClose)} &nbsp;&#8722;&nbsp; Excess paid: &#8377;${R2(excessPmt)}</div>
+          <div class="step-val">&#8377;${R2(pos)}</div>
+        </div>
+      </div>` : mkStep(1,'Actual Outstanding Principal (POS)',
+        `Schedule closing after EMI ${fcIdx>=0?fcIdx+1:0}`,pos)}
+
+      <div class="step-connector">+</div>
+      ${mkStep(2,'Prorated Interest',
+        `&#8377;${R2(pos)} &times; APR/360 &times; ${dm} days`,pInt)}
+
+      <div class="step-connector">= &#8594;</div>
+      ${mkStep(3,'Foreclosure Base Amount (POS + Interest)',
+        'Outstanding principal + prorated interest for current month',fcAmt)}
+
+      <div class="step-connector">+</div>
+      ${mkStep(4,'FC Charge @ 2.95% (incl. GST)',
+        `2.95% &times; &#8377;${R2(fcAmt)}`,fcChg)}
+
+      ${isD && ret > 0 ? `<div class="step-connector">&#8722;</div>
+      ${mkStep(5,'Retention Amount (deducted)',`FLDG retention waived at closure`,ret)}` : ''}
+
+      ${bounce > 0 ? `<div class="step-connector">+</div>
+      ${mkStep(isD&&ret>0?6:5,'Bounce / Mandate Charges','Outstanding bounce/mandate fees',bounce)}` : ''}
+
+      <hr class="steps-divider">
+      <div class="steps-total${totalCls}">
         <div>
-          <div class="fc-total-label">${totalLabel}</div>
-          <div class="fc-total-amt" style="color:${totalColor}">${RR(final)}</div>
+          <div class="steps-total-label">${isD ? 'Total Dropout Closure Amount' : 'Total Final Foreclosure Amount'}</div>
+          <div class="steps-total-amt">&#8377;${R2(final)}</div>
         </div>
-        <div class="fc-date-chip">
-          <div class="fc-date-l">Date</div>
-          <div class="fc-date-v">${today}</div>
+        <div class="steps-date">
+          <div class="steps-date-l">As of Date</div>
+          <div class="steps-date-v">${today}</div>
         </div>
       </div>
     </div>`;
 
-  document.getElementById(elId).innerHTML =
-    `<div style="padding:0">${tbl}</div>${summary}`;
+  document.getElementById(elId).innerHTML = `<div>${tbl}</div>${steps}`;
 }
 
 function switchClosure(id,btn){
@@ -755,9 +762,9 @@ function renderSched(elId, sched, fcIdx, advAmt, netP, ae, label){
   </tr></thead><tbody>`;
   if(ae>0)t+=`<tr><td>ADV</td><td style="color:var(--muted);text-align:right">—</td><td>${R2(advAmt)}</td><td style="text-align:right">—</td><td>${R2(advAmt)}</td><td>${R2(netP)}</td><td><span class="tag ta">Advance</span></td></tr>`;
   sched.forEach((row,idx)=>{
-    const paid=fcIdx>=0&&idx<=fcIdx;
-    const cls=paid?'rp':'';
-    const tag=paid?'<span class="tag tp">&#10003; Paid</span>':'<span class="tag tpn">Pending</span>';
+    const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
+    const cls=paid?'rp':fc?'rf':'';
+    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
     t+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td><td style="color:var(--red)">${R2(row.int)}</td><td style="color:var(--green)">${R2(row.pr)}</td><td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
   });
   document.getElementById(elId).innerHTML=t+'</tbody></table>';
@@ -815,111 +822,6 @@ function switchSched(id,btn){
   document.querySelectorAll('.st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-// ── RBI-COMPLIANT KFS + FULL AMORTISATION SCHEDULE ───────────────────────
-function renderRBISchedule(loan, emi, ne, ae, advAmt, netP, mR, apr,
-    currentPOS, excessPmt, emisPaid, fcIdx, bounce, final1, final2, totalInt, totalPayable){
-
-  const aprPct = (apr * 100).toFixed(4);
-
-  // ── KEY FACT STATEMENT ──
-  document.getElementById('rbi-kfs').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px;">
-      ${[
-        ['Sanctioned Loan Amount',          'Rs.'+R2(loan),          'blue'],
-        ['Loan Tenure',                     (ne+ae)+' EMIs ('+ae+' advance)', ''],
-        ['Monthly EMI Amount',              'Rs.'+R2(emi),            'green'],
-        ['Annual Percentage Rate (APR)',    aprPct+'% p.a.',          'red'],
-        ['Total Interest Payable',          'Rs.'+R2(totalInt),       'orange'],
-        ['Total Amount Payable',            'Rs.'+R2(totalPayable),   'purple'],
-        ['Foreclosure Charge',              '2.95% of O/S (incl. GST)',''],
-        ['Current Outstanding (POS)',       'Rs.'+R2(currentPOS),    'gold'],
-        ['Dropout Closure Amount',          'Rs.'+R2(final1),        'orange'],
-        ['Final Foreclosure Amount',        'Rs.'+R2(final2),        'teal'],
-      ].map(([l,v,c])=>`
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
-          <div style="font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px">${l}</div>
-          <div style="font-size:.85rem;font-weight:700;color:var(--${c||'text'})">${v}</div>
-        </div>`).join('')}
-    </div>
-    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:.72rem;color:#1e40af;line-height:1.7">
-      <strong>RBI Disclosure (Digital Lending Guidelines, Sep 2022 — RBI/2022-23/111):</strong>
-      APR of <strong>${aprPct}% p.a.</strong> represents annualised all-in cost of loan.
-      Foreclosure charge: <strong>2.95% (incl. GST)</strong> of outstanding principal.
-      Current POS: <strong>Rs.${R2(currentPOS)}</strong>
-      (${emisPaid} EMI(s) paid${excessPmt>0?' + Rs.'+R2(excessPmt)+' excess applied':''}).
-    </div>`;
-
-  // ── AMORTISATION TABLE ──
-  let rows = '';
-  let cumInt = 0, cumPr = 0;
-
-  if(ae > 0){
-    rows += `<tr style="background:#f5f3ff">
-      <td style="text-align:center;font-weight:700;color:var(--purple)">ADV</td>
-      <td>${R2(advAmt)}</td><td>${R2(advAmt)}</td>
-      <td style="color:var(--muted)">0.00</td><td style="color:var(--green)">${R2(advAmt)}</td>
-      <td>${R2(netP)}</td><td>0.00</td><td>${R2(advAmt)}</td>
-      <td><span class="tag ta">Advance</span></td>
-    </tr>`;
-  }
-
-  S1.forEach((row,idx)=>{
-    cumInt += row.int; cumPr += row.pr;
-    const paid    = fcIdx >= 0 && idx <= fcIdx;
-    const isCurr  = fcIdx >= 0 && idx === fcIdx;
-    const rowBg   = paid ? 'background:#f0fdf4' : '';
-    const tag     = paid ? '<span class="tag tp">&#10003; Paid</span>' : '<span class="tag tpn">Pending</span>';
-    rows += `<tr style="${rowBg}${isCurr?';border-bottom:2px solid #f59e0b':''}">
-      <td style="text-align:center;font-weight:700;color:var(--blue)">${row.t}</td>
-      <td>${R2(row.op)}</td><td>${R2(row.emi)}</td>
-      <td style="color:var(--red)">${R2(row.int)}</td>
-      <td style="color:var(--green)">${R2(row.pr)}</td>
-      <td><strong>${R2(row.cl)}</strong></td>
-      <td style="color:var(--red)">${R2(cumInt)}</td>
-      <td style="color:var(--green)">${R2(cumPr+advAmt)}</td>
-      <td>${tag}</td>
-    </tr>`;
-    if(isCurr){
-      rows += `<tr style="background:linear-gradient(90deg,#fef9c3,#fef3c7);border-bottom:2px dashed #f59e0b">
-        <td colspan="5" style="text-align:left;padding:8px 14px;font-size:.74rem;">
-          <strong style="color:#92400e;">&#9654; CURRENT OUTSTANDING</strong>
-          &nbsp; Schedule closing: <strong style="color:#dc2626;">Rs.${R2(row.cl)}</strong>
-          ${excessPmt>0?`&nbsp;<span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:.67rem;font-weight:700;">Excess Rs.${R2(excessPmt)} applied</span>`:''}
-        </td>
-        <td style="background:rgba(245,158,11,.2);text-align:right;padding:8px 12px;">
-          <div style="font-weight:800;color:#b45309;font-size:.92rem;">Rs.${R2(currentPOS)}</div>
-          <div style="font-size:.58rem;color:#92400e;font-weight:700;">ACTUAL POS</div>
-        </td>
-        <td colspan="2"></td>
-        <td style="text-align:center;"><span style="background:#dc2626;color:#fff;padding:3px 8px;border-radius:5px;font-size:.62rem;font-weight:800;">&#9679; FC HERE</span></td>
-      </tr>`;
-    }
-  });
-
-  // Totals row
-  rows += `<tr style="background:#f1f5f9;font-weight:700;border-top:2px solid var(--border)">
-    <td style="text-align:center;color:var(--muted)">TOTAL</td>
-    <td>—</td>
-    <td style="color:var(--blue)">Rs.${R2(emi*ne+advAmt)}</td>
-    <td style="color:var(--red)">Rs.${R2(cumInt)}</td>
-    <td style="color:var(--green)">Rs.${R2(cumPr+advAmt)}</td>
-    <td>—</td>
-    <td style="color:var(--red)">Rs.${R2(cumInt)}</td>
-    <td style="color:var(--green)">Rs.${R2(cumPr+advAmt)}</td>
-    <td></td>
-  </tr>`;
-
-  document.getElementById('rbi-table').innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Month</th><th>Opening (Rs.)</th><th>EMI (Rs.)</th>
-        <th>Interest (Rs.)</th><th>Principal (Rs.)</th><th>Closing (Rs.)</th>
-        <th>Cum. Interest</th><th>Cum. Principal</th><th>Status</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-}
-
 </script>
 </body>
 </html>
