@@ -190,7 +190,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div class="hbadges">
     <span class="badge b-blue">⚡ 2-Sheet Fetch</span>
     <span class="badge b-green">3 Inputs</span>
-    <span class="badge b-orange">Dual Closure</span>
+    <span class="badge b-orange">Dual Closure + RBI</span>
   </div>
 </header>
 
@@ -247,7 +247,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div class="tabs">
     <button class="tb active" onclick="switchTab('summary',this)">📊 Summary</button>
     <button class="tb" onclick="switchTab('schedule',this)">📅 Schedule</button>
-    <button class="tb" onclick="switchTab('closure',this)">⚡ Closure Details</button>
+    <button class="tb" onclick="switchTab('closure',this)">FC Closure Details</button>
+    <button class="tb" onclick="switchTab('rbi',this)">&#128203; RBI Schedule</button>
   </div>
 
   <!-- SUMMARY -->
@@ -269,10 +270,22 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
     <div class="tw">
       <div class="sched-tabs">
         <button class="st active" onclick="switchSched('d',this)">🎓 Dropout Schedule</button>
-        <button class="st" onclick="switchSched('f',this)">⚡ Final FC Schedule</button>
+        <button class="st" onclick="switchSched('f',this)">FC Final Schedule</button>
       </div>
       <div id="sched-d"></div>
       <div id="sched-f" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- RBI SCHEDULE -->
+  <div id="tab-rbi" style="display:none">
+    <div class="card" style="margin-bottom:14px">
+      <div class="sh">&#128203; Key Fact Statement (KFS) — RBI Digital Lending Guidelines 2022</div>
+      <div id="rbi-kfs"></div>
+    </div>
+    <div class="tw">
+      <div class="sh" style="padding:12px 16px 0">&#128197; Full Amortisation Schedule — Month-wise Breakup</div>
+      <div id="rbi-table"></div>
     </div>
   </div>
 
@@ -282,7 +295,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
     <div class="tw" style="margin-bottom:14px;">
       <div class="sched-tabs">
         <button class="st active" onclick="switchClosure('d',this)">🎓 Dropout Closure</button>
-        <button class="st" onclick="switchClosure('f',this)">⚡ Final Foreclosure</button>
+        <button class="st" onclick="switchClosure('f',this)">FC Final Foreclosure</button>
       </div>
       <div id="closure-d"></div>
       <div id="closure-f" style="display:none"></div>
@@ -523,12 +536,22 @@ function calc(){
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
   // ── PENDING POS — Amount field shows full amount (incl. advance) ──
-  // Internally subtract advance EMI to get only normal EMIs paid
-  // User types 37,600 → internal: 37,600 - 9,400 = 28,200 → 3 EMIs → correct POS
+  // Step 1: Subtract advance EMI to get only normal EMIs paid
   const normalPaid = Math.max(0, amtPaid - advAmt);
   const emisPaid = emi > 0 ? Math.min(Math.floor(normalPaid / emi), ne) : 0;
-  const pos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
-  const pos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
+
+  // Step 2: Base POS = closing balance after last COMPLETE EMI per amortisation schedule
+  const basePos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
+  const basePos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
+
+  // Step 3: EXCESS PAYMENT directly reduces the outstanding principal
+  // e.g. Paid Rs.260,105 => 3 full EMIs + Rs.50,423 excess => POS = basePos - Rs.50,423
+  // e.g. Paid Rs.258,105 => 3 full EMIs + Rs.48,423 excess => POS = basePos - Rs.48,423 (Rs.2,000 MORE)
+  // So paying Rs.2,000 LESS means closure amount is Rs.2,000 HIGHER — correct behaviour.
+  const excessPmt = Math.max(0, normalPaid - emisPaid * emi);
+  const pos1 = Math.max(0, basePos1 - excessPmt);
+  const pos2 = Math.max(0, basePos2 - excessPmt);
+
   const fcIdx1 = emisPaid > 0 ? emisPaid - 1 : -1;
   const fcIdx2 = emisPaid > 0 ? emisPaid - 1 : -1;
 
@@ -547,7 +570,7 @@ function calc(){
     <div class="qs"><div class="qs-l">EMI Amount</div><div class="qs-v blue">₹${R2(emi)}</div><div class="qs-s">${ne} normal + ${ae} advance</div></div>
     <div class="qs"><div class="qs-l">Net Principal O/S</div><div class="qs-v green">₹${R2(netP1)}</div><div class="qs-s">After deductions</div></div>
     <div class="qs"><div class="qs-l">🎓 Dropout Closure</div><div class="qs-v gold">₹${R2(final1)}</div><div class="qs-s">With retention</div></div>
-    <div class="qs"><div class="qs-l">⚡ Final Foreclosure</div><div class="qs-v teal">₹${R2(final2)}</div><div class="qs-s">Without retention</div></div>
+    <div class="qs"><div class="qs-l">FC Final Foreclosure</div><div class="qs-v teal">₹${R2(final2)}</div><div class="qs-s">Without retention</div></div>
   `;
 
   // ── SUMMARY ──
@@ -566,6 +589,7 @@ function calc(){
     ['Normal EMIs',           ne,''],
     ['Amount Paid by Parent', RR(amtPaid),'blue'],
     ['EMIs Paid (Derived)',    emisPaid+' EMIs','teal'],
+    ['Excess Payment Applied',    RR(excessPmt),'purple'],
     ['Tenure (Years)',        (te/12).toFixed(2),''],
     ['Pending POS (Dropout)', RR(pos1),'orange'],
     ['Pending POS (Final FC)',RR(pos2),'teal'],
@@ -586,6 +610,10 @@ function calc(){
 
   // ── PER-MONTH FC TABLE ──
   renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
+
+  // ── RBI KFS + AMORTISATION TABLE ──
+  renderRBISchedule(r, loan, emi, ne, ae, advAmt, netP1, mR1, apr1, subvAmt, retAmt, intFee, netDisb,
+    pos1, excessPmt, emisPaid, fcIdx1, bounce, final1, final2, today);
 }
 
 function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
@@ -646,7 +674,7 @@ function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
   sched.forEach((row,idx)=>{
     const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
     const cls=paid?'rp':fc?'rf':'';
-    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
+    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">FC Foreclosure</span>':'<span class="tag tpn">Pending</span>';
     tbl+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td>
       <td style="color:var(--red)">${R2(row.int)}</td>
       <td style="color:var(--green)">${R2(row.pr)}</td>
@@ -707,7 +735,7 @@ function renderSched(elId, sched, fcIdx, advAmt, netP, ae, label){
   sched.forEach((row,idx)=>{
     const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
     const cls=paid?'rp':fc?'rf':'';
-    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">⚡ Foreclosure</span>':'<span class="tag tpn">Pending</span>';
+    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">FC Foreclosure</span>':'<span class="tag tpn">Pending</span>';
     t+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td><td style="color:var(--red)">${R2(row.int)}</td><td style="color:var(--green)">${R2(row.pr)}</td><td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
   });
   document.getElementById(elId).innerHTML=t+'</tbody></table>';
@@ -765,6 +793,116 @@ function switchSched(id,btn){
   document.querySelectorAll('.st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
+// ── RBI-COMPLIANT KFS + AMORTISATION SCHEDULE ─────────────────────────────
+function renderRBISchedule(r, loan, emi, ne, ae, advAmt, netP, mR, apr,
+    subvAmt, retAmt, intFee, netDisb, currentPOS, excessPmt, emisPaid, fcIdx1, bounce, final1, final2, today){
+
+  const totalInterest = (emi * ne) - netP;
+  const totalPayable  = emi * ne + advAmt;
+  const aprPct        = (apr * 100).toFixed(4);
+
+  // ── KFS CARD ──
+  document.getElementById('rbi-kfs').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+      ${[
+        ['Sanctioned Loan Amount', 'Rs.'+R2(loan), 'blue'],
+        ['Loan Tenure', ne+ae+' EMIs ('+ae+' advance)', ''],
+        ['EMI Amount', 'Rs.'+R2(emi), 'green'],
+        ['Annual Percentage Rate (APR)', aprPct+'% p.a.', 'red'],
+        ['Total Interest Payable', 'Rs.'+R2(totalInterest), 'orange'],
+        ['Total Amount Payable', 'Rs.'+R2(totalPayable), 'purple'],
+        ['Foreclosure Charge', '2.95% of outstanding (incl. GST)', ''],
+        ['Dropout Closure Amount', 'Rs.'+R2(final1), 'gold'],
+        ['Final Foreclosure Amount', 'Rs.'+R2(final2), 'teal'],
+      ].map(([l,v,c])=>`
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+          <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px">${l}</div>
+          <div style="font-size:.85rem;font-weight:700;color:var(--${c||'text'})">${v}</div>
+        </div>`).join('')}
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:.72rem;color:#1e40af;line-height:1.6">
+      <strong>RBI Disclosure (Digital Lending Guidelines, Sep 2022):</strong>
+      This schedule is prepared as per RBI circular RBI/2022-23/111. The APR of <strong>${aprPct}% p.a.</strong>
+      represents the annualised cost of the loan inclusive of all charges.
+      Foreclosure charges are <strong>2.95% (incl. GST)</strong> of the outstanding principal.
+      Current Outstanding Principal: <strong>Rs.${R2(currentPOS)}</strong>
+      (after ${emisPaid} EMI(s) paid + Rs.${R2(excessPmt)} excess applied).
+    </div>`;
+
+  // ── AMORTISATION TABLE (RBI format) ──
+  let cumInt = 0, cumPr = 0;
+  let rows = '';
+
+  // Advance EMI row
+  if(ae > 0){
+    rows += `<tr style="background:#f5f3ff">
+      <td style="text-align:center;font-weight:700;color:var(--purple)">ADV</td>
+      <td style="text-align:right">—</td>
+      <td style="text-align:right;font-weight:700">${R2(advAmt)}</td>
+      <td style="text-align:right;color:var(--muted)">0.00</td>
+      <td style="text-align:right;color:var(--green)">${R2(advAmt)}</td>
+      <td style="text-align:right"><strong>${R2(netP)}</strong></td>
+      <td style="text-align:right;color:var(--muted)">0.00</td>
+      <td style="text-align:right;color:var(--green)">${R2(advAmt)}</td>
+      <td><span class="tag ta">Advance</span></td>
+    </tr>`;
+  }
+
+  S1.forEach((row, idx) => {
+    cumInt += row.int;
+    cumPr  += row.pr;
+    const paid = fcIdx1 >= 0 && idx < fcIdx1;
+    const fc   = fcIdx1 >= 0 && idx === fcIdx1;
+    const rowBg = paid ? 'background:#f0fdf4' : fc ? 'background:#fffbeb;font-weight:600' : '';
+    const tag   = paid
+      ? '<span class="tag tp">Paid</span>'
+      : fc
+        ? '<span class="tag tfc" style="font-size:.6rem">FC Here</span>'
+        : '<span class="tag tpn">Pending</span>';
+
+    rows += `<tr style="${rowBg}">
+      <td style="text-align:center;font-weight:700;color:var(--blue)">${row.t}</td>
+      <td style="text-align:right">${R2(row.op)}</td>
+      <td style="text-align:right">${R2(row.emi)}</td>
+      <td style="text-align:right;color:var(--red)">${R2(row.int)}</td>
+      <td style="text-align:right;color:var(--green)">${R2(row.pr)}</td>
+      <td style="text-align:right"><strong>${R2(row.cl)}</strong></td>
+      <td style="text-align:right;color:var(--red)">${R2(cumInt)}</td>
+      <td style="text-align:right;color:var(--green)">${R2(cumPr)}</td>
+      <td>${tag}</td>
+    </tr>`;
+  });
+
+  // Total row
+  rows += `<tr style="background:#f1f5f9;font-weight:700;border-top:2px solid var(--border)">
+    <td style="text-align:center">TOTAL</td>
+    <td style="text-align:right;color:var(--muted)">—</td>
+    <td style="text-align:right;color:var(--blue)">Rs.${R2(emi*ne + advAmt)}</td>
+    <td style="text-align:right;color:var(--red)">Rs.${R2(cumInt)}</td>
+    <td style="text-align:right;color:var(--green)">Rs.${R2(cumPr + advAmt)}</td>
+    <td style="text-align:right">—</td>
+    <td style="text-align:right;color:var(--red)">Rs.${R2(cumInt)}</td>
+    <td style="text-align:right;color:var(--green)">Rs.${R2(cumPr + advAmt)}</td>
+    <td></td>
+  </tr>`;
+
+  document.getElementById('rbi-table').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Month</th>
+        <th>Opening (Rs.)</th>
+        <th>EMI (Rs.)</th>
+        <th>Interest (Rs.)</th>
+        <th>Principal (Rs.)</th>
+        <th>Closing (Rs.)</th>
+        <th>Cum. Interest (Rs.)</th>
+        <th>Cum. Principal (Rs.)</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
 </script>
 </body>
 </html>
