@@ -584,7 +584,7 @@ function calc(){
   // ── SCHEDULES ──
   renderSched('sched-d', S1, fcIdx1, advAmt, netP1, ae, 'Dropout');
   renderSched('sched-f', S2, fcIdx2, advAmt, netP2, ae, 'Final FC');
-  renderRBITable(S1, emi, advAmt, netP1, ae, loan, subvAmt, retAmt, intFee, netDisb, amtPaid, emisPaid, extraPaid, apr1);
+  renderRBITable(S1, emi, advAmt, netP1, ae, loan, subvAmt, retAmt, intFee, netDisb, amtPaid, emisPaid, extraPaid, apr1, fcIdx1);
 
   // ── CLOSURE DETAIL — schedule table + summary matching final amount ──
   renderClosureDetail('closure-d', S1, fcIdx1, advAmt, netP1, ae,
@@ -722,7 +722,7 @@ function switchClosure(id,btn){
 }
 
 // ── RBI REPAYMENT TABLE ──────────────────────────────────
-function renderRBITable(sched, emi, advAmt, netP, ae, loan, subvAmt, retAmt, intFee, netDisb, amtPaid, emisPaid, extraPaid, apr){
+function renderRBITable(sched, emi, advAmt, netP, ae, loan, subvAmt, retAmt, intFee, netDisb, amtPaid, emisPaid, extraPaid, apr, fcIdx){
   const annualRate = apr * 100;
   const monthlyRate = apr / 12 * 100;
   const totalPayable = advAmt + emi * sched.length;
@@ -794,7 +794,7 @@ function renderRBITable(sched, emi, advAmt, netP, ae, loan, subvAmt, retAmt, int
     cumInterest += row.int;
     cumPrincipal += row.pr;
     const isPaid = idx < emisPaid - (extraPaid>0.01?0:1);
-    const isFc   = idx === fcIdx1;
+    const isFc   = idx === fcIdx;
     const rowBg  = isPaid?'#f0fdf4': isFc?'#fffbeb':'white';
     const tag    = isPaid
       ? '<span class="tag tp">✓ Paid</span>'
