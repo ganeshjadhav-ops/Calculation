@@ -604,9 +604,9 @@ function calc(){
 
   // ── CLOSURE DETAIL — schedule table + summary matching final amount ──
   renderClosureDetail('closure-d', S1, fcIdx1, advAmt, netP1, ae,
-    pos1, dm, pInt1, fcAmt1, fcChg1, retAmt, bounce, final1, today, true);
+    pos1, dm, pInt1, fcAmt1, fcChg1, retAmt, bounce, final1, today, true, excessPmt);
   renderClosureDetail('closure-f', S2, fcIdx2, advAmt, netP2, ae,
-    pos2, dm, pInt2, fcAmt2, fcChg2, 0, bounce, final2, today, false);
+    pos2, dm, pInt2, fcAmt2, fcChg2, 0, bounce, final2, today, false, excessPmt);
 
   // ── PER-MONTH FC TABLE ──
   renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx1);
@@ -693,7 +693,9 @@ function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
     <div class="fc-box ${isDropout?'fc-dropout':'fc-final'}" style="margin-top:16px;">
       <div class="fc-title">${title}</div>
       <div class="fc-rows">
-        ${mkRow('Pending POS (Closing Balance at Foreclosure Month)', RR(pos), true)}
+        ${mkRow('Schedule Closing (after last paid EMI)', RR(excessPmt>0 ? pos+excessPmt : pos), false)}
+        ${excessPmt>0 ? mkRow('(-) Excess Payment Already Applied', '− '+RR(excessPmt)) : ''}
+        ${mkRow('Actual Current POS (Outstanding Principal)', RR(pos), true)}
         ${mkRow('No. of Days (Current Month)', dm+' days')}
         ${mkRow('Prorated Interest (POS × APR/360 × Days)', RR(pInt))}
         ${mkRow('Foreclosure Amount (POS + Prorated Interest)', RR(fcAmt), true)}
@@ -733,9 +735,9 @@ function renderSched(elId, sched, fcIdx, advAmt, netP, ae, label){
   </tr></thead><tbody>`;
   if(ae>0)t+=`<tr><td>ADV</td><td style="color:var(--muted);text-align:right">—</td><td>${R2(advAmt)}</td><td style="text-align:right">—</td><td>${R2(advAmt)}</td><td>${R2(netP)}</td><td><span class="tag ta">Advance</span></td></tr>`;
   sched.forEach((row,idx)=>{
-    const paid=fcIdx>=0&&idx<fcIdx, fc=fcIdx>=0&&idx===fcIdx;
-    const cls=paid?'rp':fc?'rf':'';
-    const tag=paid?'<span class="tag tp">✓ Paid</span>':fc?'<span class="tag tfc">FC Foreclosure</span>':'<span class="tag tpn">Pending</span>';
+    const paid=fcIdx>=0&&idx<=fcIdx, pending=fcIdx<0||idx>fcIdx;
+    const cls=paid?'rp':'';
+    const tag=paid?'<span class="tag tp">&#10003; Paid</span>':'<span class="tag tpn">Pending</span>';
     t+=`<tr class="${cls}"><td>${row.t}</td><td>${R2(row.op)}</td><td>${R2(row.emi)}</td><td style="color:var(--red)">${R2(row.int)}</td><td style="color:var(--green)">${R2(row.pr)}</td><td><strong>${R2(row.cl)}</strong></td><td>${tag}</td></tr>`;
   });
   document.getElementById(elId).innerHTML=t+'</tbody></table>';
