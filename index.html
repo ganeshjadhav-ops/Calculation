@@ -342,9 +342,10 @@ async function fetchAll(){
   document.getElementById('fb').disabled=true;
 
   try{
+    const q=encodeURIComponent(`select * where A='${aid}'`);
     const [r1,r2]=await Promise.all([
-      fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
-      fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
+      fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json&tq=${q}`),
+      fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}&tq=${q}`)
     ]);
     const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
 
