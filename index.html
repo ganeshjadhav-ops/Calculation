@@ -316,13 +316,12 @@ async function syncSheets(){
     _CACHE2=parseGviz(t2,true);
     _cacheReady=true;
     const n1=_CACHE1.length, n2=_CACHE2.length;
-    info.innerHTML=`<span style="color:var(--green);font-weight:700;">&#10003; Synced!</span> `
-      +`${n1} records in Sheet 1, ${n2} in Sheet 2. App ID lookup is now instant.`;
-    btn.textContent='&#10003; Synced';
+    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced</span>`;
+    btn.innerHTML='✓ Synced';
     btn.style.background='var(--glight)';btn.style.color='var(--green)';btn.style.borderColor='#a7f3d0';
   }catch(e){
     info.innerHTML=`<span style="color:var(--red);">Sync failed: ${e.message}</span>`;
-    btn.disabled=false; btn.textContent='&#9881; Retry Sync';
+    btn.disabled=false; btn.innerHTML='&#9881; Retry Sync'; btn.disabled=false;
   }
 }
 
@@ -468,12 +467,17 @@ async function fetchAll(){
       }
     }catch(e){console.log('[Sheet2 error]',e.message);}
 
-    ss('success',`✅ <strong>${REC.name}</strong> &nbsp;|&nbsp; ₹${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
+    ss('success',`&#9989; <strong>${REC.name}</strong> &nbsp;|&nbsp; &#8377;${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
     renderStrip(REC);
     document.getElementById('strip').style.display='block';
     document.getElementById('ms').style.display='block';
+    // ── RESET auto-fill flags so new App ID always gets fresh values ──
+    document.getElementById('amtPaid').dataset.autoSet='';
+    document.getElementById('bc').dataset.autoSet='';
+    document.getElementById('ep-tag').style.display='none';
+    document.getElementById('bc-tag').style.display='none';
     calc();
-    toast(`✅ ${REC.name} loaded!`);
+    toast(`&#9989; ${REC.name} loaded!`);
   }catch(e){
     ss('error',`❌ ${e.message}. Make both sheets public (Share → Anyone with link → Viewer).`);
   }
