@@ -172,7 +172,16 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 <body>
 <header>
   <div class="logo-wrap">
-    <div class="logo">GQ</div>
+    <div style="width:36px;height:36px;flex-shrink:0;">
+      <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="17" fill="none" stroke="#3d52d6" stroke-width="2"/>
+        <circle cx="18" cy="18" r="12" fill="none" stroke="#3d52d6" stroke-width="1.5" opacity=".6"/>
+        <circle cx="18" cy="18" r="7" fill="none" stroke="#3d52d6" stroke-width="1" opacity=".35"/>
+        <circle cx="18" cy="18" r="3" fill="#3d52d6" opacity=".5"/>
+        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
+              font-family="Sora,sans-serif" font-size="0" fill="#3d52d6">GQ</text>
+      </svg>
+    </div>
     <div class="logo-text">
       <span class="brand">GrayQuest</span>
       <span class="sub">Finance Pvt. Ltd.</span>
@@ -191,14 +200,22 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
 <!-- STEP 1 -->
 <div class="card">
-  <div class="sh">🔍 Step 1 — Enter App ID</div>
+  <div class="sh">&#128269; Step 1 — Sync &amp; Fetch</div>
+  <!-- Sync bar -->
+  <div id="sync-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:var(--rs);">
+    <div style="flex:1;">
+      <div style="font-size:.75rem;font-weight:700;color:var(--t2);margin-bottom:2px;">&#128257; Sync Data First (recommended)</div>
+      <div style="font-size:.67rem;color:var(--muted);" id="sync-info">Pre-loads all sheet data into memory — after sync, App ID lookup is instant (no wait)</div>
+    </div>
+    <button class="btn btn-ghost" id="sync-btn" onclick="syncSheets()" style="white-space:nowrap;font-size:.78rem;padding:8px 14px;">&#9881; Sync Data</button>
+  </div>
   <div class="search-wrap">
     <div class="sf">
       <label>App ID</label>
-      <input class="big-inp" id="aid" placeholder="e.g. 1214970 — press Enter" onkeydown="if(event.key==='Enter')fetchAll()">
+      <input class="big-inp" id="aid" placeholder="e.g. 1586412 — press Enter or click Fetch" onkeydown="if(event.key==='Enter')fetchAll()">
     </div>
-    <button class="btn btn-blue" id="fb" onclick="fetchAll()">⬇ Fetch</button>
-    <button class="btn btn-ghost" onclick="clearAll()">↺ Clear</button>
+    <button class="btn btn-blue" id="fb" onclick="fetchAll()">&#11015; Fetch</button>
+    <button class="btn btn-ghost" onclick="clearAll()">&#8635; Clear</button>
   </div>
   <div id="sb"></div>
 </div>
@@ -215,19 +232,19 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
     <div class="inp-grid">
       <div class="fl-wrap">
         <label>📌 Amount Paid by Parent / Institute (₹)</label>
-        <div class="fl-hint">Auto-fetched from Sheet 2 (Col L − R) · Manual edit OK</div>
+        
         <input class="fl-inp" type="number" id="amtPaid" value="0" min="0" step="0.01" oninput="calc()">
         <span class="auto-tag" id="ep-tag" style="display:none">Auto &#10003;</span>
         <div class="emi-derived" id="emi-derived-info"></div>
       </div>
       <div class="fl-wrap">
         <label>📌 No. of Days — Current Month</label>
-        <div class="fl-hint">For prorated interest calculation</div>
+        
         <input class="fl-inp" type="number" id="dm" value="30" min="0" oninput="calc()">
       </div>
       <div class="fl-wrap">
         <label>📌 Bounce / Mandate Charges (₹)</label>
-        <div class="fl-hint">Auto-fetched from Outstanding Charges col</div>
+        
         <input class="fl-inp" type="number" id="bc" value="0" min="0" step="0.01" oninput="calc()">
         <span class="auto-tag" id="bc-tag" style="display:none">Auto ✓</span>
       </div>
@@ -280,6 +297,34 @@ const SID2='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
 const GID2='491266174';
 
 let REC=null,S1=[],S2=[];
+// ── DATA CACHE (Sync Data) ──────────────────────────────────────
+let _CACHE1=null,_CACHE2=null,_cacheReady=false;
+
+async function syncSheets(){
+  const btn=document.getElementById('sync-btn');
+  const info=document.getElementById('sync-info');
+  btn.disabled=true; btn.textContent='Syncing...';
+  info.textContent='Fetching Sheet 1...';
+  try{
+    const [r1,r2]=await Promise.all([
+      fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
+      fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
+    ]);
+    info.textContent='Parsing data...';
+    const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
+    _CACHE1=parseGviz(t1);
+    _CACHE2=parseGviz(t2,true);
+    _cacheReady=true;
+    const n1=_CACHE1.length, n2=_CACHE2.length;
+    info.innerHTML=`<span style="color:var(--green);font-weight:700;">&#10003; Synced!</span> `
+      +`${n1} records in Sheet 1, ${n2} in Sheet 2. App ID lookup is now instant.`;
+    btn.textContent='&#10003; Synced';
+    btn.style.background='var(--glight)';btn.style.color='var(--green)';btn.style.borderColor='#a7f3d0';
+  }catch(e){
+    info.innerHTML=`<span style="color:var(--red);">Sync failed: ${e.message}</span>`;
+    btn.disabled=false; btn.textContent='&#9881; Retry Sync';
+  }
+}
 
 // ── IRR ──────────────────────────────────────────────────
 function irr(cf){
@@ -337,20 +382,29 @@ function parseGviz(txt, keepRaw=false){
 // ── FETCH — PARALLEL, FAST ────────────────────────────────
 async function fetchAll(){
   const aid=document.getElementById('aid').value.trim();
-  if(!aid){ss('error','⚠️ Enter an App ID');return;}
-  ss('loading',`<span class="spin"></span> &nbsp;Fetching <strong>${aid}</strong>...`);
+  if(!aid){ss('error','&#9888; Enter an App ID');return;}
+  ss('loading',`<span class="spin"></span> &nbsp;${_cacheReady?'Looking up':'Fetching'} <strong>${aid}</strong>...`);
   document.getElementById('fb').disabled=true;
 
   try{
-    const [r1,r2]=await Promise.all([
-      fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
-      fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
-    ]);
-    const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
+    let rows1, rows2raw;
+    if(_cacheReady){
+      // Use pre-synced cache — instant lookup
+      rows1=_CACHE1;
+      rows2raw=_CACHE2;
+    } else {
+      const [r1,r2]=await Promise.all([
+        fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
+        fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
+      ]);
+      const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
+      rows1=parseGviz(t1);
+      rows2raw=parseGviz(t2,true);
+    }
 
     // Sheet 1 — main calc data
-    const rows1=parseGviz(t1);
-    const rec=rows1.find(r=>{
+    const rows1_=rows1;
+    const rec=rows1_.find(r=>{
       const id=gv(r,'App ID','AppID','Application Id');
       return id&&String(id).trim()===aid;
     });
@@ -359,7 +413,7 @@ async function fetchAll(){
 
     // Sheet 2 — PD Dump: Col A=GQ Application ID, L(idx11)=Total Payment, R(idx17)=Total Charges Paid, S(idx18)=Outstanding
     try{
-      const rows2=parseGviz(t2, true); // keepRaw=true for index fallback
+      const rows2=rows2raw;
       const pmtRec=rows2.find(r=>{
         const id=gv(r,
           'GQ Application ID','GQ App ID','gqapplicationid',
@@ -408,7 +462,7 @@ async function fetchAll(){
         REC._totalChg         = totalChg;
       } else {
         // Debug: log available cols & first ID
-        const rows2d=parseGviz(t2);
+        const rows2d=_cacheReady?rows2raw:[];
         console.log('[Sheet2 not matched] cols:', Object.keys(rows2d[0]||{}).join(' | '));
         console.log('[Sheet2 first row col A]:', rows2d[0]?.[Object.keys(rows2d[0])[0]]);
       }
@@ -528,16 +582,28 @@ function calc(){
   const mR2=irr(cf2),apr2=mR2*12;
   S2=buildSched(netP2,emi,ne,mR2,false,0);
 
-  // ── PENDING POS ──────────────────────────────────────────────────
+  // ── PENDING POS — Interest-first allocation (paying MORE → LOWER closure) ──
   const normalPaid = Math.max(0, amtPaid - advAmt);
-  const emisPaid   = emi > 0 ? Math.min(Math.floor(normalPaid / emi), ne) : 0;
-  // Base POS = schedule closing after last complete EMI
-  const basePos1 = emisPaid > 0 && emisPaid <= S1.length ? S1[emisPaid-1].cl : netP1;
-  const basePos2 = emisPaid > 0 && emisPaid <= S2.length ? S2[emisPaid-1].cl : netP2;
-  // Excess beyond complete EMIs directly reduces outstanding principal
-  const excessPmt = Math.max(0, normalPaid - emisPaid * emi);
-  const pos1 = Math.max(0, basePos1 - excessPmt);
-  const pos2 = Math.max(0, basePos2 - excessPmt);
+  // Walk schedule: count complete EMIs covered by normalPaid
+  let _rem = normalPaid, emisPaid = 0;
+  for(let i = 0; i < S1.length; i++){
+    if(_rem >= S1[i].emi){ _rem -= S1[i].emi; emisPaid = i+1; } else break;
+  }
+  const basePos1 = emisPaid > 0 ? S1[emisPaid-1].cl : netP1;
+  const basePos2 = emisPaid > 0 ? S2[emisPaid-1].cl : netP2;
+  // Remaining after complete EMIs = excess. Apply interest-first to next EMI:
+  // excess covers next EMI's accrued interest first, only remainder reduces principal.
+  // This guarantees paying MORE always gives LOWER outstanding & closure amount.
+  const excessPmt = _rem;
+  let pos1 = basePos1, pos2 = basePos2;
+  if(excessPmt > 0 && emisPaid < S1.length){
+    const nxtInt1 = S1[emisPaid].int;
+    pos1 = Math.max(0, basePos1 - Math.max(0, excessPmt - nxtInt1));
+  }
+  if(excessPmt > 0 && emisPaid < S2.length){
+    const nxtInt2 = S2[emisPaid].int;
+    pos2 = Math.max(0, basePos2 - Math.max(0, excessPmt - nxtInt2));
+  }
   const fcIdx1 = emisPaid > 0 ? emisPaid - 1 : -1;
   const fcIdx2 = emisPaid > 0 ? emisPaid - 1 : -1;
 
