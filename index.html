@@ -539,7 +539,6 @@ function calc(){
   const loan=r.loan, te=r.te, ae=r.ae;
   const subvP=r.subv/100, retP=r.ret/100, intP=r.intr/100;
   const dm  = parseFloat(document.getElementById('dm').value)||0;
-  const bounce=parseFloat(document.getElementById('bc').value)||0;
   if(!loan||!te)return;
 
   // Core values (exact Excel formulas)
@@ -573,6 +572,7 @@ function calc(){
 
   // ── Amount paid (auto or manual) ──
   const amtPaid = parseFloat(document.getElementById('amtPaid').value)||0;
+  const bounce  = parseFloat(document.getElementById('bc').value)||0;
 
   // ── SCHEDULE 1: Dropout (WITH retention in last EMI) ──
   const netP1=(loan-advAmt-subvAmt-retAmt)-(intFee<=0?intFee:0);
