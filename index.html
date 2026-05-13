@@ -172,21 +172,14 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 </head>
 <body>
 <header>
-  <div class="logo-wrap">
-    <div style="width:36px;height:36px;flex-shrink:0;">
-      <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="18" cy="18" r="17" fill="none" stroke="#3d52d6" stroke-width="2"/>
-        <circle cx="18" cy="18" r="12" fill="none" stroke="#3d52d6" stroke-width="1.5" opacity=".6"/>
-        <circle cx="18" cy="18" r="7" fill="none" stroke="#3d52d6" stroke-width="1" opacity=".35"/>
-        <circle cx="18" cy="18" r="3" fill="#3d52d6" opacity=".5"/>
-        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
-              font-family="Sora,sans-serif" font-size="0" fill="#3d52d6">GQ</text>
-      </svg>
-    </div>
-    <div class="logo-text">
-      <span class="brand">GrayQuest</span>
-      <span class="sub">Finance Pvt. Ltd.</span>
-    </div>
+  <div class="logo-wrap" style="display:flex;align-items:center;">
+    <svg width="130" height="36" viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="16.5" fill="none" stroke="#2196F3" stroke-width="2.2"/>
+      <circle cx="18" cy="18" r="11"   fill="none" stroke="#2196F3" stroke-width="2.2"/>
+      <circle cx="18" cy="18" r="5.5"  fill="none" stroke="#2196F3" stroke-width="2.2"/>
+      <circle cx="12" cy="24.5" r="2.2" fill="#2196F3"/>
+      <text x="40" y="23.5" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#2196F3" letter-spacing="-0.3">grayquest</text>
+    </svg>
   </div>
   <div class="divider"></div>
   <span class="tool-name">Dropout Repayment Calculator</span>
@@ -292,6 +285,22 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   </div>
 </div>
 
+
+<!-- FC LETTER TYPE MODAL -->
+<div id="fc-modal-overlay" onclick="closeFCModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;"></div>
+<div id="fc-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:28px 32px;width:360px;z-index:1001;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+  <div style="font-size:1rem;font-weight:800;color:#1a3c5e;margin-bottom:6px;">Generate FC Letter</div>
+  <div style="font-size:.75rem;color:#94a3b8;margin-bottom:20px;">Choose letter type for <strong id="fc-modal-name"></strong></div>
+  <button onclick="openLetter('dropout')" style="width:100%;margin-bottom:10px;padding:13px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:10px;cursor:pointer;text-align:left;">
+    <div style="font-size:.85rem;font-weight:800;color:#92400e;">🎓 Dropout Closure Letter</div>
+    <div style="font-size:.7rem;color:#b45309;margin-top:2px;">With retention deducted — for students dropping out</div>
+  </button>
+  <button onclick="openLetter('final')" style="width:100%;padding:13px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #3d52d6;border-radius:10px;cursor:pointer;text-align:left;">
+    <div style="font-size:.85rem;font-weight:800;color:#1d4ed8;">⚡ Final Foreclosure Letter</div>
+    <div style="font-size:.7rem;color:#2563eb;margin-top:2px;">Without retention — full loan closure</div>
+  </button>
+  <button onclick="closeFCModal()" style="width:100%;margin-top:12px;padding:8px;background:#f1f5f9;border:none;border-radius:8px;font-size:.73rem;color:#64748b;cursor:pointer;">Cancel</button>
+</div>
 <!-- BULK EXPORT SECTION -->
 <div class="card" id="bulk-card" style="margin-top:6px;">
   <div class="sh">&#128190; Bulk FC Export &mdash; Multiple App IDs to Excel</div>
@@ -908,6 +917,18 @@ function renderFCMonthTable(S1, S2, mR1, mR2, apr1, apr2, dm, bounce, fcIdx){
 // ─── FC LETTER GENERATOR ──────────────────────────────────────────
 function generateFCLetter(){
   if(!REC||!LAST_CALC){alert('Please fetch an App ID first.');return;}
+  document.getElementById('fc-modal-name').textContent=REC.name||REC.appId;
+  document.getElementById('fc-modal').style.display='block';
+  document.getElementById('fc-modal-overlay').style.display='block';
+}
+function closeFCModal(){
+  document.getElementById('fc-modal').style.display='none';
+  document.getElementById('fc-modal-overlay').style.display='none';
+}
+function openLetter(type){
+  closeFCModal();
+  if(!REC||!LAST_CALC){return;}
+  const isDropout = (type === 'dropout');
   const r=REC, c=LAST_CALC;
   const {pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,
          final1,final2,retAmt,bounce,today,emi,loan,amtPaid,
@@ -918,6 +939,16 @@ function generateFCLetter(){
   const appId=r.appId||'—';
   const liveDate=r.dateStr||'—';
   const nbfc=r.nbfc||'—';
+  // Pick values based on letter type
+  const pos   = isDropout ? pos1   : pos2;
+  const pInt  = isDropout ? pInt1  : pInt2;
+  const fcAmt = isDropout ? fcAmt1 : fcAmt2;
+  const fcChg = isDropout ? fcChg1 : fcChg2;
+  const finalAmt = isDropout ? final1 : final2;
+  const letterTitle = isDropout ? '🎓 Dropout Closure Letter' : '⚡ Final Foreclosure Letter';
+  const letterColor = isDropout ? '#92400e' : '#1d4ed8';
+  const letterBg    = isDropout ? '#fef9c3' : '#eff6ff';
+  const sectionLabel = isDropout ? 'Dropout Closure Breakdown (With Retention)' : 'Final Foreclosure Breakdown (Without Retention)';
   const lw=`
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <title>FC Letter – ${appId}</title>
@@ -964,11 +995,14 @@ function generateFCLetter(){
 <div class="page">
   <div class="hdr">
     <div class="logo-block">
-      <div class="logo-sq">GQ</div>
-      <div>
-        <div class="brand-name">GrayQuest</div>
-        <div class="brand-sub">Finance Pvt. Ltd.</div>
-      </div>
+      <svg width="130" height="40" viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="20" cy="20" r="18" fill="none" stroke="#2196F3" stroke-width="2.5"/>
+  <circle cx="20" cy="20" r="12" fill="none" stroke="#2196F3" stroke-width="2.5"/>
+  <circle cx="20" cy="20" r="6"  fill="none" stroke="#2196F3" stroke-width="2.5"/>
+  <circle cx="13.5" cy="27" r="2.5" fill="#2196F3"/>
+  <text x="46" y="26" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#2196F3" letter-spacing="-0.3">grayquest</text>
+</svg>
+      <div style="margin-top:3px;font-size:9px;color:#94a3b8;letter-spacing:.05em;">Finance Pvt. Ltd.</div>
     </div>
     <div class="date-block">
       <div style="font-size:13px;font-weight:700;color:#111;">${today}</div>
@@ -976,7 +1010,7 @@ function generateFCLetter(){
     </div>
   </div>
 
-  <div class="letter-title">Foreclosure / Dropout Closure Letter &mdash; App ID: ${appId}</div>
+  <div class="letter-title" style="background:${letterColor}">${letterTitle} &mdash; App ID: ${appId}</div>
 
   <div class="to-block">
     <div class="to-name">Dear ${name},</div>
@@ -1002,36 +1036,25 @@ function generateFCLetter(){
     <tr><td>As of Date</td><td style="font-weight:800;">${today}</td></tr>
   </table>
 
-  <div class="section-title">Dropout Closure Breakdown (With Retention)</div>
+  <div class="section-title">${sectionLabel}</div>
   <table class="details">
-    <tr><td>Outstanding Principal (POS)</td><td>&#8377;${RV(pos1)}</td></tr>
-    <tr><td>Prorated Interest (${dm} days)</td><td>&#8377;${RV(pInt1)}</td></tr>
-    <tr class="divider-row"><td>Foreclosure Base Amount (POS + Interest)</td><td>&#8377;${RV(fcAmt1)}</td></tr>
-    <tr><td>FC Charge @ 2.95% (incl. GST)</td><td>&#8377;${RV(fcChg1)}</td></tr>
-    ${retAmt>0?`<tr><td>Retention Deducted</td><td style="color:#059669">&#8722; &#8377;${RV(retAmt)}</td></tr>`:''}
+    <tr><td>Outstanding Principal (POS)</td><td>&#8377;${RV(pos)}</td></tr>
+    <tr><td>Prorated Interest (${dm} days)</td><td>&#8377;${RV(pInt)}</td></tr>
+    <tr class="divider-row"><td>Foreclosure Base Amount (POS + Interest)</td><td>&#8377;${RV(fcAmt)}</td></tr>
+    <tr><td>FC Charge @ 2.95% (incl. GST)</td><td>&#8377;${RV(fcChg)}</td></tr>
+    ${isDropout && retAmt>0 ? `<tr><td>Retention Deducted</td><td style="color:#059669">&#8722; &#8377;${RV(retAmt)}</td></tr>` : ''}
     ${bounce>0?`<tr><td>Bounce / Mandate Charges</td><td>&#8377;${RV(bounce)}</td></tr>`:''}
-    <tr class="total-row-d"><td>&#127891; DROPOUT CLOSURE AMOUNT</td><td>&#8377;${RV(final1)}</td></tr>
+    <tr style="background:${letterBg};font-weight:800;font-size:13px;"><td style="color:${letterColor}">${letterTitle.replace(/^[^ ]+ /,'').toUpperCase()} AMOUNT</td><td style="color:${letterColor}">&#8377;${RV(finalAmt)}</td></tr>
   </table>
 
-  <div class="section-title">Final Foreclosure Breakdown (Without Retention)</div>
-  <table class="details">
-    <tr><td>Outstanding Principal (POS)</td><td>&#8377;${RV(pos2)}</td></tr>
-    <tr><td>Prorated Interest (${dm} days)</td><td>&#8377;${RV(pInt2)}</td></tr>
-    <tr class="divider-row"><td>Foreclosure Base Amount (POS + Interest)</td><td>&#8377;${RV(fcAmt2)}</td></tr>
-    <tr><td>FC Charge @ 2.95% (incl. GST)</td><td>&#8377;${RV(fcChg2)}</td></tr>
-    ${bounce>0?`<tr><td>Bounce / Mandate Charges</td><td>&#8377;${RV(bounce)}</td></tr>`:''}
-    <tr class="total-row-f"><td>&#9889; FINAL FORECLOSURE AMOUNT</td><td>&#8377;${RV(final2)}</td></tr>
-  </table>
-
-  <div class="highlight-box">
+  <div class="highlight-box" style="border-color:${letterColor}">
     <div>
-      <div class="hl-label">Total Amount Payable (Dropout Closure)</div>
-      <div class="hl-amt">&#8377;${RV(final1)}</div>
+      <div class="hl-label">Total Amount Payable</div>
+      <div class="hl-amt" style="color:${letterColor}">&#8377;${RV(finalAmt)}</div>
       <div class="hl-date">As of Date: ${today}</div>
     </div>
     <div style="text-align:right;">
-      <div class="hl-label">Final Foreclosure (Alt.)</div>
-      <div style="font-size:16px;font-weight:800;color:#0891b2;">&#8377;${RV(final2)}</div>
+      <div class="hl-label" style="color:${letterColor};font-weight:800;">${isDropout?'With Retention (Dropout)':'Without Retention (Final FC)'}</div>
     </div>
   </div>
 
@@ -1082,54 +1105,46 @@ async function bulkExport(){
     const aid=ids[i];
     prog.innerHTML=`<span style="color:var(--blue)">Processing ${i+1}/${ids.length}: App ID ${aid}...</span>`;
     try{
+      // Use same parseRec + gv logic as fetchAll (exact match)
       const row=_CACHE1 && _CACHE1.find(r=>{
-        const cv=(names,idx)=>{for(const n of names){const k=Object.keys(r).find(x=>x.toLowerCase().replace(/\s+/g,'')===(n.toLowerCase().replace(/\s+/g,'')));if(k&&r[k]!=null&&r[k]!=='')return r[k];}return r[Object.keys(r)[idx]]??'';};
-        const idVal=cv(['Application ID','App ID','AppID','ApplicationID','application_id','app_id'],0);
-        return String(idVal).trim()===String(aid).trim();
+        const id=gv(r,'App ID','AppID','Application Id');
+        return id && String(id).trim()===String(aid).trim();
       });
       if(!row){results.push({aid,error:'Not found in Sheet1'});continue;}
 
-      // Parse Sheet1 row (same as fetchAll logic)
-      const cv1=(names,idx)=>{for(const n of names){const k=Object.keys(row).find(x=>x.toLowerCase().replace(/\s+/g,'')===(n.toLowerCase().replace(/\s+/g,'')));if(k&&row[k]!=null&&row[k]!=='')return row[k];}return row[Object.keys(row)[idx]]??'';};
-      const nv=x=>parseFloat(String(x).replace(/[^0-9.-]/g,''))||0;
-      const loan=nv(cv1(['Loan Amount','loan_amount','LoanAmount'],4));
-      const te=nv(cv1(['No of EMI','No. of EMI','NoOfEMI','TotalEMI','Total EMI','no_of_emi','EMI Count'],5));
-      const ae=nv(cv1(['Advance EMI','AdvanceEMI','advance_emi','Adv EMI'],6));
-      const subv=nv(cv1(['Subvention %','Subvention Pct','subvention_pct','Subvention'],8));
-      const ret=nv(cv1(['Retention %','Retention Pct','retention_pct','Retention','FLDG %'],9));
-      const intr=nv(cv1(['Interest Rate','interest_rate','Interest %','InterestRate'],10));
-      const studentName=String(cv1(['Student Name','student_name','Name','StudentName'],2));
-      const grp=String(cv1(['Group','Group Name','group_name','Institute'],3));
-      const nbfc=String(cv1(['NBFC','nbfc','NBFC Name'],7));
+      // Parse using same parseRec function
+      const bREC=parseRec(row);
+      if(!bREC.loan||!bREC.te){results.push({aid,error:'Invalid loan data'});continue;}
 
-      // Look up Sheet2
+      // Sheet2 lookup using same logic as fetchAll
       let netPaid2=0, bounce2=0;
       if(_CACHE2){
-        const r2=_CACHE2.find(r=>{
-          const cv2=(names,idx)=>{for(const n of names){const k=Object.keys(r).find(x=>x.toLowerCase().replace(/\s+/g,'')===(n.toLowerCase().replace(/\s+/g,'')));if(k&&r[k]!=null&&r[k]!=='')return r[k];}return r[Object.keys(r)[idx]]??'';};
-          const idVal=cv2(['Application ID','App ID','AppID'],0);
-          return String(idVal).trim()===String(aid).trim();
+        const pmtRec=_CACHE2.find(r=>{
+          const id=gv(r,'GQ Application ID','GQ App ID','gqapplicationid','App ID','AppID','Application Id');
+          return id && String(id).trim()===String(aid).trim();
         });
-        if(r2){
-          const cv2=(names,idx)=>{for(const n of names){const k=Object.keys(r2).find(x=>x.toLowerCase().replace(/\s+/g,'')===(n.toLowerCase().replace(/\s+/g,'')));if(k&&r2[k]!=null&&r2[k]!=='')return r2[k];}return r2[Object.keys(r2)[idx]]??'';};
-          const totalPaid=nv(cv2(['Total Payment made till date','Total Payment Made Till Date','Total Payments Made'],11));
-          const totalChg=nv(cv2(['Total Charges Paid','Total charges paid','Charges Paid'],17));
+        if(pmtRec){
+          const cvB=(names,idx)=>{
+            const v=gv(pmtRec,...names);
+            if(v!==null&&v!=='')return parseFloat(v)||0;
+            return parseFloat(pmtRec._raw?.[idx]?.v)||0;
+          };
+          const totalPaid=cvB(['Total Payment made till date','Total Payment Made Till Date','totalpaymentmadetilldate','Total Payments Made','TotalPaymentMade','total payment','Total EMI Paid','TotalEMIPaid'],11);
+          const totalChg=cvB(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid','Charges Paid','Total Charge Paid'],17);
           netPaid2=Math.max(0,totalPaid-totalChg);
-          bounce2=nv(cv2(['Charges Outstanding','charges_outstanding','Bounce Charges','BounceCharges','Mandate Charges'],18));
+          bounce2=cvB(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount','Charges Outstanding','Outstanding Charges'],18);
         }
       }
 
-      if(!loan||!te){results.push({aid,error:'Invalid loan data'});continue;}
-
-      // Run same calc logic
+      // Run same calc logic as calc()
+      const {loan,te,ae,subv,ret:retP,intr,name:studentName,grp,nbfc}=bREC;
       const intFee=intr/100*loan;
       const emi=(loan/te)+(intFee/te);
       const advAmt=ae*emi;
       const ne=te-ae;
       const subvAmt=subv/100*loan;
       const netLoan=loan-subvAmt;
-      const retAmt=ret/100*netLoan;
-      const netDisb=netLoan-retAmt;
+      const retAmt=retP/100*netLoan;
       const netP1=(loan-advAmt-subvAmt-retAmt)-(intFee<=0?intFee:0);
       const cf1=[-netP1]; for(let k=1;k<=ne;k++){let c=emi;if(k===ne)c-=retAmt;cf1.push(c);}
       const mR1=irr(cf1),apr1=mR1*12;
@@ -1139,7 +1154,6 @@ async function bulkExport(){
       const mR2=irr(cf2),apr2=mR2*12;
       const localS2=buildSched(netP2,emi,ne,mR2,false,0);
 
-      // POS calc
       const amtPaid=netPaid2;
       const bounce=bounce2;
       const normalPaid=Math.max(0,amtPaid-advAmt);
@@ -1156,7 +1170,6 @@ async function bulkExport(){
       const fcAmt1=pos1+pInt1,fcChg1=0.0295*fcAmt1,final1=fcAmt1+fcChg1+bounce;
       const fcAmt2=pos2+pInt2,fcChg2=0.0295*fcAmt2,final2=fcAmt2+fcChg2+bounce;
 
-      // Date
       const _now=new Date();
       const _ms=new Date(_now.getFullYear(),_now.getMonth(),1);
       const fcDate=new Date(_ms.getTime()+dm_val*86400000);
