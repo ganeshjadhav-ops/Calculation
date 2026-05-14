@@ -673,10 +673,13 @@ async function fetchAll(){
     document.getElementById('strip').style.display='block';
     // fc-letter-btn auto-shown via #ms
     document.getElementById('ms').style.display='block';
-    // ── RESET auto-fill flags so new App ID always gets fresh values ──
+    // ── RESET fields so new App ID always starts fresh ──
+    document.getElementById('amtPaid').value = '0';
     document.getElementById('amtPaid').dataset.autoSet='';
+    document.getElementById('bc').value = '0';
     document.getElementById('bc').dataset.autoSet='';
     document.getElementById('ep-tag').style.display='none';
+    document.getElementById('emi-derived-info').textContent='';
     // Auto-set date to today if not already set
     if(!document.getElementById('dmDate').value){
       const _td=new Date(); const _pad=n=>String(n).padStart(2,'0');
