@@ -117,6 +117,9 @@ main{max-width:1200px;margin:0 auto;padding:20px 22px;}
 .v{font-size:.83rem;font-weight:700;}
 .v.blue{color:var(--blue);}.v.green{color:var(--green);}.v.orange{color:var(--orange);}.v.red{color:var(--red);}.v.purple{color:var(--purple);}.v.teal{color:var(--teal);}
 
+/* ── CLOSURE TYPE CARDS ── */
+.ctype-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1);}
+
 /* ── CLOSURE TABS ── */
 .tw{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;}
 .sched-tabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);}
@@ -197,6 +200,50 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
 <main>
 
+<!-- TYPE SELECTOR — Choose closure type FIRST, then enter App ID -->
+<div id="closure-selector" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">
+  <div class="ctype-card active" id="ct-both" onclick="switchClosure('both',this)"
+    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #3d52d6;background:#eff6ff;text-align:center;transition:all .15s;">
+    <div style="font-size:1.4rem;margin-bottom:5px;">&#128203;</div>
+    <div style="font-size:.72rem;font-weight:800;color:#3d52d6;line-height:1.35;">Dropout +<br>Foreclosure</div>
+    <div id="ct-both-amt" style="font-size:.72rem;font-weight:700;color:#374151;margin-top:6px;">—</div>
+  </div>
+  <div class="ctype-card" id="ct-d" onclick="switchClosure('d',this)"
+    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
+    <div style="font-size:1.4rem;margin-bottom:5px;">&#127891;</div>
+    <div style="font-size:.72rem;font-weight:800;color:#92400e;line-height:1.35;">Dropout<br>Closure</div>
+    <div id="ct-d-amt" style="font-size:.88rem;font-weight:800;color:#92400e;margin-top:6px;">—</div>
+  </div>
+  <div class="ctype-card" id="ct-f" onclick="switchClosure('f',this)"
+    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
+    <div style="font-size:1.4rem;margin-bottom:5px;">&#9889;</div>
+    <div style="font-size:.72rem;font-weight:800;color:#1d4ed8;line-height:1.35;">Final<br>Foreclosure</div>
+    <div id="ct-f-amt" style="font-size:.88rem;font-weight:800;color:#1d4ed8;margin-top:6px;">—</div>
+  </div>
+  <div class="ctype-card" id="ct-rd" onclick="switchClosure('rd',this)"
+    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
+    <div style="font-size:1.4rem;margin-bottom:5px;">&#128176;</div>
+    <div style="font-size:.72rem;font-weight:800;color:#065f46;line-height:1.35;">Refund<br>Dropout</div>
+    <div id="ct-rd-amt" style="font-size:.88rem;font-weight:800;color:#065f46;margin-top:6px;">—</div>
+  </div>
+  <div class="ctype-card" id="ct-rf" onclick="switchClosure('rf',this)"
+    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
+    <div style="font-size:1.4rem;margin-bottom:5px;">&#128176;</div>
+    <div style="font-size:.72rem;font-weight:800;color:#1e3a8a;line-height:1.35;">Refund<br>Final FC</div>
+    <div id="ct-rf-amt" style="font-size:.88rem;font-weight:800;color:#1e3a8a;margin-top:6px;">—</div>
+  </div>
+</div>
+
+<!-- MAIN TABS: Calculator | Bulk Export -->
+<div class="tabs" style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+  <button class="tb active" id="mvt-calc" onclick="switchMainView('calc',this)">&#128202; Calculator</button>
+  <button class="tb" id="mvt-bulk" onclick="switchMainView('bulk',this)">&#128190; Bulk Export</button>
+  <div style="flex:1"></div>
+  <button class="btn" id="fc-letter-btn" onclick="generateFCLetter()" style="display:none;background:#3d52d6;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;">&#128233; Generate FC Letter</button>
+</div>
+
+<div id="mv-calc">
+
 <!-- STEP 1 -->
 <div class="card">
   <div class="sh">&#128269; Step 1 — Sync &amp; Fetch</div>
@@ -240,6 +287,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
         <label>📅 Calculation Valid Till Date</label>
         <input class="fl-inp" type="date" id="dmDate" oninput="calc()" style="cursor:pointer;">
         <div id="dm-info" style="font-size:.67rem;color:var(--t2);margin-top:3px;min-height:15px;"></div>
+        <div id="dm-debug" style="font-size:.63rem;color:var(--muted);margin-top:2px;min-height:13px;"></div>
       </div>
       <div class="fl-wrap">
         <label>📌 Bounce / Mandate Charges (₹)</label>
@@ -253,18 +301,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <!-- QUICK STATS -->
   <div class="qstats" id="qstats"></div>
 
-  <!-- TABS -->
-  <div class="tabs" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-    <button class="tb active" onclick="switchTab('summary',this)">&#128202; Summary</button>
-    <button class="tb" onclick="switchTab('closure',this)">&#9889; FC Closure Details</button>
-    <button class="tb" onclick="switchTab('bulk',this)">&#128190; Bulk Export</button>
-    <div style="flex:1"></div>
-    <button class="btn" id="fc-letter-btn" onclick="generateFCLetter()" style="display:none;background:#3d52d6;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;">&#128233; Generate FC Letter</button>
-  </div>
-
-  <!-- SUMMARY -->
-  <div id="tab-summary">
-    <div class="sum-g">
+  <!-- SUMMARY + KEY VALUES -->
+  <div class="sum-g" id="sum-grid">
       <div class="card" style="margin-bottom:0">
         <div class="sh">📋 Loan Breakdown</div>
         <div id="bd"></div>
@@ -274,30 +312,24 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
         <div id="cv"></div>
       </div>
     </div>
-  </div>
 
-
-
-  <!-- CLOSURE -->
-  <div id="tab-closure" style="display:none">
+  <!-- CLOSURE CONTENT (type controlled by cards above) -->
+  <!-- CONTENT PANELS -->
     <div class="tw" style="margin-bottom:0;">
-      <div class="sched-tabs" style="flex-wrap:wrap;">
-        <button class="st active" onclick="switchClosure('both',this)">&#128203; Dropout + Foreclosure</button>
-        <button class="st" onclick="switchClosure('d',this)">&#127891; Dropout Closure</button>
-        <button class="st" onclick="switchClosure('f',this)">&#9889; Final Foreclosure</button>
-        <button class="st" onclick="switchClosure('rd',this)">&#128176; Refund — Dropout</button>
-        <button class="st" onclick="switchClosure('rf',this)">&#128176; Refund — Final FC</button>
-      </div>
       <div id="closure-both"></div>
       <div id="closure-d" style="display:none"></div>
       <div id="closure-f" style="display:none"></div>
       <div id="closure-rd" style="display:none"></div>
       <div id="closure-rf" style="display:none"></div>
     </div>
-  </div>
 
-  <!-- BULK TAB -->
-  <div id="tab-bulk" style="display:none">
+</div><!-- end #ms -->
+
+</div><!-- end #mv-calc -->
+
+<!-- BULK EXPORT VIEW -->
+<div id="mv-bulk" style="display:none">
+  <div style="padding:0">
     <div class="card" style="margin-bottom:14px;">
       <div class="sh">&#128190; Bulk FC Calculation &amp; Export</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
@@ -337,8 +369,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
       </div>
     </div>
     <div id="bulk-preview" style="display:none;overflow-x:auto;"></div>
-  </div>
-</div>
+  </div><!-- end inner bulk wrap -->
+</div><!-- end mv-bulk -->
 
 
 <!-- FC LETTER TYPE MODAL -->
@@ -731,18 +763,27 @@ function calc(){
       }
       dm = Math.round((_validTillDate - lastPaidDate) / 86400000);
       const lpdStr = lastPaidDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      const fedStr = r._firstEMIDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
       const dmColor = dm < 0 ? 'var(--red)' : dm === 0 ? 'var(--orange)' : 'var(--green)';
+      // Warn if firstEMIDate looks suspicious (before liveDate - 60 days or >12m before 1st paid)
+      const liveDateObj = r.dateStr && r.dateStr !== '—' ? new Date(r.dateStr.split(' ').reverse().join('-')) : null;
+      const suspicious = liveDateObj && r._firstEMIDate < new Date(liveDateObj.getTime() - 30*86400000);
       document.getElementById('dm-info').innerHTML =
-        `From: <strong>${lpdStr}</strong> &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>`;
+        `From: <strong>${lpdStr}</strong> (Last paid EMI) &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>`;
+      document.getElementById('dm-debug').innerHTML =
+        `1st EMI date (Col J): <strong>${fedStr}</strong> &bull; ${emisPaid} EMIs paid`
+        + (suspicious ? ` <span style="color:var(--red);font-weight:700">⚠ Date may be wrong — check Sheet2 Col J</span>` : '');
     } else {
       // Fallback: days from 1st of selected month
       const ms = new Date(_validTillDate.getFullYear(), _validTillDate.getMonth(), 1);
       dm = Math.round((_validTillDate - ms) / 86400000);
       document.getElementById('dm-info').innerHTML =
-        `<span style="color:var(--muted)">(No EMI date — counting from 1st of month: ${dm} days)</span>`;
+        `<span style="color:var(--muted)">(No EMI date in Sheet2 — counting from 1st of month: ${dm} days)</span>`;
+      document.getElementById('dm-debug').innerHTML = '';
     }
   } else {
     document.getElementById('dm-info').innerHTML = '<span style="color:var(--muted)">Select a date above</span>';
+    document.getElementById('dm-debug').innerHTML = '';
     today = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
   }
 
@@ -807,6 +848,16 @@ function calc(){
     amtPaid,today,dm);
 
   // Store last calc for FC Letter & Bulk Export
+  // Update card amount badges
+  const _rv=v=>isFinite(v)&&!isNaN(v)?'₹'+v.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,','):'—';
+  const _rvR=v=>v>=0?_rv(v):'Owes '+_rv(-v);
+  ['ct-both-amt','ct-d-amt','ct-f-amt','ct-rd-amt','ct-rf-amt'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const vals=[`${_rv(final1)} / ${_rv(final2)}`,_rv(final1),_rv(final2),_rvR(refund1),_rvR(refund2)];
+    el.textContent=vals[i];
+  });
+
   LAST_CALC={pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,
     final1,final2,retAmt,bounce,today,emi,loan,amtPaid,emisPaid,
     excessPmt,apr1,apr2,dm,netP1,netP2,fcIdx:fcIdx1,ne,ae,advAmt,refund1,refund2};
@@ -975,8 +1026,16 @@ function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
 
 function switchClosure(id,btn){
   ['both','d','f','rd','rf'].forEach(x=>document.getElementById('closure-'+x).style.display=id===x?'block':'none');
-  document.querySelectorAll('#tab-closure .sched-tabs .st').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  // Reset all cards
+  document.querySelectorAll('.ctype-card').forEach(c=>{
+    c.style.border='2px solid #e2e8f0';
+    c.style.background='#fff';
+  });
+  // Highlight active card
+  const colors={'both':'#3d52d6','d':'#92400e','f':'#1d4ed8','rd':'#059669','rf':'#1e3a8a'};
+  const bgs={'both':'#eff6ff','d':'#fffbeb','f':'#eff6ff','rd':'#ecfdf5','rf':'#eff6ff'};
+  const el=document.getElementById('ct-'+id);
+  if(el){el.style.border=`2px solid ${colors[id]||'#3d52d6'}`;el.style.background=bgs[id]||'#eff6ff';}
 }
 
 // ── SCHEDULE RENDER ──────────────────────────────────────
@@ -1416,12 +1475,7 @@ async function bulkExport(){
       let pos1=basePos1,pos2=basePos2;
       if(excessPmt>0&&emisPaid<localS1.length){const ni=localS1[emisPaid].int;pos1=Math.max(0,basePos1-Math.max(0,excessPmt-ni));}
       if(excessPmt>0&&emisPaid<localS2.length){const ni=localS2[emisPaid].int;pos2=Math.max(0,basePos2-Math.max(0,excessPmt-ni));}
-      const dInt1=pos1*(apr1/360),dInt2=pos2*(apr2/360);
-      const pInt1=dm_val*dInt1,pInt2=dm_val*dInt2;
-      const fcAmt1=pos1+pInt1,fcChg1=0.0295*fcAmt1,final1=fcAmt1+fcChg1+bounce;
-      const fcAmt2=pos2+pInt2,fcChg2=0.0295*fcAmt2,final2=fcAmt2+fcChg2+bounce;
-
-      // Compute dm from dates (same logic as main calc)
+      // Compute dm from dates FIRST (needed for pInt)
       const rowDate = idRows.find(r=>r.aid===aid)?.dt || defaultDateVal;
       const _validTill = new Date(rowDate);
       let dm_val=0;
@@ -1433,6 +1487,11 @@ async function bulkExport(){
         const _ms=new Date(_validTill.getFullYear(),_validTill.getMonth(),1);
         dm_val=Math.round((_validTill-_ms)/86400000);
       }
+
+      const dInt1=pos1*(apr1/360),dInt2=pos2*(apr2/360);
+      const pInt1=dm_val*dInt1,pInt2=dm_val*dInt2;
+      const fcAmt1=pos1+pInt1,fcChg1=0.0295*fcAmt1,final1=fcAmt1+fcChg1+bounce;
+      const fcAmt2=pos2+pInt2,fcChg2=0.0295*fcAmt2,final2=fcAmt2+fcChg2+bounce;
       const todayStr=_validTill.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 
       results.push({aid,student:studentName,institute:grp,nbfc,loan,emi:+emi.toFixed(2),ne,ae,
@@ -1649,12 +1708,20 @@ function clearAll(){
   document.getElementById('fc-letter-btn').style.display='none';
   document.getElementById('ms').style.display='none';
   REC=null;S1=[];S2=[];
+  // Reset main view to calculator
+  const _mvb=document.getElementById('mvt-calc');
+  if(_mvb)switchMainView('calc',_mvb);
 }
-function switchTab(id,btn){
-  document.querySelectorAll('[id^="tab-"]').forEach(e=>e.style.display='none');
-  document.getElementById('tab-'+id).style.display='block';
+function switchMainView(id,btn){
+  document.getElementById('mv-calc').style.display=id==='calc'?'block':'none';
+  document.getElementById('mv-bulk').style.display=id==='bulk'?'block':'none';
   document.querySelectorAll('.tabs .tb').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+}
+function switchTab(id,btn){
+  // Legacy — now routes to switchMainView for bulk
+  if(id==='bulk'){const b=document.getElementById('mvt-bulk');if(b)switchMainView('bulk',b);return;}
+  // else no-op (summary/closure now always visible)
 }
 function switchSched(id,btn){
   document.getElementById('sched-d').style.display=id==='d'?'':'none';
