@@ -42,7 +42,19 @@ header{background:#fff;border-bottom:2px solid #e2e8f0;padding:0 28px;height:58p
 .b-green{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
 .b-orange{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
 
-main{max-width:1200px;margin:0 auto;padding:20px 22px;}
+main{max-width:1440px;margin:0 auto;padding:0;display:flex;align-items:flex-start;}
+.right-content{flex:1;padding:20px 22px;min-width:0;overflow-x:hidden;}
+/* ── LEFT SIDEBAR ── */
+#left-sidebar{width:195px;min-width:195px;background:linear-gradient(180deg,#1565C0 0%,#1a78d4 100%);min-height:calc(100vh - 58px);position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
+.sb-section{padding:14px 14px 5px;font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42);}
+.sb-item{padding:11px 14px 12px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;color:rgba(255,255,255,.7);user-select:none;margin:1px 0;}
+.sb-item:hover{background:rgba(255,255,255,.09);color:#fff;border-left-color:rgba(255,255,255,.35);}
+.sb-item.active{background:rgba(255,255,255,.17);border-left:3px solid #fff;color:#fff;}
+.sb-icon{font-size:.95rem;margin-bottom:3px;}
+.sb-label{font-size:.7rem;font-weight:700;line-height:1.3;}
+.sb-amt{font-size:.75rem;font-weight:800;margin-top:4px;min-height:14px;color:rgba(255,255,255,.88);}
+.sb-divider{height:1px;background:rgba(255,255,255,.12);margin:6px 14px;}
+
 
 /* ── CARD ── */
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;box-shadow:var(--sh);margin-bottom:14px;}
@@ -204,40 +216,48 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
 <main>
 
-<!-- TYPE SELECTOR — Choose closure type FIRST, then enter App ID -->
-<div id="closure-selector" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">
-  <div class="ctype-card" id="ct-both" onclick="switchClosure('both',this)"
-    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #1565C0;background:linear-gradient(145deg,#1565C0,#1976d2);text-align:center;transition:all .15s;box-shadow:0 4px 18px rgba(21,101,192,.35);">
-    <div style="font-size:1.4rem;margin-bottom:5px;">&#128203;</div>
-    <div style="font-size:.72rem;font-weight:800;color:#fff;line-height:1.35;">Dropout +<br>Foreclosure</div>
-    <div id="ct-both-amt" style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.9);margin-top:6px;">—</div>
-  </div>
-  <div class="ctype-card" id="ct-d" onclick="switchClosure('d',this)"
-    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
-    <div style="font-size:1.4rem;margin-bottom:5px;">&#127891;</div>
-    <div style="font-size:.72rem;font-weight:800;color:#92400e;line-height:1.35;">Dropout<br>Closure</div>
-    <div id="ct-d-amt" style="font-size:.88rem;font-weight:800;color:#92400e;margin-top:6px;">—</div>
-  </div>
-  <div class="ctype-card" id="ct-f" onclick="switchClosure('f',this)"
-    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
-    <div style="font-size:1.4rem;margin-bottom:5px;">&#9889;</div>
-    <div style="font-size:.72rem;font-weight:800;color:#1d4ed8;line-height:1.35;">Final<br>Foreclosure</div>
-    <div id="ct-f-amt" style="font-size:.88rem;font-weight:800;color:#1d4ed8;margin-top:6px;">—</div>
-  </div>
-  <div class="ctype-card" id="ct-rd" onclick="switchClosure('rd',this)"
-    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
-    <div style="font-size:1.4rem;margin-bottom:5px;">&#128176;</div>
-    <div style="font-size:.72rem;font-weight:800;color:#065f46;line-height:1.35;">Refund<br>Dropout</div>
-    <div id="ct-rd-amt" style="font-size:.88rem;font-weight:800;color:#065f46;margin-top:6px;">—</div>
-  </div>
-  <div class="ctype-card" id="ct-rf" onclick="switchClosure('rf',this)"
-    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
-    <div style="font-size:1.4rem;margin-bottom:5px;">&#128176;</div>
-    <div style="font-size:.72rem;font-weight:800;color:#1e3a8a;line-height:1.35;">Refund<br>Final FC</div>
-    <div id="ct-rf-amt" style="font-size:.88rem;font-weight:800;color:#1e3a8a;margin-top:6px;">—</div>
-  </div>
-</div>
+<!-- LEFT SIDEBAR — Click type first, then enter App ID -->
+<div id="left-sidebar">
+  <div class="sb-section">Closure Type</div>
 
+  <div class="sb-item active" id="sb-both" onclick="switchClosure('both',this)">
+    <div class="sb-icon">&#128203;</div>
+    <div class="sb-label">Dropout +<br>Foreclosure</div>
+    <div class="sb-amt" id="ct-both-amt">—</div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-item" id="sb-d" onclick="switchClosure('d',this)">
+    <div class="sb-icon">&#127891;</div>
+    <div class="sb-label">Dropout Closure</div>
+    <div class="sb-amt" id="ct-d-amt">—</div>
+  </div>
+
+  <div class="sb-item" id="sb-f" onclick="switchClosure('f',this)">
+    <div class="sb-icon">&#9889;</div>
+    <div class="sb-label">Final Foreclosure</div>
+    <div class="sb-amt" id="ct-f-amt">—</div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-item" id="sb-rd" onclick="switchClosure('rd',this)">
+    <div class="sb-icon">&#128176;</div>
+    <div class="sb-label">Refund Dropout</div>
+    <div class="sb-amt" id="ct-rd-amt">—</div>
+  </div>
+
+  <div class="sb-item" id="sb-rf" onclick="switchClosure('rf',this)">
+    <div class="sb-icon">&#128176;</div>
+    <div class="sb-label">Refund Final FC</div>
+    <div class="sb-amt" id="ct-rf-amt">—</div>
+  </div>
+
+</div><!-- end left-sidebar -->
+
+<!-- RIGHT CONTENT -->
+<div class="right-content">
 <!-- MAIN TABS: Calculator | Bulk Export -->
 <div class="tabs" style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
   <button class="tb active" id="mvt-calc" onclick="switchMainView('calc',this)">&#128202; Calculator</button>
@@ -305,7 +325,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <!-- QUICK STATS -->
   <div class="qstats" id="qstats"></div>
 
-  <!-- SUMMARY + KEY VALUES -->
+  <!-- SUMMARY + KEY VALUES (visible for Combined, hidden for specific types) -->
   <div class="sum-g" id="sum-grid">
       <div class="card" style="margin-bottom:0">
         <div class="sh">📋 Loan Breakdown</div>
@@ -393,6 +413,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <button onclick="closeFCModal()" style="width:100%;margin-top:12px;padding:8px;background:#f1f5f9;border:none;border-radius:8px;font-size:.73rem;color:#64748b;cursor:pointer;">Cancel</button>
 </div>
 
+</div><!-- end right-content -->
 </main>
 <div id="toast"></div>
 
@@ -868,6 +889,10 @@ function calc(){
   LAST_CALC={pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,
     final1,final2,retAmt,bounce,today,emi,loan,amtPaid,emisPaid,
     excessPmt,apr1,apr2,dm,netP1,netP2,fcIdx:fcIdx1,ne,ae,advAmt,refund1,refund2};
+  // Re-apply sidebar active state after calc updates all amounts
+  const _activeSb=document.querySelector('.sb-item.active');
+  const _activeId=_activeSb?.id?.replace('sb-','')||'both';
+  switchClosure(_activeId,_activeSb);
 }
 
 function mkFCBox(cls, type, title, pos, dInt, dm, pInt, fcAmt, fcChg, ret, bounce, final, today, isDropout){
@@ -1032,22 +1057,18 @@ function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
 }
 
 function switchClosure(id,btn){
+  // Show only the selected content panel
   ['both','d','f','rd','rf'].forEach(x=>document.getElementById('closure-'+x).style.display=id===x?'block':'none');
-  // Reset all cards to unselected state
-  document.querySelectorAll('.ctype-card').forEach(c=>{
-    c.style.border='2px solid #e2e8f0';
-    c.style.background='#fff';
-    c.style.boxShadow='none';
-    c.querySelectorAll('div').forEach(d=>{d.style.color='';});
-  });
-  // Highlight selected card — portal blue gradient + white text
-  const el=document.getElementById('ct-'+id);
-  if(el){
-    el.style.border='2.5px solid #1565C0';
-    el.style.background='linear-gradient(145deg,#1565C0,#1976d2)';
-    el.style.boxShadow='0 4px 18px rgba(21,101,192,.35)';
-    el.querySelectorAll('div').forEach(d=>{d.style.color='#fff';});
-  }
+  // Update sidebar active state
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const sbEl=document.getElementById('sb-'+id);
+  if(sbEl) sbEl.classList.add('active');
+  // Show sum-g (loan breakdown) only for Combined view
+  const sg=document.getElementById('sum-grid');
+  if(sg) sg.style.display=id==='both'?'grid':'none';
+  // Add top margin to content panel for non-both views
+  const tw=document.querySelector('.tw');
+  if(tw) tw.style.marginTop=id==='both'?'0':'14px';
 }
 
 // ── SCHEDULE RENDER ──────────────────────────────────────
@@ -1727,6 +1748,9 @@ function clearAll(){
 function switchMainView(id,btn){
   document.getElementById('mv-calc').style.display=id==='calc'?'block':'none';
   document.getElementById('mv-bulk').style.display=id==='bulk'?'block':'none';
+  // Hide sidebar when in Bulk Export view
+  const sb=document.getElementById('left-sidebar');
+  if(sb) sb.style.display=id==='calc'?'flex':'none';
   document.querySelectorAll('.tabs .tb').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
