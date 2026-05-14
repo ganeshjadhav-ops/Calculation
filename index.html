@@ -30,9 +30,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* ── HEADER ── */
 header{background:#fff;border-bottom:2px solid #e2e8f0;padding:0 28px;height:58px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .logo-wrap{display:flex;align-items:center;gap:10px;}
-.logo{width:36px;height:36px;background:linear-gradient(135deg,#3d52d6,#2f42c2);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:0 2px 6px rgba(8,145,178,.3);}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,#1565C0,#1976d2);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:0 2px 6px rgba(21,101,192,.35);}
 .logo-text{display:flex;flex-direction:column;}
-.logo-text .brand{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:800;color:#3d52d6;letter-spacing:-.01em;line-height:1.1;}
+.logo-text .brand{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:800;color:#1565C0;letter-spacing:-.01em;line-height:1.1;}
 .logo-text .sub{font-size:.62rem;color:#94a3b8;font-weight:500;letter-spacing:.03em;}
 .divider{width:1px;height:28px;background:#e2e8f0;margin:0 4px;}
 .tool-name{font-size:.78rem;font-weight:600;color:#475569;letter-spacing:.01em;}
@@ -54,10 +54,10 @@ main{max-width:1200px;margin:0 auto;padding:20px 22px;}
 .sf{flex:1;min-width:200px;}
 .sf label{display:block;font-size:.74rem;font-weight:600;color:var(--t2);margin-bottom:4px;}
 .big-inp{width:100%;padding:10px 14px;border:2px solid var(--b2);border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:.95rem;font-weight:600;color:var(--text);background:var(--white);outline:none;transition:all .15s;}
-.big-inp:focus{border-color:var(--gq2);box-shadow:0 0 0 3px rgba(61,82,214,.12);}
+.big-inp:focus{border-color:#1565C0;box-shadow:0 0 0 3px rgba(21,101,192,.12);}
 .btn{padding:10px 20px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;letter-spacing:.01em;}
-.btn-blue{background:linear-gradient(135deg,#3d52d6,#2f42c2);color:#fff;box-shadow:0 2px 10px rgba(8,145,178,.35);}
-.btn-blue:hover{background:linear-gradient(135deg,#2f42c2,#2535a8);transform:translateY(-1px);box-shadow:0 4px 14px rgba(8,145,178,.4);}
+.btn-blue{background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;box-shadow:0 2px 10px rgba(21,101,192,.35);}
+.btn-blue:hover{background:linear-gradient(135deg,#0d47a1,#1565C0);transform:translateY(-1px);box-shadow:0 4px 14px rgba(21,101,192,.4);}
 .btn-blue:disabled{background:var(--muted);cursor:not-allowed;transform:none;box-shadow:none;}
 .btn-ghost{background:var(--bg);border:1.5px solid var(--b2);color:var(--t2);}
 .btn-ghost:hover{background:var(--border);color:var(--text);}
@@ -83,8 +83,8 @@ main{max-width:1200px;margin:0 auto;padding:20px 22px;}
 .fl-wrap{position:relative;}
 .fl-wrap label{display:block;font-size:.74rem;font-weight:700;color:var(--t2);margin-bottom:2px;}
 .fl-hint{font-size:.63rem;color:var(--muted);margin-bottom:5px;}
-.fl-inp{width:100%;padding:10px 14px;border:2px solid #3d52d6;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:#2f42c2;background:#f0f2ff;outline:none;transition:all .18s;}
-.fl-inp:focus{border-color:#2f42c2;box-shadow:0 0 0 3px rgba(61,82,214,.12);}
+.fl-inp{width:100%;padding:10px 14px;border:2px solid #1565C0;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:#1565C0;background:#e3f2fd;outline:none;transition:all .18s;}
+.fl-inp:focus{border-color:#0d47a1;box-shadow:0 0 0 3px rgba(21,101,192,.15);}
 .auto-tag{position:absolute;right:10px;bottom:11px;font-size:.58rem;font-weight:700;background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;}
 .emi-derived{font-size:.68rem;color:#3d52d6;font-weight:700;margin-top:4px;min-height:16px;}
 
@@ -106,7 +106,7 @@ main{max-width:1200px;margin:0 auto;padding:20px 22px;}
 /* ── TABS ── */
 .tabs{display:flex;gap:2px;margin-bottom:14px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);padding:3px;width:fit-content;box-shadow:var(--sh);}
 .tb{padding:7px 18px;border:none;border-radius:7px;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .13s;}
-.tb.active{background:linear-gradient(135deg,#3d52d6,#2f42c2);color:#fff;box-shadow:0 2px 8px rgba(8,145,178,.3);}
+.tb.active{background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;box-shadow:0 2px 8px rgba(21,101,192,.3);}
 
 /* ── SUMMARY GRID ── */
 .sum-g{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
@@ -118,7 +118,11 @@ main{max-width:1200px;margin:0 auto;padding:20px 22px;}
 .v.blue{color:var(--blue);}.v.green{color:var(--green);}.v.orange{color:var(--orange);}.v.red{color:var(--red);}.v.purple{color:var(--purple);}.v.teal{color:var(--teal);}
 
 /* ── CLOSURE TYPE CARDS ── */
-.ctype-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1);}
+.ctype-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.ctype-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(21,101,192,.18);border-color:#90caf9 !important;}
+
+/* ── PORTAL-STYLE CONTENT PANEL ── */
+.tw{background:var(--white);border:1.5px solid #bbdefb;border-radius:var(--r);overflow:hidden;box-shadow:0 2px 12px rgba(21,101,192,.08);margin-bottom:14px;border-top:3px solid #1565C0;}
 
 /* ── CLOSURE TABS ── */
 .tw{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;}
@@ -202,11 +206,11 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
 <!-- TYPE SELECTOR — Choose closure type FIRST, then enter App ID -->
 <div id="closure-selector" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">
-  <div class="ctype-card active" id="ct-both" onclick="switchClosure('both',this)"
-    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #3d52d6;background:#eff6ff;text-align:center;transition:all .15s;">
+  <div class="ctype-card" id="ct-both" onclick="switchClosure('both',this)"
+    style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #1565C0;background:linear-gradient(145deg,#1565C0,#1976d2);text-align:center;transition:all .15s;box-shadow:0 4px 18px rgba(21,101,192,.35);">
     <div style="font-size:1.4rem;margin-bottom:5px;">&#128203;</div>
-    <div style="font-size:.72rem;font-weight:800;color:#3d52d6;line-height:1.35;">Dropout +<br>Foreclosure</div>
-    <div id="ct-both-amt" style="font-size:.72rem;font-weight:700;color:#374151;margin-top:6px;">—</div>
+    <div style="font-size:.72rem;font-weight:800;color:#fff;line-height:1.35;">Dropout +<br>Foreclosure</div>
+    <div id="ct-both-amt" style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.9);margin-top:6px;">—</div>
   </div>
   <div class="ctype-card" id="ct-d" onclick="switchClosure('d',this)"
     style="cursor:pointer;border-radius:12px;padding:16px 10px;border:2.5px solid #e2e8f0;background:#fff;text-align:center;transition:all .15s;">
@@ -239,7 +243,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <button class="tb active" id="mvt-calc" onclick="switchMainView('calc',this)">&#128202; Calculator</button>
   <button class="tb" id="mvt-bulk" onclick="switchMainView('bulk',this)">&#128190; Bulk Export</button>
   <div style="flex:1"></div>
-  <button class="btn" id="fc-letter-btn" onclick="generateFCLetter()" style="display:none;background:#3d52d6;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;">&#128233; Generate FC Letter</button>
+  <button class="btn" id="fc-letter-btn" onclick="generateFCLetter()" style="display:none;background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(21,101,192,.3);">&#128233; Generate FC Letter</button>
 </div>
 
 <div id="mv-calc">
@@ -636,6 +640,7 @@ function parseRec(row){
     grp:   g('Group Name','groupname')||'—',
     nbfc:  g('NBFC','nbfc')||'—',
     dateStr:parseSheetDate(g('Loan Live Date','loan live date','Start Date','disbursement date')),
+    _liveDate:parseSheetDateObj(g('Loan Live Date','loan live date','Start Date','disbursement date')),
     _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0,_firstEMIDate:null
   };
 }
@@ -756,23 +761,27 @@ function calc(){
     _validTillDate = new Date(dmDateVal);
     today = _validTillDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     if(r._firstEMIDate){
-      // Last paid EMI date = firstEMIDate + (emisPaid - 1) months
-      const lastPaidDate = new Date(r._firstEMIDate);
+      // If Col J date is before loan live date, it's stale — fall back to liveDate + 1 month
+      let effectiveFirstEMI = r._firstEMIDate;
+      let fedNote = '';
+      if(r._liveDate && r._firstEMIDate < r._liveDate){
+        effectiveFirstEMI = new Date(r._liveDate);
+        effectiveFirstEMI.setMonth(effectiveFirstEMI.getMonth() + 1);
+        const colJStr = r._firstEMIDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+        fedNote = ` <span style="background:#fff3cd;color:#92400e;padding:1px 5px;border-radius:3px;font-size:.6rem;font-weight:700;">⚠ Col J (${colJStr}) before live date — using Live Date+1m</span>`;
+      }
+      const lastPaidDate = new Date(effectiveFirstEMI);
       if(emisPaid > 0){
         lastPaidDate.setMonth(lastPaidDate.getMonth() + (emisPaid - 1));
       }
       dm = Math.round((_validTillDate - lastPaidDate) / 86400000);
       const lpdStr = lastPaidDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-      const fedStr = r._firstEMIDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      const fedStr = effectiveFirstEMI.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
       const dmColor = dm < 0 ? 'var(--red)' : dm === 0 ? 'var(--orange)' : 'var(--green)';
-      // Warn if firstEMIDate looks suspicious (before liveDate - 60 days or >12m before 1st paid)
-      const liveDateObj = r.dateStr && r.dateStr !== '—' ? new Date(r.dateStr.split(' ').reverse().join('-')) : null;
-      const suspicious = liveDateObj && r._firstEMIDate < new Date(liveDateObj.getTime() - 30*86400000);
       document.getElementById('dm-info').innerHTML =
-        `From: <strong>${lpdStr}</strong> (Last paid EMI) &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>`;
+        `From: <strong>${lpdStr}</strong> &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>`;
       document.getElementById('dm-debug').innerHTML =
-        `1st EMI date (Col J): <strong>${fedStr}</strong> &bull; ${emisPaid} EMIs paid`
-        + (suspicious ? ` <span style="color:var(--red);font-weight:700">⚠ Date may be wrong — check Sheet2 Col J</span>` : '');
+        `1st EMI: <strong>${fedStr}</strong> &bull; ${emisPaid} EMIs paid${fedNote}`;
     } else {
       // Fallback: days from 1st of selected month
       const ms = new Date(_validTillDate.getFullYear(), _validTillDate.getMonth(), 1);
@@ -802,11 +811,9 @@ function calc(){
   // ── QUICK STATS ──
   document.getElementById('qstats').innerHTML=`
     <div class="qs q-blue"><div class="qs-l">EMI Amount</div><div class="qs-v blue">&#8377;${R2(emi)}</div><div class="qs-s">${ne} normal + ${ae} advance</div></div>
-    <div class="qs q-green"><div class="qs-l">Net Principal O/S</div><div class="qs-v green">&#8377;${R2(netP1)}</div><div class="qs-s">After deductions</div></div>
-    <div class="qs q-gold"><div class="qs-l">&#127891; Dropout Closure</div><div class="qs-v gold">&#8377;${R2(final1)}</div><div class="qs-s">With retention</div></div>
-    <div class="qs q-teal"><div class="qs-l">&#9889; Final Foreclosure</div><div class="qs-v teal">&#8377;${R2(final2)}</div><div class="qs-s">Without retention</div></div>
-    <div class="qs" style="background:${refund1>=0?'#ecfdf5':'#fef2f2'};border-top:2px solid ${refund1>=0?'#059669':'#dc2626'}"><div class="qs-l">&#128176; Refund (Dropout)</div><div class="qs-v" style="color:${refund1>=0?'#059669':'#dc2626'}">${refund1>=0?'&#8377;'+R2(refund1):'Owes &#8377;'+R2(-refund1)}</div><div class="qs-s">${refund1>=0?'To parent':'Still payable'}</div></div>
-    <div class="qs" style="background:${refund2>=0?'#ecfdf5':'#fef2f2'};border-top:2px solid ${refund2>=0?'#059669':'#dc2626'}"><div class="qs-l">&#128176; Refund (Final FC)</div><div class="qs-v" style="color:${refund2>=0?'#059669':'#dc2626'}">${refund2>=0?'&#8377;'+R2(refund2):'Owes &#8377;'+R2(-refund2)}</div><div class="qs-s">${refund2>=0?'To parent':'Still payable'}</div></div>
+    <div class="qs q-green"><div class="qs-l">Amount Paid</div><div class="qs-v green">&#8377;${R2(amtPaid)}</div><div class="qs-s">${emisPaid} EMI${emisPaid!==1?'s':''} paid</div></div>
+    <div class="qs q-gold"><div class="qs-l">EMIs Paid</div><div class="qs-v gold">${emisPaid} <span style="font-size:.75rem;font-weight:500">/ ${ne}</span></div><div class="qs-s">Normal EMIs (excl. advance)</div></div>
+    <div class="qs q-teal"><div class="qs-l">POS Outstanding</div><div class="qs-v teal">&#8377;${R2(pos1)}</div><div class="qs-s">After ${emisPaid} paid EMIs</div></div>
   `;
 
   // ── SUMMARY ──
@@ -1026,16 +1033,21 @@ function renderClosureDetail(elId, sched, fcIdx, advAmt, netP, ae,
 
 function switchClosure(id,btn){
   ['both','d','f','rd','rf'].forEach(x=>document.getElementById('closure-'+x).style.display=id===x?'block':'none');
-  // Reset all cards
+  // Reset all cards to unselected state
   document.querySelectorAll('.ctype-card').forEach(c=>{
     c.style.border='2px solid #e2e8f0';
     c.style.background='#fff';
+    c.style.boxShadow='none';
+    c.querySelectorAll('div').forEach(d=>{d.style.color='';});
   });
-  // Highlight active card
-  const colors={'both':'#3d52d6','d':'#92400e','f':'#1d4ed8','rd':'#059669','rf':'#1e3a8a'};
-  const bgs={'both':'#eff6ff','d':'#fffbeb','f':'#eff6ff','rd':'#ecfdf5','rf':'#eff6ff'};
+  // Highlight selected card — portal blue gradient + white text
   const el=document.getElementById('ct-'+id);
-  if(el){el.style.border=`2px solid ${colors[id]||'#3d52d6'}`;el.style.background=bgs[id]||'#eff6ff';}
+  if(el){
+    el.style.border='2.5px solid #1565C0';
+    el.style.background='linear-gradient(145deg,#1565C0,#1976d2)';
+    el.style.boxShadow='0 4px 18px rgba(21,101,192,.35)';
+    el.querySelectorAll('div').forEach(d=>{d.style.color='#fff';});
+  }
 }
 
 // ── SCHEDULE RENDER ──────────────────────────────────────
