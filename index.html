@@ -30,7 +30,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 main{max-width:1440px;margin:0 auto;padding:0;display:flex;align-items:flex-start;}
 .right-content{flex:1;padding:20px 22px;min-width:0;overflow-x:hidden;}
 /* ── LEFT SIDEBAR ── */
-#left-sidebar{width:255px;min-width:255px;background:#3d52d6;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
+#left-sidebar{width:280px;min-width:280px;background:#3d52d6;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
 .sb-section{padding:14px 14px 5px;font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42);}
 .sb-item{padding:11px 14px 12px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;color:rgba(255,255,255,.7);user-select:none;margin:1px 0;}
 .sb-item:hover{background:rgba(255,255,255,.09);color:#fff;border-left-color:rgba(255,255,255,.35);}
@@ -198,22 +198,11 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <!-- Calculator Sub-items -->
   <div id="sb-sub-calc" class="sb-subitems">
     
-    <div class="sb-item active" id="sb-both" onclick="switchClosure('both',this)">
-      <div class="sb-label">Dropout +<br>Foreclosure</div>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-item" id="sb-d" onclick="switchClosure('d',this)">
+        <div class="sb-item active" id="sb-d" onclick="switchClosure('d',this)">
       <div class="sb-label">Dropout Closure</div>
     </div>
     <div class="sb-item" id="sb-f" onclick="switchClosure('f',this)">
       <div class="sb-label">Final Foreclosure</div>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-item" id="sb-rd" onclick="switchClosure('rd',this)">
-      <div class="sb-label">Refund Dropout</div>
-    </div>
-    <div class="sb-item" id="sb-rf" onclick="switchClosure('rf',this)">
-      <div class="sb-label">Refund Final FC</div>
     </div>
   </div><!-- end sb-sub-calc -->
 
@@ -227,23 +216,14 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <!-- Bulk Sub-items -->
   <div id="sb-sub-bulk" class="sb-subitems" style="display:none">
     
-    <div class="sb-item" id="sb-bulk-both" onclick="switchBulkType('both',this)">
-      <div class="sb-label">Dropout +<br>Foreclosure</div>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-item" id="sb-bulk-d" onclick="switchBulkType('d',this)">
+    
+    <div class="sb-item active" id="sb-bulk-d" onclick="switchBulkType('d',this)">
       <div class="sb-label">Dropout Closure</div>
     </div>
     <div class="sb-item" id="sb-bulk-f" onclick="switchBulkType('f',this)">
       <div class="sb-label">Final Foreclosure</div>
     </div>
-    <div class="sb-divider"></div>
-    <div class="sb-item" id="sb-bulk-rd" onclick="switchBulkType('rd',this)">
-      <div class="sb-label">Refund Dropout</div>
-    </div>
-    <div class="sb-item" id="sb-bulk-rf" onclick="switchBulkType('rf',this)">
-      <div class="sb-label">Refund Final FC</div>
-    </div>
+
   </div><!-- end sb-sub-bulk -->
 
   <div class="sb-divider"></div>
@@ -307,8 +287,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
       <div class="fl-wrap">
         <label>📅 Calculation Valid Till Date</label>
         <input class="fl-inp" type="date" id="dmDate" oninput="calc()" style="cursor:pointer;">
-        <div id="dm-info" style="font-size:.67rem;color:var(--t2);margin-top:3px;min-height:15px;"></div>
-        <div id="dm-debug" style="font-size:.63rem;color:var(--muted);margin-top:2px;min-height:13px;"></div>
+        <div id="dm-info" style="font-size:.67rem;color:var(--t2);margin-top:3px;"></div>
+        <div id="dm-debug" style="font-size:.63rem;color:var(--muted);margin-top:1px;"></div>
       </div>
       <div class="fl-wrap">
         <label>📌 Bounce / Mandate Charges (₹)</label>
@@ -337,8 +317,8 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <!-- CLOSURE CONTENT (type controlled by cards above) -->
   <!-- CONTENT PANELS -->
     <div class="tw" style="margin-bottom:0;">
-      <div id="closure-both"></div>
-      <div id="closure-d" style="display:none"></div>
+      <div id="closure-both" style="display:none"></div>
+      <div id="closure-d"></div>
       <div id="closure-f" style="display:none"></div>
       <div id="closure-rd" style="display:none"></div>
       <div id="closure-rf" style="display:none"></div>
@@ -411,9 +391,7 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;background:#f8fafc;">
           <input type="radio" name="fcletter-type" value="final"> &#9889; Final Foreclosure
         </label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;background:#f8fafc;">
-          <input type="radio" name="fcletter-type" value="both"> &#128203; Both Letters
-        </label>
+        
       </div>
     </div>
     <div style="margin-bottom:14px;">
@@ -560,6 +538,9 @@ function parseGviz(txt, keepRaw=false){
 async function fetchAll(){
   const aid=document.getElementById('aid').value.trim();
   if(!aid){ss('error','&#9888; Enter an App ID');return;}
+  // Reset auto-populated fields for fresh fetch
+  ['amtPaid','bc'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='0';el.dataset.autoSet='';}}); 
+  ['ep-tag','bc-tag'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   ss('loading',`<span class="spin"></span> &nbsp;${_cacheReady?'Looking up':'Fetching'} <strong>${aid}</strong>...`);
   document.getElementById('fb').disabled=true;
 
@@ -639,10 +620,13 @@ async function fetchAll(){
         console.log('[Sheet2]', {totalPaid, totalChg, netPaid, chargesOutstanding});
         // Col J (idx 9) — First EMI Date (after advance EMIs)
         const firstEMIDateRaw = (()=>{
+          const cell=pmtRec._raw?.[9];
+          const fmtVal=cell?.f?String(cell.f).trim():'';
+          if(fmtVal)return fmtVal;
           const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate',
             'first_emi_date','EMI Start Date','emi start date','EmiStartDate');
           if(v!==null&&v!=='')return v;
-          return pmtRec._raw?.[9]?.v??'';
+          return cell?.v??'';
         })();
         REC._firstEMIDate     = parseSheetDateObj(firstEMIDateRaw);
         REC._netPaid          = netPaid;
@@ -877,7 +861,7 @@ function calc(){
     <div class="qs q-gold" id="qs-closure-stat"><div class="qs-l">Closure Amount</div><div class="qs-v gold">—</div><div class="qs-s">Select a type</div></div>
   `;
   // Update 4th stat based on currently active sidebar type
-  (()=>{const _as=document.querySelector('.sb-item.active');const _ai=_as?.id?.replace('sb-','')||'both';_updateClosureStat(_ai,{final1,final2,refund1,refund2});})();
+  (()=>{const _as=document.querySelector('.sb-item.active');const _ai=_as?.id?.replace('sb-','')||'d';_updateClosureStat(_ai,{final1,final2,refund1,refund2});})();
 
   // ── SUMMARY ──
   document.getElementById('bd').innerHTML=[
@@ -926,7 +910,7 @@ function calc(){
     excessPmt,apr1,apr2,dm,netP1,netP2,fcIdx:fcIdx1,ne,ae,advAmt,refund1,refund2};
   // Re-apply sidebar active state after calc updates all amounts
   const _activeSb=document.querySelector('.sb-item.active');
-  const _activeId=_activeSb?.id?.replace('sb-','')||'both';
+  const _activeId=_activeSb?.id?.replace('sb-','')||'d';
   switchClosure(_activeId,_activeSb);
 }
 
@@ -1757,8 +1741,8 @@ async function bulkExport(){
         <button class="bst active" onclick="switchBulkTab(0,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#3d52d6;color:#fff;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#128203; Combined</button>
         <button class="bst" onclick="switchBulkTab(1,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#92400e;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#127891; Dropout</button>
         <button class="bst" onclick="switchBulkTab(2,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#1d4ed8;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#9889; Final FC</button>
-        <button class="bst" onclick="switchBulkTab(3,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#065f46;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#128176; Refund-Dropout</button>
-        <button class="bst" onclick="switchBulkTab(4,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#1e3a8a;cursor:pointer;border-radius:6px 6px 0 0;">&#128176; Refund-Final FC</button>
+        
+        
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;overflow-x:auto;">
         <div class="btp" style="display:block">${t1}</div>
@@ -1873,7 +1857,7 @@ async function bulkGenerateLetters(){
         const tc=cv(['Total Charges Paid','totalchargespaid'],17);
         r._bounce=cv(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
         r._netPaid=Math.max(0,r._netPaid-tc);
-        const fraw=(()=>{const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate');if(v!==null&&v!=='')return v;return pmtRec._raw?.[9]?.v??'';})();
+        const fraw=(()=>{const cell=pmtRec._raw?.[9];const fv=cell?.f?String(cell.f).trim():'';if(fv)return fv;const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate');if(v!==null&&v!=='')return v;return cell?.v??'';})();
         r._firstEMIDate=parseSheetDateObj(fraw);
       }
       // Quick calc
@@ -1912,12 +1896,11 @@ async function bulkGenerateLetters(){
       const todayStr=vd.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
       const bulkC={pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,final1,final2,retAmt,bounce:r._bounce||0,today:todayStr,emi,loan:r.loan,amtPaid:amtP,emisPaid:ep,apr1:mR1*12,apr2:mR2*12,dm,netP1,netP2,ne,ae,advAmt:ae*emi,refund1:amtP-final1,refund2:amtP-final2};
       // Open letter(s) in new window(s)
-      const openL=(type)=>{const w=window.open('','_blank','width=860,height=800,scrollbars=yes');if(w){const tmp=REC;const tmpC=LAST_CALC;REC=r;LAST_CALC=bulkC;const html2=buildLetterHTML(type);w.document.write(html2);w.document.close();REC=tmp;LAST_CALC=tmpC;}};
-      if(letterType==='dropout'||letterType==='both') openL('dropout');
-      if(letterType==='final'||letterType==='both') openL('final');
+      const downloadL=(type)=>{const tmp=REC;const tmpC=LAST_CALC;REC=r;LAST_CALC=bulkC;const html2=buildLetterHTML(type);REC=tmp;LAST_CALC=tmpC;if(html2){const blob=new Blob([html2],{type:'text/html'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='GrayQuest_'+(type==='dropout'?'Dropout':'FinalFC')+'_'+aid+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);}};
+      if(letterType==='dropout') downloadL('dropout');
+      if(letterType==='final') downloadL('final');
       done++;
     }catch(e){errors.push(aid+' ('+e.message+')');done++;}
-    await new Promise(res=>setTimeout(res,300)); // small gap so browser can open tabs
   }
   prog.innerHTML=`&#10003; Done: ${done-errors.length} generated${errors.length>0?', '+errors.length+' errors: '+errors.join(', '):''}`;
 }
