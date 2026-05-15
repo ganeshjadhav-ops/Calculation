@@ -447,9 +447,10 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 <div id="toast"></div>
 
 <script>
-const SID1='1FvGTH4IOzoDr6PNBKLfWVENBhevuQDrt2uy8yOwNsZ8';
-const SID2='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
-const GID2='491266174';
+// ── Single source: PD Dump Live Closed sheet (user's actual sheet) ──
+const SID='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
+const GID='491266174';
+const SID1=SID, SID2=SID, GID2=GID; // legacy compat
 
 let REC=null,S1=[],S2=[];
 let LAST_CALC=null;
@@ -460,19 +461,15 @@ async function syncSheets(){
   const btn=document.getElementById('sync-btn');
   const info=document.getElementById('sync-info');
   btn.disabled=true; btn.textContent='Syncing...';
-  info.textContent='Fetching Sheet 1...';
+  info.textContent='Fetching data...';
   try{
-    const [r1,r2]=await Promise.all([
-      fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
-      fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
-    ]);
+    const r=await fetch(`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&gid=${GID}`);
     info.textContent='Parsing data...';
-    const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
-    _CACHE1=parseGviz(t1);
-    _CACHE2=parseGviz(t2,true);
+    const t=await r.text();
+    _CACHE2=parseGviz(t,true);
+    _CACHE1=_CACHE2; // same data — keep legacy ref working
     _cacheReady=true;
-    const n1=_CACHE1.length, n2=_CACHE2.length;
-    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced</span>`;
+    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced — ${_CACHE2.length} rows</span>`;
     btn.innerHTML='✓ Synced';
     btn.style.background='var(--glight)';btn.style.color='var(--green)';btn.style.borderColor='#a7f3d0';
   }catch(e){
@@ -509,21 +506,41 @@ function gv(row,...vs){
 function parseSheetDateObj(dd){
   if(!dd||dd==='')return null;
   if(dd instanceof Date)return isNaN(dd)?null:dd;
-  if(typeof dd==='string'&&dd.startsWith('Date(')){
-    const p=dd.replace('Date(','').replace(')','').split(',').map(Number);
+  const s=String(dd).trim();
+  // gviz Date() serial — trust only if no formatted text available
+  if(s.startsWith('Date(')){
+    const p=s.replace('Date(','').replace(')','').split(',').map(Number);
     const d=new Date(p[0],p[1],p[2]); return isNaN(d)?null:d;
   }
   if(typeof dd==='number'){
-    // Excel serial date
     const d=new Date(Math.round((dd-25569)*86400000)); return isNaN(d)?null:d;
   }
   try{
-    const p=dd.toString().split(/[-\/]/);
+    // Handle "5-May-2020" / "5 May 2020" (month name in middle)
+    const _mn={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+    const mp=s.split(/[-\/\s]+/);
+    if(mp.length===3){
+      const mid=mp[1].toLowerCase().substring(0,3);
+      if(_mn[mid]!==undefined){
+        const d=new Date(parseInt(mp[2]),_mn[mid],parseInt(mp[0]));
+        if(!isNaN(d))return d;
+      }
+    }
+    // Indian DD/MM/YYYY or DD-MM-YYYY (always treat first part as Day, second as Month)
+    const p=s.split(/[-\/]/);
     if(p.length===3){
-      const d=p[0].length===4
-        ?new Date(`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`)
-        :new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`);
-      if(!isNaN(d))return d;
+      if(p[0].length===4){
+        // YYYY-MM-DD or YYYY/MM/DD
+        const d=new Date(`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`);
+        if(!isNaN(d))return d;
+      } else {
+        // DD/MM/YYYY — Indian format: p[0]=day, p[1]=month, p[2]=year
+        const day=parseInt(p[0]),mon=parseInt(p[1]),yr=parseInt(p[2]);
+        if(mon>=1&&mon<=12&&day>=1&&day<=31){
+          const d=new Date(yr,mon-1,day); // month is 0-indexed
+          if(!isNaN(d))return d;
+        }
+      }
     }
   }catch(e){}
   return null;
@@ -564,101 +581,34 @@ async function fetchAll(){
   document.getElementById('fb').disabled=true;
 
   try{
-    let rows1, rows2raw;
+    // ── Single-sheet fetch (PD Dump has everything: loan data + payment data) ──
+    let allRows;
     if(_cacheReady){
-      // Use pre-synced cache — instant lookup
-      rows1=_CACHE1;
-      rows2raw=_CACHE2;
+      allRows=_CACHE2; // instant from cache
     } else {
-      const [r1,r2]=await Promise.all([
-        fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
-        fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
-      ]);
-      const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
-      rows1=parseGviz(t1);
-      rows2raw=parseGviz(t2,true);
+      const r=await fetch(`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&gid=${GID}`);
+      const t=await r.text();
+      allRows=parseGviz(t,true);
     }
 
-    // Sheet 1 — main calc data
-    const rows1_=rows1;
-    const rec=rows1_.find(r=>{
-      const id=gv(r,'App ID','AppID','Application Id');
-      return id&&String(id).trim()===aid;
+    // ── Look up App ID in Col A ("GQ Application ID") with raw index fallback ──
+    const rec=allRows.find(r=>{
+      const id=gv(r,'GQ Application ID','GQ App ID','App ID','AppID');
+      const rawId=(id!==null&&id!=='')?id:(r._raw?.[0]?.v??'');
+      return rawId!==''&&rawId!=null&&String(rawId).trim()===String(aid).trim();
     });
-    if(!rec){ss('error',`❌ App ID "${aid}" not found. Ensure Sheet 1 is public.`);document.getElementById('fb').disabled=false;return;}
-    REC=parseRec(rec);
+    if(!rec){
+      const _r0=allRows[0]||{};
+      console.warn('[Lookup] Cols:',Object.keys(_r0).filter(k=>k!=='_raw').join(' | '));
+      console.warn('[Lookup] Col A first row:',_r0._raw?.[0]?.v);
+      ss('error',`❌ App ID "${aid}" not found. Ensure the sheet is public (Share → Anyone → Viewer).`);
+      document.getElementById('fb').disabled=false;return;
+    }
 
-    // Sheet 2 — PD Dump: Col A=GQ Application ID, L(idx11)=Total Payment, R(idx17)=Total Charges Paid, S(idx18)=Outstanding
-    try{
-      const rows2=rows2raw;
-      const pmtRec=rows2.find(r=>{
-        // Try all known column name variants
-        const id=gv(r,
-          'GQ Application ID','GQ App ID','gqapplicationid','gqappid',
-          'App ID','AppID','Application Id','applicationid',
-          'GQ App No','GQ App No.','gqappno','Application No','applicationno',
-          'Loan ID','loanid','LoanID'
-        );
-        // Fallback: use raw Col A (index 0) regardless of column name
-        const rawId = (id!==null&&id!=='') ? id : (r._raw?.[0]?.v ?? '');
-        return rawId!==''&&rawId!=null && String(rawId).trim()===String(aid).trim();
-      });
-      if(pmtRec){
-        // Helper: try column name first, then raw index
-        const cv=(names,idx)=>{
-          // Try column name first (multiple variants for resilience)
-          const v=gv(pmtRec,...names);
-          if(v!==null&&v!=='')return parseFloat(v)||0;
-          // Fallback to raw index position
-          return parseFloat(pmtRec._raw?.[idx]?.v)||0;
-        };
-        // Col L (idx 11) — Total Payment made till date
-        const totalPaid = cv([
-          'Total Payment made till date','Total Payment Made Till Date',
-          'totalpaymentmadetilldate','Total Payments Made','TotalPaymentMade',
-          'total payment','Total EMI Paid','TotalEMIPaid'
-        ], 11);
-        // Col R (idx 17) — Total Charges Paid
-        const totalChg = cv([
-          'Total Charges Paid','Total charges paid','TotalChargesPaid',
-          'totalchargespaid','Charges Paid','Total Charge Paid'
-        ], 17);
-        // Col Q (idx 16) — Total Outstanding
-        const totalOutstanding = cv([
-          'Total Outstanding Amount','Total outstanding amount','totaloutstandingamount',
-          'Outstanding Amount','TotalOutstanding'
-        ], 16);
-        // Col S (idx 18) — Charges Outstanding (Bounce/Mandate)
-        const chargesOutstanding = cv([
-          'Total Charges Outstanding Amount','Total Charges Outstanding',
-          'ChargesOutstandingAmount','totalchargesoutstandingamount',
-          'Charges Outstanding','Outstanding Charges'
-        ], 18);
-        // NET PAID = Col L − Col R (payment received minus charges already paid)
-        const netPaid = Math.max(0, totalPaid - totalChg);
-        console.log('[Sheet2]', {totalPaid, totalChg, netPaid, chargesOutstanding});
-        // Col J (idx 9) — First EMI Date (after advance EMIs)
-        const firstEMIDateRaw = (()=>{
-          const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate',
-            'first_emi_date','EMI Start Date','emi start date','EmiStartDate');
-          if(v!==null&&v!=='')return v;
-          return pmtRec._raw?.[9]?.v??'';
-        })();
-        REC._firstEMIDate     = parseSheetDateObj(firstEMIDateRaw);
-        REC._netPaid          = netPaid;
-        REC._totalOutstanding = totalOutstanding > 0 ? totalOutstanding : 0;
-        REC._bounce           = chargesOutstanding > 0 ? chargesOutstanding : 0;
-        REC._totalPaid        = totalPaid;
-        REC._totalChg         = totalChg;
-      } else {
-        // Sheet2 lookup failed — log actual columns for debugging
-        const _r0 = rows2[0]||{};
-        console.warn('[Sheet2] No match for App ID:', aid);
-        console.warn('[Sheet2] Available columns:', Object.keys(_r0).filter(k=>k!=='_raw').join(' | '));
-        console.warn('[Sheet2] Col A raw value of first row:', _r0._raw?.[0]?.v);
-        console.warn('[Sheet2] Total rows in Sheet2:', rows2.length);
-      }
-    }catch(e){console.log('[Sheet2 error]',e.message);}
+    // ── parseRec extracts ALL fields (loan data + payment data) from the same row ──
+    REC=parseRec(rec);
+    console.log('[REC]',{appId:REC.appId,name:REC.name,loan:REC.loan,te:REC.te,ae:REC.ae,
+      netPaid:REC._netPaid,bounce:REC._bounce,firstEMI:REC._firstEMIDate,emisPaid:REC._emisPaid});
 
     ss('success',`&#9989; <strong>${REC.name}</strong> &nbsp;|&nbsp; &#8377;${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
     renderStrip(REC);
@@ -681,42 +631,120 @@ async function fetchAll(){
     calc();
     toast(`&#9989; ${REC.name} loaded!`);
   }catch(e){
-    ss('error',`❌ ${e.message}. Make both sheets public (Share → Anyone with link → Viewer).`);
+    ss('error',`❌ ${e.message}. Make the sheet public (Share → Anyone with link → Viewer).`);
   }
   document.getElementById('fb').disabled=false;
 }
 
 function parseRec(row){
   const g=(...v)=>gv(row,...v);
+  const num=(...v)=>{const x=parseFloat(g(...v));return isFinite(x)?x:0;};
+  const cv=(names,rawIdx)=>{
+    const v=g(...names);
+    if(v!==null&&v!=='')return parseFloat(v)||0;
+    return parseFloat(row._raw?.[rawIdx]?.v)||0;
+  };
+
+  // ── Core loan fields (PD Dump column names) ──────────────────
+  // Col O (idx 14): Tranch Amount = per-tranche principal
+  // Col H (idx 7):  Loan Amount   = total loan (multi-tranche)
+  const loan  = cv(['Tranch Amount','Tranche Amount'],14) || cv(['Loan Amount'],7);
+  // Col P (idx 15): Tranch Tenure = net EMIs (AFTER advance EMIs)
+  const te_net= Math.round(cv(['Tranch Tenure','Tranche Tenure','Number of EMIs','No of EMIs'],15));
+  // Col K (idx 10): EMI Amount = actual monthly EMI
+  const emi_direct = cv(['EMI Amount'],10);
+
+  // ── Derive advance EMIs: loan / EMI_direct → total tenure; ae = total - net ──
+  // e.g. loan=71000, emi=7100 → total=10, net=9 → ae=1
+  const te_total = (emi_direct>0&&loan>0) ? Math.max(te_net, Math.round(loan/emi_direct)) : te_net;
+  const ae       = Math.max(0, te_total - te_net);
+
+  // ── Amounts from sheet (not rates) ───────────────────────────
+  // Col Z (idx 25): Discount Amt (subvention amount)
+  const discAmt = cv(['Discount Amt','Discount Amount'],25);
+  // Col Y (idx 24): Retention Amt (FLDG amount)
+  const retAmt_  = cv(['Retention Amt','Retention Amount'],24);
+  // Col AA (idx 26): Interest Amt (processing/interest fee)
+  const intAmt  = cv(['Interest Amt','Interest Amount'],26);
+
+  // Derive % rates (used in calc() formulas: subvAmt=subv/100*loan, etc.)
+  const subv = loan>0 ? (discAmt/loan*100) : 0;
+  const netL = loan-discAmt;
+  const ret  = netL>0  ? (retAmt_/netL*100)  : 0;
+  // Interest is NOT embedded in EMI for this sheet (EMI = loan/te_total)
+  // Setting intr=0 means intFee=0 in calc() — correct for principal-only EMIs
+  const intr = 0;
+
+  // ── Payment data (same row — PD Dump has everything) ─────────
+  // Col L (idx 11): Total Payment made till date
+  const totalPaid = cv(['Total Payment made till date'],11);
+  // Col R (idx 17): Total Charges Paid
+  const totalChg  = cv(['Total Charges Paid'],17);
+  // NET PAID = Total Payment − Charges Paid (only principal portion)
+  const netPaid   = Math.max(0, totalPaid - totalChg);
+  // Col Q (idx 16): Total Outstanding Amount (POS from lender records)
+  const totalOut  = cv(['Total Outstanding Amount'],16);
+  // Col S (idx 18): Charges Outstanding (bounce/mandate)
+  const chargesOut= cv(['Total Charges Outstanding Amount'],18);
+  // Col V (idx 21): No. of EMIs Paid
+  const emisPaid_ = Math.round(cv(['No. of EMIs Paid','No of EMIs Paid'],21));
+  // Col U (idx 20): Last Payment Date
+  const lastPayRaw= g('Last Payment Date');
+  // Col J (idx 9):  First EMI Date
+  // KEY FIX: prefer .f (formatted/display value) over .v (raw Date() value)
+  // .f gives the actual text shown in sheet in Indian DD/MM/YYYY format e.g. "4-6-2021"
+  // .v might give Date(2021,3,6)=April6 when user meant June4 (DD/MM swap bug)
+  const firstEMIRaw = (()=>{
+    const cell = row._raw?.[9];
+    const fmtVal = cell?.f ? String(cell.f).trim() : '';
+    if(fmtVal) return fmtVal; // Use display text → parsed as DD/MM/YYYY ✓
+    const v=g('First EMI Date','first emi date','FirstEMIDate','EMI Start Date');
+    if(v!==null&&v!=='')return v;
+    return cell?.v??'';
+  })();
+
+  // ── Display fields ────────────────────────────────────────────
+  const loanStage = g('Loan Stage')||'';
+
   return{
-    appId: g('App ID','AppID','Application Id')||'',
-    name:  g('Student Name','student name','Name')||'—',
-    loan:  parseFloat(g('Tranche Amount','tranche amount','Loan Amount'))||0,
-    te:    parseInt(g('Number of EMIs','numberofemis','No of EMIs'))||0,
-    ae:    parseInt(g('Advance EMIs','advance emis','Adv EMI'))||0,
-    subv:  parseFloat(g('Discount Rate','discount rate','Subvention %','Subvention','discount%'))||0,
-    ret:   parseFloat(g('FLDG %','FLDG','Retention %','fldg%'))||0,
-    intr:  parseFloat(g('Total Regular Int Rate','interest rate','totalregularintrate'))||0,
-    grp:   g('Group Name','groupname')||'—',
-    nbfc:  g('NBFC','nbfc')||'—',
-    dateStr:parseSheetDate(g('Loan Live Date','loan live date','Start Date','disbursement date')),
-    _liveDate:parseSheetDateObj(g('Loan Live Date','loan live date','Start Date','disbursement date')),
-    _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0,_firstEMIDate:null
+    appId:   g('GQ Application ID','GQ App ID','App ID','AppID')||'',
+    name:    g('Name of Student','Student Name','Name')||'—',
+    parentName: g('Parent Name')||'—',
+    loan,
+    te:  te_total,   // total EMIs (incl. advance) — matches original calc() usage
+    ae,              // advance EMI count
+    subv, ret, intr,
+    discAmt, retAmt:retAmt_, intAmt,
+    grp:     g('Group Name','groupname')||'—',
+    nbfc:    g('LENDER','Lender','NBFC')||'—',
+    loanStage,
+    tranch:  g('Tranch Type','Tranche Type')||'',
+    dateStr: '—',
+    _liveDate: null,      // not in PD Dump sheet — DD/MM auto-correct handles dates
+    _netPaid:    netPaid,
+    _totalOutstanding: totalOut>0?totalOut:0,
+    _bounce:     chargesOut>0?chargesOut:0,
+    _totalPaid:  totalPaid,
+    _totalChg:   totalChg,
+    _firstEMIDate: parseSheetDateObj(firstEMIRaw),
+    _emisPaid:   emisPaid_,
+    _lastPayDate:parseSheetDateObj(lastPayRaw),
   };
 }
 
 function renderStrip(r){
   document.getElementById('igrid').innerHTML=[
-    ['App ID',     r.appId,           'blue'],
-    ['Student',    r.name,            ''],
-    ['Loan',       '₹'+R2(r.loan),   'green'],
-    ['EMIs',       `${r.te} (Adv:${r.ae})`,''],
-    ['Discount %', r.subv+'%',        r.subv>0?'orange':''],
-    ['Interest %', r.intr+'%',        r.intr>0?'red':''],
-    ['FLDG %',     r.ret+'%',         ''],
-    ['Live Date',  r.dateStr,         ''],
-    ['Group',      r.grp,             ''],
-    ['NBFC',       r.nbfc,            ''],
+    ['App ID',       r.appId,                       'blue'],
+    ['Student',      r.name,                        ''],
+    ['Parent',       r.parentName,                  ''],
+    ['Loan Amt',     '₹'+R2(r.loan),               'green'],
+    ['EMIs',         `${r.te} total (${r.ae} adv)`, ''],
+    ['Loan Stage',   r.loanStage,                   ''],
+    ['Discount Amt', r.discAmt>0?'₹'+R2(r.discAmt):'—', r.discAmt>0?'orange':''],
+    ['Retention Amt',r.retAmt>0?'₹'+R2(r.retAmt):'—',''],
+    ['Interest Fee', r.intAmt>0?'₹'+R2(r.intAmt):'—',''],
+    ['Group',        r.grp,                         ''],
+    ['Lender',       r.nbfc,                        ''],
   ].map(([l,v,c])=>`<div class="ibox"><div class="ib-l">${l}</div><div class="ib-v ${c}" title="${v}">${v}</div></div>`).join('');
 }
 
@@ -836,11 +864,42 @@ function calc(){
         lastPaidDate.setMonth(lastPaidDate.getMonth() + (emisPaid - 1));
       }
       dm = Math.round((_validTillDate - lastPaidDate) / 86400000);
+
+      // ── Auto-correct DD/MM swap (Indian format stored as US format in Sheet2) ──
+      // If dm < 0 but month/day swap gives valid positive dm, use swapped date
+      let dmNote = '';
+      if(dm < 0 && r._firstEMIDate){
+        const orig = r._firstEMIDate;
+        // Swap month ↔ day (e.g. Date(2026,4,1)=May1 → try Date(2026,0,5)=Jan5)
+        const swapped = new Date(orig.getFullYear(), orig.getDate()-1, orig.getMonth()+1);
+        if(!isNaN(swapped) && swapped.getFullYear()===orig.getFullYear()){
+          let swEff = swapped;
+          if(r._liveDate && swapped < r._liveDate){
+            swEff = new Date(r._liveDate);
+            swEff.setMonth(swEff.getMonth()+1);
+          }
+          const swLP = new Date(swEff);
+          if(emisPaid>0) swLP.setMonth(swLP.getMonth()+(emisPaid-1));
+          const swDm = Math.round((_validTillDate - swLP)/86400000);
+          if(swDm >= 0){
+            effectiveFirstEMI = swEff;
+            lastPaidDate.setTime(swLP.getTime());
+            dm = swDm;
+            dmNote = ` <span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:3px;font-size:.6rem;font-weight:700;">✓ DD/MM format auto-corrected</span>`;
+          }
+        }
+        // If still negative after swap, use 30 days as fallback
+        if(dm < 0){
+          dmNote = ` <span style="background:#fff3cd;color:#92400e;padding:1px 6px;border-radius:3px;font-size:.6rem;font-weight:700;">⚠ Using 30d default</span>`;
+          dm = 30;
+        }
+      }
+
       const lpdStr = lastPaidDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
       const fedStr = effectiveFirstEMI.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-      const dmColor = dm < 0 ? 'var(--red)' : dm === 0 ? 'var(--orange)' : 'var(--green)';
+      const dmColor = dm === 0 ? 'var(--orange)' : 'var(--green)';
       document.getElementById('dm-info').innerHTML =
-        `From: <strong>${lpdStr}</strong> &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>`;
+        `From: <strong>${lpdStr}</strong> &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>${dmNote}`;
       document.getElementById('dm-debug').innerHTML =
         `1st EMI: <strong>${fedStr}</strong> &bull; ${emisPaid} EMIs paid${fedNote}`;
     } else {
@@ -1500,41 +1559,21 @@ async function bulkExport(){
     const aid=ids[i];
     prog.innerHTML=`<span style="color:var(--blue)">Processing ${i+1}/${ids.length}: App ID ${aid}...</span>`;
     try{
-      // Use same parseRec + gv logic as fetchAll (exact match)
-      const row=_CACHE1 && _CACHE1.find(r=>{
-        const id=gv(r,'App ID','AppID','Application Id');
-        return id && String(id).trim()===String(aid).trim();
+      // Single-sheet lookup — same sheet has all data (loan + payment)
+      const row=_CACHE2 && _CACHE2.find(r=>{
+        const id=gv(r,'GQ Application ID','GQ App ID','App ID','AppID');
+        const rawId=(id!==null&&id!=='')?id:(r._raw?.[0]?.v??'');
+        return rawId!==''&&rawId!=null && String(rawId).trim()===String(aid).trim();
       });
-      if(!row){results.push({aid,error:'Not found in Sheet1'});continue;}
+      if(!row){results.push({aid,error:'Not found in sheet'});continue;}
 
-      // Parse using same parseRec function
+      // parseRec now extracts ALL fields including payment data
       const bREC=parseRec(row);
       if(!bREC.loan||!bREC.te){results.push({aid,error:'Invalid loan data'});continue;}
 
-      // Sheet2 lookup using same logic as fetchAll
-      let netPaid2=0, bounce2=0;
-      if(_CACHE2){
-        const pmtRec=_CACHE2.find(r=>{
-          const _bid=gv(r,'GQ Application ID','GQ App ID','gqapplicationid','gqappid','App ID','AppID','Application Id','applicationid','GQ App No','gqappno');
-          const _rawBid=(_bid!==null&&_bid!=='')?_bid:(r._raw?.[0]?.v??'');
-          return _rawBid!==''&&_rawBid!=null && String(_rawBid).trim()===String(aid).trim();
-        });
-        if(pmtRec){
-          const cvB=(names,idx)=>{
-            const v=gv(pmtRec,...names);
-            if(v!==null&&v!=='')return parseFloat(v)||0;
-            return parseFloat(pmtRec._raw?.[idx]?.v)||0;
-          };
-          const totalPaid=cvB(['Total Payment made till date','Total Payment Made Till Date','totalpaymentmadetilldate','Total Payments Made','TotalPaymentMade','total payment','Total EMI Paid','TotalEMIPaid'],11);
-          const totalChg=cvB(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid','Charges Paid','Total Charge Paid'],17);
-          netPaid2=Math.max(0,totalPaid-totalChg);
-          bounce2=cvB(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount','Charges Outstanding','Outstanding Charges'],18);
-        }
-      }
-
       // Run same calc logic as calc()
       const {loan,te,ae,subv,ret:retP,intr,name:studentName,grp,nbfc}=bREC;
-      const intFee=intr/100*loan;
+      const intFee=intr/100*loan; // intr=0 for PD Dump sheet → intFee=0
       const emi=(loan/te)+(intFee/te);
       const advAmt=ae*emi;
       const ne=te-ae;
@@ -1550,8 +1589,9 @@ async function bulkExport(){
       const mR2=irr(cf2),apr2=mR2*12;
       const localS2=buildSched(netP2,emi,ne,mR2,false,0);
 
-      const amtPaid=netPaid2;
-      const bounce=bounce2;
+      // Payment data now comes directly from parseRec (same row)
+      const amtPaid=bREC._netPaid;
+      const bounce=bREC._bounce;
       const normalPaid=Math.max(0,amtPaid-advAmt);
       let _rem=normalPaid,emisPaid=0;
       for(let k=0;k<localS1.length;k++){if(_rem>=localS1[k].emi){_rem-=localS1[k].emi;emisPaid=k+1;}else break;}
@@ -1569,6 +1609,18 @@ async function bulkExport(){
         const lastPd=new Date(bREC._firstEMIDate);
         if(emisPaid>0) lastPd.setMonth(lastPd.getMonth()+(emisPaid-1));
         dm_val=Math.round((_validTill-lastPd)/86400000);
+        // DD/MM swap auto-correct (same logic as single calc)
+        if(dm_val<0){
+          const orig=bREC._firstEMIDate;
+          const swapped=new Date(orig.getFullYear(),orig.getDate()-1,orig.getMonth()+1);
+          if(!isNaN(swapped)&&swapped.getFullYear()===orig.getFullYear()){
+            const swLP=new Date(swapped);
+            if(emisPaid>0) swLP.setMonth(swLP.getMonth()+(emisPaid-1));
+            const swDm=Math.round((_validTill-swLP)/86400000);
+            if(swDm>=0) dm_val=swDm;
+          }
+          if(dm_val<0) dm_val=30; // fallback
+        }
       } else {
         const _ms=new Date(_validTill.getFullYear(),_validTill.getMonth(),1);
         dm_val=Math.round((_validTill-_ms)/86400000);
@@ -1859,25 +1911,16 @@ async function bulkGenerateLetters(){
     prog.innerHTML=`Generating ${done+1}/${ids.length}: <strong>${aid}</strong>...`;
     await new Promise(res=>setTimeout(res,0));
     try{
-      const rec=_CACHE1.find(r=>{const id=gv(r,'App ID','AppID','Application Id');return id&&String(id).trim()===aid;});
-      if(!rec){errors.push(aid+' (not found)');done++;continue;}
-      const r=parseRec(rec);
-      const pmtRec=_CACHE2.find(row=>{
-        const _id=gv(row,'GQ Application ID','GQ App ID','gqapplicationid','gqappid','App ID','AppID','Application Id','applicationid','GQ App No','gqappno');
+      // Single-sheet lookup — parseRec extracts all fields including payment data
+      const rec=_CACHE2&&_CACHE2.find(row=>{
+        const _id=gv(row,'GQ Application ID','GQ App ID','App ID','AppID');
         const _rid=(_id!==null&&_id!=='')?_id:(row._raw?.[0]?.v??'');
         return _rid!==''&&_rid!=null&&String(_rid).trim()===String(aid).trim();
       });
-      if(pmtRec){
-        const cv=(names,idx)=>{const v=gv(pmtRec,...names);if(v!==null&&v!=='')return parseFloat(v)||0;return parseFloat(pmtRec._raw?.[idx]?.v)||0;};
-        r._netPaid=cv(['Total Payment made till date','totalpaymentmadetilldate'],11);
-        const tc=cv(['Total Charges Paid','totalchargespaid'],17);
-        r._bounce=cv(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
-        r._netPaid=Math.max(0,r._netPaid-tc);
-        const fraw=(()=>{const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate');if(v!==null&&v!=='')return v;return pmtRec._raw?.[9]?.v??'';})();
-        r._firstEMIDate=parseSheetDateObj(fraw);
-      }
+      if(!rec){errors.push(aid+' (not found)');done++;continue;}
+      const r=parseRec(rec); // all fields including _netPaid, _bounce, _firstEMIDate
       // Quick calc
-      const intFee=r.intr/100*r.loan;
+      const intFee=r.intr/100*r.loan; // intr=0 for PD Dump → intFee=0
       const emi=(r.loan/r.te)+(intFee/r.te);
       const ae=r.ae,ne=r.te-ae;
       const subvAmt=r.subv/100*r.loan;
