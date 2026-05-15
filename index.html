@@ -27,23 +27,40 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
+/* ── HEADER ── */
+header{background:#fff;border-bottom:2px solid #e2e8f0;padding:0 28px;height:58px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,#1565C0,#1976d2);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:0 2px 6px rgba(21,101,192,.35);}
+.logo-text{display:flex;flex-direction:column;}
+.logo-text .brand{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:800;color:#1565C0;letter-spacing:-.01em;line-height:1.1;}
+.logo-text .sub{font-size:.62rem;color:#94a3b8;font-weight:500;letter-spacing:.03em;}
+.divider{width:1px;height:28px;background:#e2e8f0;margin:0 4px;}
+.tool-name{font-size:.78rem;font-weight:600;color:#475569;letter-spacing:.01em;}
+.hbadges{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.badge{padding:3px 9px;border-radius:20px;font-size:.63rem;font-weight:700;letter-spacing:.03em;}
+.b-white{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;}
+.b-green{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+.b-orange{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+
 main{max-width:1440px;margin:0 auto;padding:0;display:flex;align-items:flex-start;}
 .right-content{flex:1;padding:20px 22px;min-width:0;overflow-x:hidden;}
 /* ── LEFT SIDEBAR ── */
-#left-sidebar{width:255px;min-width:255px;background:#3d52d6;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
+#left-sidebar{width:195px;min-width:195px;background:linear-gradient(180deg,#1565C0 0%,#1a78d4 100%);min-height:calc(100vh - 58px);position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
 .sb-section{padding:14px 14px 5px;font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42);}
 .sb-item{padding:11px 14px 12px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;color:rgba(255,255,255,.7);user-select:none;margin:1px 0;}
 .sb-item:hover{background:rgba(255,255,255,.09);color:#fff;border-left-color:rgba(255,255,255,.35);}
-.sb-nav{padding:13px 20px 12px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;color:rgba(255,255,255,.8);user-select:none;display:flex;align-items:center;gap:12px;margin:0;}
-.sb-nav:hover{background:rgba(255,255,255,.09);color:#fff;border-left-color:rgba(255,255,255,.35);}
-.sb-nav.active{background:rgba(255,255,255,.16);border-left:3px solid #fff;color:#fff;}
-
-.sb-nav-label{font-size:.82rem;font-weight:600;line-height:1.3;letter-spacing:.01em;}
-.sb-subitems{background:rgba(0,0,0,.12);}
-.sb-top-label{padding:10px 18px 4px;font-size:.55rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);}
+.sb-nav{padding:13px 16px 12px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;color:rgba(255,255,255,.85);user-select:none;display:flex;align-items:center;gap:10px;margin:1px 0;}
+.sb-nav:hover{background:rgba(255,255,255,.12);color:#fff;border-left-color:rgba(255,255,255,.4);}
+.sb-nav.active{background:rgba(255,255,255,.22);border-left:3px solid #fff;color:#fff;}
+.sb-nav-icon{font-size:1.1rem;flex-shrink:0;}
+.sb-nav-label{font-size:.75rem;font-weight:700;line-height:1.3;}
+.sb-subitems{background:rgba(0,0,0,.14);}
+.sb-top-label{padding:11px 16px 4px;font-size:.55rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);}
 .sb-item.active{background:rgba(255,255,255,.17);border-left:3px solid #fff;color:#fff;}
+.sb-icon{font-size:.95rem;margin-bottom:3px;}
+.sb-label{font-size:.7rem;font-weight:700;line-height:1.3;}
 .sb-amt{font-size:.75rem;font-weight:800;margin-top:4px;min-height:14px;color:rgba(255,255,255,.88);}
-.sb-divider{height:1px;background:rgba(255,255,255,.1);margin:4px 18px;}
+.sb-divider{height:1px;background:rgba(255,255,255,.12);margin:6px 14px;}
 
 
 /* ── CARD ── */
@@ -177,68 +194,73 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 #toast.show{transform:translateY(0);opacity:1;}
 .spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(8,145,178,.2);border-top-color:var(--gq2);border-radius:50%;animation:sp .5s linear infinite;vertical-align:middle;}
 @keyframes sp{to{transform:rotate(360deg);}}
-
-/* ── PORTAL INFO PANEL (GrayQuest 3-column style) ── */
-.portal-panel{display:grid;grid-template-columns:0.9fr 1.25fr 1fr;border-radius:var(--rs);overflow:hidden;background:var(--white);}
-.pp-col{display:flex;flex-direction:column;}
-.pp-col:not(:last-child){border-right:1.5px solid #c8d9ec;}
-.pp-head{padding:8px 14px;font-size:.61rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-bottom:1.5px solid rgba(0,0,0,.08);}
-.pp-left .pp-head{background:#dde8f5;color:#1a3c5e;}
-.pp-mid .pp-head{background:#bbd9f3;color:#0c4a6e;}
-.pp-right .pp-head{background:#fbd5d5;color:#991b1b;}
-.pp-left{background:#f4f8fd;}
-.pp-mid{background:#e8f4fd;}
-.pp-right{background:#fef1f1;}
-.pp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;border-top:1px solid rgba(0,0,0,.045);}
-.pp-row.mid-blue{background:rgba(200,230,255,.35);}
-.pp-row.mid-green{background:rgba(200,250,220,.35);}
-.pp-row.pp-sep{border-top:2px solid rgba(0,0,0,.1);}
-.pp-lbl{font-size:.69rem;color:#4b6080;font-weight:500;}
-.pp-val{font-size:.73rem;font-weight:700;text-align:right;max-width:55%;word-break:break-word;}
-.pp-val.c-blue{color:#1565c0;}.pp-val.c-green{color:#059669;}.pp-val.c-red{color:#dc2626;}
-.pp-val.c-orange{color:#d97706;}.pp-val.c-teal{color:#0891b2;}.pp-val.c-muted{color:#94a3b8;font-weight:400;}
-.pp-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.63rem;font-weight:700;}
-.pp-badge.live{background:#d1fae5;color:#065f46;}
-.pp-badge.drop{background:#fef3c7;color:#92400e;}
-.pp-badge.other{background:#fee2e2;color:#991b1b;}
-@media(max-width:900px){.portal-panel{grid-template-columns:1fr;}.pp-col:not(:last-child){border-right:none;border-bottom:1.5px solid #c8d9ec;}}
 </style>
 </head>
 <body>
+<header>
+  <div class="logo-wrap" style="display:flex;align-items:center;">
+    <svg width="148" height="36" viewBox="0 0 148 36" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="18" cy="18" r="16" fill="none" stroke="#1565C0" stroke-width="2.4"/>
+      <!-- Middle ring -->
+      <circle cx="18" cy="18" r="10.5" fill="none" stroke="#1565C0" stroke-width="2.4"/>
+      <!-- Inner ring -->
+      <circle cx="18" cy="18" r="5.2" fill="none" stroke="#1565C0" stroke-width="2.4"/>
+      <!-- Small filled dot (bottom-left) -->
+      <circle cx="11" cy="25.5" r="2.4" fill="#1565C0"/>
+      <!-- grayquest text -->
+      <text x="40" y="23" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#1565C0" letter-spacing="-0.4">grayquest</text>
+    </svg>
+  </div>
+  <div class="divider"></div>
+  <span class="tool-name">Dropout Repayment Calculator</span>
+  <div class="hbadges">
+    <span class="badge b-white">&#9889; Live Data</span>
+    <span class="badge b-green">Auto-Fetch</span>
+    <span class="badge b-orange">Dual Closure</span>
+  </div>
+</header>
+
 <main>
 
 <!-- LEFT SIDEBAR — Navigation -->
 <div id="left-sidebar">
 
-  <!-- SIDEBAR LOGO — actual GrayQuest JPG -->
-  <div style="padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:4px;">
-    <img src="data:image/jpeg;base64,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" alt="GrayQuest" style="height:32px;width:auto;display:block;background:#fff;padding:3px 10px;border-radius:7px;">
-  </div>
-
   <!-- TOP-LEVEL NAV: Calculator -->
   <div class="sb-nav active" id="nav-calc" onclick="switchNav('calc',this)">
+    <span class="sb-nav-icon">&#129518;</span>
     <span class="sb-nav-label">Calculator</span>
   </div>
 
   <!-- Calculator Sub-items -->
   <div id="sb-sub-calc" class="sb-subitems">
-    
+    <div class="sb-top-label">Closure Type</div>
     <div class="sb-item active" id="sb-both" onclick="switchClosure('both',this)">
+      <div class="sb-icon">&#128203;</div>
       <div class="sb-label">Dropout +<br>Foreclosure</div>
+      <div class="sb-amt" id="ct-both-amt">—</div>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-item" id="sb-d" onclick="switchClosure('d',this)">
+      <div class="sb-icon">&#127891;</div>
       <div class="sb-label">Dropout Closure</div>
+      <div class="sb-amt" id="ct-d-amt">—</div>
     </div>
     <div class="sb-item" id="sb-f" onclick="switchClosure('f',this)">
+      <div class="sb-icon">&#9889;</div>
       <div class="sb-label">Final Foreclosure</div>
+      <div class="sb-amt" id="ct-f-amt">—</div>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-item" id="sb-rd" onclick="switchClosure('rd',this)">
+      <div class="sb-icon">&#128176;</div>
       <div class="sb-label">Refund Dropout</div>
+      <div class="sb-amt" id="ct-rd-amt">—</div>
     </div>
     <div class="sb-item" id="sb-rf" onclick="switchClosure('rf',this)">
+      <div class="sb-icon">&#128176;</div>
       <div class="sb-label">Refund Final FC</div>
+      <div class="sb-amt" id="ct-rf-amt">—</div>
     </div>
   </div><!-- end sb-sub-calc -->
 
@@ -246,27 +268,33 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
   <!-- TOP-LEVEL NAV: Bulk Calculator -->
   <div class="sb-nav" id="nav-bulk" onclick="switchNav('bulk',this)">
+    <span class="sb-nav-icon">&#128202;</span>
     <span class="sb-nav-label">Bulk Calculator</span>
   </div>
 
   <!-- Bulk Sub-items -->
   <div id="sb-sub-bulk" class="sb-subitems" style="display:none">
-    
+    <div class="sb-top-label">Export Type</div>
     <div class="sb-item" id="sb-bulk-both" onclick="switchBulkType('both',this)">
+      <div class="sb-icon">&#128203;</div>
       <div class="sb-label">Dropout +<br>Foreclosure</div>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-item" id="sb-bulk-d" onclick="switchBulkType('d',this)">
+      <div class="sb-icon">&#127891;</div>
       <div class="sb-label">Dropout Closure</div>
     </div>
     <div class="sb-item" id="sb-bulk-f" onclick="switchBulkType('f',this)">
+      <div class="sb-icon">&#9889;</div>
       <div class="sb-label">Final Foreclosure</div>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-item" id="sb-bulk-rd" onclick="switchBulkType('rd',this)">
+      <div class="sb-icon">&#128176;</div>
       <div class="sb-label">Refund Dropout</div>
     </div>
     <div class="sb-item" id="sb-bulk-rf" onclick="switchBulkType('rf',this)">
+      <div class="sb-icon">&#128176;</div>
       <div class="sb-label">Refund Final FC</div>
     </div>
   </div><!-- end sb-sub-bulk -->
@@ -275,14 +303,18 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
   <!-- TOP-LEVEL NAV: Bulk FC/DC Letter -->
   <div class="sb-nav" id="nav-fcletter" onclick="switchNav('fcletter',this)">
-    <span class="sb-nav-label">Bulk FC/DC Letter</span>
+    <span class="sb-nav-icon">&#128233;</span>
+    <span class="sb-nav-label">Bulk FC/DC<br>Letter</span>
   </div>
 
 </div><!-- end left-sidebar -->
 
 <!-- RIGHT CONTENT -->
 <div class="right-content">
-
+<!-- FC Letter button (shown after fetch, floating in top-right of calc view) -->
+<div id="fc-letter-bar" style="display:none;justify-content:flex-end;margin-bottom:10px;">
+  <button id="fc-letter-btn" onclick="generateFCLetter()" style="background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(21,101,192,.3);">&#128233; Generate FC Letter</button>
+</div>
 
 <div id="mv-calc">
 
@@ -308,17 +340,13 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div id="sb"></div>
 </div>
 
-<!-- INFO STRIP — portal 3-panel -->
-<div id="strip" class="card" style="padding:0;display:none;overflow:hidden;">
-  <div id="igrid"></div>
+<!-- INFO STRIP -->
+<div id="strip" class="card" style="padding:14px 18px;">
+  <div class="info-grid" id="igrid"></div>
 </div>
 
 <!-- INPUTS + RESULTS -->
-<div id="ms" style="display:none">
-  <!-- Generate FC Letter — only visible after App ID fetched -->
-  <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-    <button id="fc-letter-btn" onclick="generateFCLetter()" style="background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(21,101,192,.3);">&#128233; Generate FC Letter</button>
-  </div>
+<div id="ms">
   <div class="card">
     <div class="sh">✏️ Step 2 — 3 Fields (Auto-fetched · Manual Override OK)</div>
     <div class="inp-grid">
@@ -497,7 +525,7 @@ async function syncSheets(){
     _CACHE2=parseGviz(t2,true);
     _cacheReady=true;
     const n1=_CACHE1.length, n2=_CACHE2.length;
-    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced — ${n1} + ${n2} rows</span>`;
+    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced</span>`;
     btn.innerHTML='✓ Synced';
     btn.style.background='var(--glight)';btn.style.color='var(--green)';btn.style.borderColor='#a7f3d0';
   }catch(e){
@@ -534,41 +562,21 @@ function gv(row,...vs){
 function parseSheetDateObj(dd){
   if(!dd||dd==='')return null;
   if(dd instanceof Date)return isNaN(dd)?null:dd;
-  const s=String(dd).trim();
-  // gviz Date() serial — trust only if no formatted text available
-  if(s.startsWith('Date(')){
-    const p=s.replace('Date(','').replace(')','').split(',').map(Number);
+  if(typeof dd==='string'&&dd.startsWith('Date(')){
+    const p=dd.replace('Date(','').replace(')','').split(',').map(Number);
     const d=new Date(p[0],p[1],p[2]); return isNaN(d)?null:d;
   }
   if(typeof dd==='number'){
+    // Excel serial date
     const d=new Date(Math.round((dd-25569)*86400000)); return isNaN(d)?null:d;
   }
   try{
-    // Handle "5-May-2020" / "5 May 2020" (month name in middle)
-    const _mn={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-    const mp=s.split(/[-\/\s]+/);
-    if(mp.length===3){
-      const mid=mp[1].toLowerCase().substring(0,3);
-      if(_mn[mid]!==undefined){
-        const d=new Date(parseInt(mp[2]),_mn[mid],parseInt(mp[0]));
-        if(!isNaN(d))return d;
-      }
-    }
-    // Indian DD/MM/YYYY or DD-MM-YYYY (always treat first part as Day, second as Month)
-    const p=s.split(/[-\/]/);
+    const p=dd.toString().split(/[-\/]/);
     if(p.length===3){
-      if(p[0].length===4){
-        // YYYY-MM-DD or YYYY/MM/DD
-        const d=new Date(`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`);
-        if(!isNaN(d))return d;
-      } else {
-        // DD/MM/YYYY — Indian format: p[0]=day, p[1]=month, p[2]=year
-        const day=parseInt(p[0]),mon=parseInt(p[1]),yr=parseInt(p[2]);
-        if(mon>=1&&mon<=12&&day>=1&&day<=31){
-          const d=new Date(yr,mon-1,day); // month is 0-indexed
-          if(!isNaN(d))return d;
-        }
-      }
+      const d=p[0].length===4
+        ?new Date(`${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`)
+        :new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`);
+      if(!isNaN(d))return d;
     }
   }catch(e){}
   return null;
@@ -611,6 +619,7 @@ async function fetchAll(){
   try{
     let rows1, rows2raw;
     if(_cacheReady){
+      // Use pre-synced cache — instant lookup
       rows1=_CACHE1;
       rows2raw=_CACHE2;
     } else {
@@ -624,101 +633,89 @@ async function fetchAll(){
     }
 
     // Sheet 1 — main calc data
-    const rec=rows1.find(r=>{
+    const rows1_=rows1;
+    const rec=rows1_.find(r=>{
       const id=gv(r,'App ID','AppID','Application Id');
       return id&&String(id).trim()===aid;
     });
     if(!rec){ss('error',`❌ App ID "${aid}" not found. Ensure Sheet 1 is public.`);document.getElementById('fb').disabled=false;return;}
     REC=parseRec(rec);
 
-    // Sheet 2 — PD Dump: payment data only
+    // Sheet 2 — PD Dump: Col A=GQ Application ID, L(idx11)=Total Payment, R(idx17)=Total Charges Paid, S(idx18)=Outstanding
     try{
       const rows2=rows2raw;
       const pmtRec=rows2.find(r=>{
-        const id=gv(r,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','applicationid','GQ App No','gqappno');
-        const rawId=(id!==null&&id!=='')?id:(r._raw?.[0]?.v??'');
-        return rawId!==''&&rawId!=null&&String(rawId).trim()===String(aid).trim();
+        const id=gv(r,
+          'GQ Application ID','GQ App ID','gqapplicationid',
+          'App ID','AppID','Application Id'
+        );
+        return id&&String(id).trim()===aid;
       });
       if(pmtRec){
+        // Helper: try column name first, then raw index
         const cv=(names,idx)=>{
+          // Try column name first (multiple variants for resilience)
           const v=gv(pmtRec,...names);
           if(v!==null&&v!=='')return parseFloat(v)||0;
+          // Fallback to raw index position
           return parseFloat(pmtRec._raw?.[idx]?.v)||0;
         };
-        const totalPaid=cv(['Total Payment made till date','totalpaymentmadetilldate','Total Payments Made','Total EMI Paid'],11);
-        const totalChg=cv(['Total Charges Paid','totalchargespaid','Charges Paid'],17);
-        const totalOutstanding=cv(['Total Outstanding Amount','totaloutstandingamount','Outstanding Amount'],16);
-        const chargesOutstanding=cv(['Total Charges Outstanding Amount','totalchargesoutstandingamount','Charges Outstanding'],18);
-        const netPaid=Math.max(0,totalPaid-totalChg);
-        console.log('[Sheet2]',{totalPaid,totalChg,netPaid,chargesOutstanding});
-        // Col J (idx 9) — First EMI Date
-        // KEY: prefer .f (formatted display value) → gives Indian DD/MM/YYYY text correctly
-        const firstEMIDateRaw=(()=>{
-          const cell=pmtRec._raw?.[9];
-          const fmtVal=cell?.f?String(cell.f).trim():'';
-          if(fmtVal)return fmtVal;
-          const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate','EMI Start Date');
+        // Col L (idx 11) — Total Payment made till date
+        const totalPaid = cv([
+          'Total Payment made till date','Total Payment Made Till Date',
+          'totalpaymentmadetilldate','Total Payments Made','TotalPaymentMade',
+          'total payment','Total EMI Paid','TotalEMIPaid'
+        ], 11);
+        // Col R (idx 17) — Total Charges Paid
+        const totalChg = cv([
+          'Total Charges Paid','Total charges paid','TotalChargesPaid',
+          'totalchargespaid','Charges Paid','Total Charge Paid'
+        ], 17);
+        // Col Q (idx 16) — Total Outstanding
+        const totalOutstanding = cv([
+          'Total Outstanding Amount','Total outstanding amount','totaloutstandingamount',
+          'Outstanding Amount','TotalOutstanding'
+        ], 16);
+        // Col S (idx 18) — Charges Outstanding (Bounce/Mandate)
+        const chargesOutstanding = cv([
+          'Total Charges Outstanding Amount','Total Charges Outstanding',
+          'ChargesOutstandingAmount','totalchargesoutstandingamount',
+          'Charges Outstanding','Outstanding Charges'
+        ], 18);
+        // NET PAID = Col L − Col R (payment received minus charges already paid)
+        const netPaid = Math.max(0, totalPaid - totalChg);
+        console.log('[Sheet2]', {totalPaid, totalChg, netPaid, chargesOutstanding});
+        // Col J (idx 9) — First EMI Date (after advance EMIs)
+        const firstEMIDateRaw = (()=>{
+          const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate',
+            'first_emi_date','EMI Start Date','emi start date','EmiStartDate');
           if(v!==null&&v!=='')return v;
-          return cell?.v??'';
+          return pmtRec._raw?.[9]?.v??'';
         })();
-        REC._firstEMIDate=parseSheetDateObj(firstEMIDateRaw);
-        REC._netPaid=netPaid;
-        REC._totalOutstanding=totalOutstanding>0?totalOutstanding:0;
-        REC._bounce=chargesOutstanding>0?chargesOutstanding:0;
-        REC._totalPaid=totalPaid;
-        REC._totalChg=totalChg;
-        // Loan Stage from Sheet2 (Col G, idx 6)
-        const loanStageRaw=(()=>{
-          const v=gv(pmtRec,'Loan Stage','loan stage','loanstage');
-          if(v!==null&&v!=='')return v;
-          return pmtRec._raw?.[6]?.v??'';
-        })();
-        if(loanStageRaw) REC.loanStage=String(loanStageRaw);
-        // ── Additional Sheet2 fields (string-based) ──
-        const sv=(names,idx)=>{const v=gv(pmtRec,...names);if(v!==null&&v!=='')return String(v).trim();return String(pmtRec._raw?.[idx]?.v||'').trim();};
-        REC.parentName = sv(['Parent Name','parentname','Parent','parent name'],2);
-        REC.email      = sv(['Email','Email ID','emailid','Email Address'],3);
-        REC.phone      = sv(['Phone','Mobile','Phone Number','Mobile No','mobileno','Contact'],4);
-        REC.lan        = sv(['LAN','Loan Account Number','loanaccountnumber','LAN No','lan no'],8);
-        REC.product    = sv(['Product','Product Name','productname','Course','Course Name'],5);
-        const _emiDay  = sv(['EMI Due Date','emiduedate','EMI Date','emi date','EMI Day','emiday','Due Day'],10);
-        REC.emiDueDay  = _emiDay||'';
-        REC.totalAmtPayable     = cv(['Total Amount Payable','totalamountpayable','Total Payable'],14);
-        REC.totalEMIPayable     = cv(['Total EMI Payable','totalemipayable','EMI Payable','Total EMI Amount'],12);
-        REC.totalChargesPayable = cv(['Total Charges Payable','totalchargespayable','Charges Payable'],13);
-        REC.totalAmtSettled     = cv(['Total Amount Settled to Lender','totalamountsettledtolender','Amount Settled','Settled to Lender'],15);
-        REC.maxOverDueDays      = cv(['Max Over Due Days','maxoverduedays','Max OD Days','Max Overdue Days','Max Overdue'],19);
-        REC.totalEMIOutstanding = cv(['Total EMI Outstanding','totalemioutstanding','EMI Outstanding'],20);
-        REC.currentOverDueDays  = cv(['Current Over Due Days','currentoverduedays','Current OD Days','Current Overdue Days'],21);
-        REC.excessAmtCollected  = cv(['Excess Amount Collected','excessamountcollected','Excess Amount'],22);
-        REC.excessEMICollected  = cv(['Excess EMI Collected','excessemicollected','Excess EMI'],23);
-        REC.excessChargeCollected=cv(['Excess Charge Collected','excesschargecollected','Excess Charges'],24);
-        const _rc = sv(['Repayment Complete','repaymentcomplete','Repayment Status'],25);
-        REC.repaymentComplete = _rc||'—';
-        // Computed fallbacks if Sheet2 doesn't have these columns
-        if(!REC.totalAmtSettled && REC._netPaid>0) REC.totalAmtSettled=REC._netPaid;
-        if(!REC.totalEMIOutstanding && REC._totalOutstanding>0) REC.totalEMIOutstanding=REC._totalOutstanding;
+        REC._firstEMIDate     = parseSheetDateObj(firstEMIDateRaw);
+        REC._netPaid          = netPaid;
+        REC._totalOutstanding = totalOutstanding > 0 ? totalOutstanding : 0;
+        REC._bounce           = chargesOutstanding > 0 ? chargesOutstanding : 0;
+        REC._totalPaid        = totalPaid;
+        REC._totalChg         = totalChg;
       } else {
-        const _r0=rows2[0]||{};
-        console.warn('[Sheet2] No match for App ID:',aid);
-        console.warn('[Sheet2] Cols:',Object.keys(_r0).filter(k=>k!=='_raw').join(' | '));
-        console.warn('[Sheet2] Col A first row:',_r0._raw?.[0]?.v);
-        console.warn('[Sheet2] Total rows:',rows2.length);
+        // Debug: log available cols & first ID
+        const rows2d=_cacheReady?rows2raw:[];
+        console.log('[Sheet2 not matched] cols:', Object.keys(rows2d[0]||{}).join(' | '));
+        console.log('[Sheet2 first row col A]:', rows2d[0]?.[Object.keys(rows2d[0])[0]]);
       }
     }catch(e){console.log('[Sheet2 error]',e.message);}
 
     ss('success',`&#9989; <strong>${REC.name}</strong> &nbsp;|&nbsp; &#8377;${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
     renderStrip(REC);
     document.getElementById('strip').style.display='block';
-    // fc-letter-btn auto-shown via #ms
+    const _flb=document.getElementById('fc-letter-bar');
+    if(_flb) _flb.style.display='flex';
     document.getElementById('ms').style.display='block';
-    // ── RESET fields so new App ID always starts fresh ──
-    document.getElementById('amtPaid').value = '0';
+    // ── RESET auto-fill flags so new App ID always gets fresh values ──
     document.getElementById('amtPaid').dataset.autoSet='';
-    document.getElementById('bc').value = '0';
     document.getElementById('bc').dataset.autoSet='';
     document.getElementById('ep-tag').style.display='none';
-    document.getElementById('emi-derived-info').textContent='';
     // Auto-set date to today if not already set
     if(!document.getElementById('dmDate').value){
       const _td=new Date(); const _pad=n=>String(n).padStart(2,'0');
@@ -737,90 +734,35 @@ function parseRec(row){
   const g=(...v)=>gv(row,...v);
   return{
     appId: g('App ID','AppID','Application Id')||'',
-    name:  g('Student Name','student name','Name')||'\u2014',
+    name:  g('Student Name','student name','Name')||'—',
     loan:  parseFloat(g('Tranche Amount','tranche amount','Loan Amount'))||0,
     te:    parseInt(g('Number of EMIs','numberofemis','No of EMIs'))||0,
     ae:    parseInt(g('Advance EMIs','advance emis','Adv EMI'))||0,
     subv:  parseFloat(g('Discount Rate','discount rate','Subvention %','Subvention','discount%'))||0,
     ret:   parseFloat(g('FLDG %','FLDG','Retention %','fldg%'))||0,
     intr:  parseFloat(g('Total Regular Int Rate','interest rate','totalregularintrate'))||0,
-    grp:   g('Group Name','groupname')||'\u2014',
-    nbfc:  g('NBFC','nbfc')||'\u2014',
+    grp:   g('Group Name','groupname')||'—',
+    nbfc:  g('NBFC','nbfc')||'—',
     dateStr:parseSheetDate(g('Loan Live Date','loan live date','Start Date','disbursement date')),
     _liveDate:parseSheetDateObj(g('Loan Live Date','loan live date','Start Date','disbursement date')),
-    loanStage:'',
-    _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0,_firstEMIDate:null,
-    // Extra Sheet2 fields
-    parentName:'',email:'',phone:'',lan:'',product:'',
-    emiDueDay:'',totalAmtPayable:0,totalEMIPayable:0,totalChargesPayable:0,
-    totalAmtSettled:0,maxOverDueDays:0,totalEMIOutstanding:0,
-    currentOverDueDays:0,excessAmtCollected:0,excessEMICollected:0,
-    excessChargeCollected:0,repaymentComplete:'—'
+    _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0,_firstEMIDate:null
   };
 }
 
 function renderStrip(r){
-  const _ls=r.loanStage||'';
-  const _lsLow=_ls.toLowerCase();
-  const _lsBadge=_ls?(_lsLow.includes('live')?`<span class="pp-badge live">${_ls}</span>`:(_lsLow.includes('drop')?`<span class="pp-badge drop">${_ls}</span>`:`<span class="pp-badge other">${_ls}</span>`)):'<span class="pp-val c-muted">\u2014</span>';
-  const _lsColor=_ls?(_lsLow.includes('live')?'c-green':(_lsLow.includes('drop')?'c-orange':'c-red')):'';
-  const ppRow=(lbl,val,cls='',extra='')=>`<div class="pp-row ${extra}"><span class="pp-lbl">${lbl}</span><span class="pp-val ${cls}" title="${val}">${val}</span></div>`;
-  const ppMoney=(lbl,val,cls='c-blue',extra='')=>`<div class="pp-row ${extra}"><span class="pp-lbl">${lbl}</span><span class="pp-val ${cls}">${val>0?'&#8377;'+R2(val):'<span style="color:#94a3b8;font-weight:400">\u2014</span>'}</span></div>`;
-  const ppNum=(lbl,val,cls='',extra='')=>`<div class="pp-row ${extra}"><span class="pp-lbl">${lbl}</span><span class="pp-val ${cls}">${val!==null&&val!==undefined&&val!==''?val:'<span style="color:#94a3b8;font-weight:400">\u2014</span>'}</span></div>`;
-  // EMI Due Date display
-  const _emiDue=r.emiDueDay?`${r.emiDueDay}${isNaN(r.emiDueDay)?'':' of Every Month'}`:'\u2014';
-  // Repayment complete badge
-  const _rcLow=String(r.repaymentComplete||'').toLowerCase();
-  const _rc=r.repaymentComplete&&r.repaymentComplete!=='\u2014'?((_rcLow==='yes'||_rcLow==='true'||_rcLow==='1')?'<span style="color:#059669;font-weight:700">\u2713 Yes</span>':'<span style="color:#dc2626;font-weight:700">\u2717 No</span>'):'<span style="color:#94a3b8;font-weight:400">\u2014</span>';
-  document.getElementById('igrid').innerHTML=`
-  <div class="portal-panel">
-    <!-- \u2500\u2500\u2500 LEFT: Borrower Information \u2500\u2500\u2500 -->
-    <div class="pp-col pp-left">
-      <div class="pp-head">Borrower Information</div>
-      ${ppRow('Application ID', r.appId||'\u2014', 'c-blue')}
-      ${ppRow('Student Name', r.name||'\u2014')}
-      ${ppRow('Parent Name', r.parentName||'\u2014', r.parentName?'':'c-muted')}
-      ${ppRow('Email', r.email||'\u2014', r.email?'':'c-muted')}
-      ${ppRow('Phone', r.phone||'\u2014', r.phone?'':'c-muted')}
-      <div class="pp-row"><span class="pp-lbl">Loan Stage</span>${_lsBadge}</div>
-      ${ppRow('Lender (NBFC)', r.nbfc||'\u2014')}
-      ${ppRow('LAN', r.lan||'\u2014', r.lan?'c-teal':'c-muted')}
-      ${ppRow('Group / Product', r.product||r.grp||'\u2014')}
-      ${ppRow('Live Date', r.dateStr||'\u2014')}
-      ${ppRow('EMIs (Structure)', `${r.te} EMIs (Adv: ${r.ae})`)}
-      ${ppRow('Discount %', r.subv>0?r.subv+'%':'0%', r.subv>0?'c-orange':'')}
-      ${ppRow('Interest Rate', r.intr>0?r.intr+'%':'0%', r.intr>0?'c-red':'')}
-      ${ppRow('FLDG %', r.ret>0?r.ret+'%':'0%')}
-    </div>
-    <!-- \u2500\u2500\u2500 MIDDLE: Payment Summary \u2500\u2500\u2500 -->
-    <div class="pp-col pp-mid">
-      <div class="pp-head">Payment Summary</div>
-      ${ppRow('EMI Due Date', _emiDue, 'c-teal')}
-      ${ppMoney('Total Fee / Loan Amount', r.loan, 'c-blue', 'pp-sep mid-blue')}
-      ${ppMoney('Total Amount Payable', r.totalAmtPayable||0, 'c-blue', 'mid-blue')}
-      ${ppMoney('Total EMI Payable', r.totalEMIPayable||0, 'c-blue', 'mid-blue')}
-      ${ppMoney('Total Charges Payable', r.totalChargesPayable||0, 'c-blue', 'mid-blue')}
-      ${ppMoney('Total Amount Paid', r._totalPaid||0, 'c-green', 'pp-sep mid-green')}
-      ${ppMoney('Total EMI Paid', r._netPaid||0, 'c-green', 'mid-green')}
-      ${ppMoney('Total Charges Paid', r._totalChg||0, 'c-green', 'mid-green')}
-      ${ppMoney('Total Amount Settled to Lender', r.totalAmtSettled||r._netPaid||0, 'c-green', 'mid-green')}
-    </div>
-    <!-- \u2500\u2500\u2500 RIGHT: Outstanding Details \u2500\u2500\u2500 -->
-    <div class="pp-col pp-right">
-      <div class="pp-head">Outstanding Details</div>
-      ${ppNum('Max Over Due Days', r.maxOverDueDays>0?r.maxOverDueDays:'0', r.maxOverDueDays>0?'c-red':'')}
-      ${ppMoney('Total Outstanding', r._totalOutstanding||0, r._totalOutstanding>0?'c-red':'c-green', 'pp-sep')}
-      ${ppMoney('Total EMI Outstanding', r.totalEMIOutstanding||r._totalOutstanding||0, r._totalOutstanding>0?'c-red':'c-green')}
-      ${ppMoney('Total Charges Outstanding', r._bounce||0, r._bounce>0?'c-red':'')}
-      ${ppNum('Current Over Due Days', r.currentOverDueDays>0?r.currentOverDueDays:'0', r.currentOverDueDays>0?'c-red':'')}
-      ${ppMoney('Excess Amount Collected', r.excessAmtCollected||0, '', 'pp-sep')}
-      ${ppMoney('Excess EMI Collected', r.excessEMICollected||0)}
-      ${ppMoney('Excess Charge Collected', r.excessChargeCollected||0)}
-      <div class="pp-row pp-sep"><span class="pp-lbl">Repayment Complete</span>${_rc}</div>
-    </div>
-  </div>`;
+  document.getElementById('igrid').innerHTML=[
+    ['App ID',     r.appId,           'blue'],
+    ['Student',    r.name,            ''],
+    ['Loan',       '₹'+R2(r.loan),   'green'],
+    ['EMIs',       `${r.te} (Adv:${r.ae})`,''],
+    ['Discount %', r.subv+'%',        r.subv>0?'orange':''],
+    ['Interest %', r.intr+'%',        r.intr>0?'red':''],
+    ['FLDG %',     r.ret+'%',         ''],
+    ['Live Date',  r.dateStr,         ''],
+    ['Group',      r.grp,             ''],
+    ['NBFC',       r.nbfc,            ''],
+  ].map(([l,v,c])=>`<div class="ibox"><div class="ib-l">${l}</div><div class="ib-v ${c}" title="${v}">${v}</div></div>`).join('');
 }
-
 
 // ── BUILD SCHEDULE ────────────────────────────────────────
 function buildSched(netP, emi, ne, mR, withRet, retAmt){
@@ -868,7 +810,6 @@ function calc(){
     document.getElementById('amtPaid').value = r._netPaid.toFixed(2);
     document.getElementById('amtPaid').dataset.autoSet='1';
     document.getElementById('ep-tag').style.display='';
-    document.getElementById('ep-tag').textContent='Auto ✓ (Sheet2)';
   }
   if(r._bounce>0 && document.getElementById('bc').dataset.autoSet!=='1'){
     document.getElementById('bc').value = r._bounce.toFixed(2);
@@ -938,42 +879,11 @@ function calc(){
         lastPaidDate.setMonth(lastPaidDate.getMonth() + (emisPaid - 1));
       }
       dm = Math.round((_validTillDate - lastPaidDate) / 86400000);
-
-      // ── Auto-correct DD/MM swap (Indian format stored as US format in Sheet2) ──
-      // If dm < 0 but month/day swap gives valid positive dm, use swapped date
-      let dmNote = '';
-      if(dm < 0 && r._firstEMIDate){
-        const orig = r._firstEMIDate;
-        // Swap month ↔ day (e.g. Date(2026,4,1)=May1 → try Date(2026,0,5)=Jan5)
-        const swapped = new Date(orig.getFullYear(), orig.getDate()-1, orig.getMonth()+1);
-        if(!isNaN(swapped) && swapped.getFullYear()===orig.getFullYear()){
-          let swEff = swapped;
-          if(r._liveDate && swapped < r._liveDate){
-            swEff = new Date(r._liveDate);
-            swEff.setMonth(swEff.getMonth()+1);
-          }
-          const swLP = new Date(swEff);
-          if(emisPaid>0) swLP.setMonth(swLP.getMonth()+(emisPaid-1));
-          const swDm = Math.round((_validTillDate - swLP)/86400000);
-          if(swDm >= 0){
-            effectiveFirstEMI = swEff;
-            lastPaidDate.setTime(swLP.getTime());
-            dm = swDm;
-            dmNote = ` <span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:3px;font-size:.6rem;font-weight:700;">✓ DD/MM format auto-corrected</span>`;
-          }
-        }
-        // If still negative after swap, use 30 days as fallback
-        if(dm < 0){
-          dmNote = ` <span style="background:#fff3cd;color:#92400e;padding:1px 6px;border-radius:3px;font-size:.6rem;font-weight:700;">⚠ Using 30d default</span>`;
-          dm = 30;
-        }
-      }
-
       const lpdStr = lastPaidDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
       const fedStr = effectiveFirstEMI.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-      const dmColor = dm === 0 ? 'var(--orange)' : 'var(--green)';
+      const dmColor = dm < 0 ? 'var(--red)' : dm === 0 ? 'var(--orange)' : 'var(--green)';
       document.getElementById('dm-info').innerHTML =
-        `From: <strong>${lpdStr}</strong> &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>${dmNote}`;
+        `From: <strong>${lpdStr}</strong> &rarr; <strong>${today}</strong> = <strong style="color:${dmColor}">${dm} days</strong>`;
       document.getElementById('dm-debug').innerHTML =
         `1st EMI: <strong>${fedStr}</strong> &bull; ${emisPaid} EMIs paid${fedNote}`;
     } else {
@@ -1052,7 +962,14 @@ function calc(){
 
   // Store last calc for FC Letter & Bulk Export
   // Update card amount badges
-  // Sidebar amounts removed — closure amounts shown in qstats 4th card only
+  const _rv=v=>isFinite(v)&&!isNaN(v)?'₹'+v.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,','):'—';
+  const _rvR=v=>v>=0?_rv(v):'Owes '+_rv(-v);
+  ['ct-both-amt','ct-d-amt','ct-f-amt','ct-rd-amt','ct-rf-amt'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const vals=[`${_rv(final1)} / ${_rv(final2)}`,_rv(final1),_rv(final2),_rvR(refund1),_rvR(refund2)];
+    el.textContent=vals[i];
+  });
 
   LAST_CALC={pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,
     final1,final2,retAmt,bounce,today,emi,loan,amtPaid,emisPaid,
@@ -1499,7 +1416,13 @@ function buildLetterHTML(type){
 <div class="page">
 
   <div class="hdr">
-    <div><img src="data:image/jpeg;base64,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" alt="GrayQuest" style="height:42px;width:auto;display:block;"><div style="font-size:9px;color:#94a3b8;margin-top:2px;padding-left:2px;">Finance Pvt. Ltd.</div></div>
+    <div><svg width="160" height="44" viewBox="0 0 160 44" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="22" cy="22" r="19.5" fill="none" stroke="#1565C0" stroke-width="2.8"/>
+  <circle cx="22" cy="22" r="13"   fill="none" stroke="#1565C0" stroke-width="2.8"/>
+  <circle cx="22" cy="22" r="6.5"  fill="none" stroke="#1565C0" stroke-width="2.8"/>
+  <circle cx="13.5" cy="31.5" r="2.9" fill="#1565C0"/>
+  <text x="50" y="28" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#1565C0" letter-spacing="-0.5">grayquest</text>
+</svg><div style="font-size:9px;color:#94a3b8;margin-top:2px;padding-left:2px;">Finance Pvt. Ltd.</div></div>
     <div class="hdr-right">
       <div style="font-size:13px;font-weight:700;color:#1a1a1a;">${today}</div>
       <div>Ref: GQ/${appId}/${today.replace(/ /g,'-')}</div>
@@ -1633,43 +1556,35 @@ async function bulkExport(){
     const aid=ids[i];
     prog.innerHTML=`<span style="color:var(--blue)">Processing ${i+1}/${ids.length}: App ID ${aid}...</span>`;
     try{
-      // Sheet1 — main loan data (original logic)
+      // Use same parseRec + gv logic as fetchAll (exact match)
       const row=_CACHE1 && _CACHE1.find(r=>{
         const id=gv(r,'App ID','AppID','Application Id');
         return id && String(id).trim()===String(aid).trim();
       });
       if(!row){results.push({aid,error:'Not found in Sheet1'});continue;}
 
+      // Parse using same parseRec function
       const bREC=parseRec(row);
       if(!bREC.loan||!bREC.te){results.push({aid,error:'Invalid loan data'});continue;}
 
-      // Sheet2 — payment data only
-      let netPaid2=0, bounce2=0, firstEMI2=null;
+      // Sheet2 lookup using same logic as fetchAll
+      let netPaid2=0, bounce2=0;
       if(_CACHE2){
         const pmtRec=_CACHE2.find(r=>{
-          const _bid=gv(r,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','applicationid','GQ App No','gqappno');
-          const _rawBid=(_bid!==null&&_bid!=='')?_bid:(r._raw?.[0]?.v??'');
-          return _rawBid!==''&&_rawBid!=null && String(_rawBid).trim()===String(aid).trim();
+          const id=gv(r,'GQ Application ID','GQ App ID','gqapplicationid','App ID','AppID','Application Id');
+          return id && String(id).trim()===String(aid).trim();
         });
         if(pmtRec){
-          const cvB=(names,idx)=>{const v=gv(pmtRec,...names);if(v!==null&&v!=='')return parseFloat(v)||0;return parseFloat(pmtRec._raw?.[idx]?.v)||0;};
-          const totalPaid=cvB(['Total Payment made till date','totalpaymentmadetilldate'],11);
-          const totalChg=cvB(['Total Charges Paid','totalchargespaid'],17);
+          const cvB=(names,idx)=>{
+            const v=gv(pmtRec,...names);
+            if(v!==null&&v!=='')return parseFloat(v)||0;
+            return parseFloat(pmtRec._raw?.[idx]?.v)||0;
+          };
+          const totalPaid=cvB(['Total Payment made till date','Total Payment Made Till Date','totalpaymentmadetilldate','Total Payments Made','TotalPaymentMade','total payment','Total EMI Paid','TotalEMIPaid'],11);
+          const totalChg=cvB(['Total Charges Paid','Total charges paid','TotalChargesPaid','totalchargespaid','Charges Paid','Total Charge Paid'],17);
           netPaid2=Math.max(0,totalPaid-totalChg);
-          bounce2=cvB(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
-          // First EMI Date — prefer .f formatted value (Indian DD/MM/YYYY)
-          const cell2=pmtRec._raw?.[9];
-          const fmtV=cell2?.f?String(cell2.f).trim():'';
-          const rawV=fmtV||(gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate')||cell2?.v||'');
-          firstEMI2=parseSheetDateObj(rawV);
+          bounce2=cvB(['Total Charges Outstanding Amount','Total Charges Outstanding','ChargesOutstandingAmount','totalchargesoutstandingamount','Charges Outstanding','Outstanding Charges'],18);
         }
-      }
-      bREC._netPaid=netPaid2; bREC._bounce=bounce2;
-      if(firstEMI2) bREC._firstEMIDate=firstEMI2;
-      // Loan Stage from Sheet2 (Col G, idx 6)
-      if(_CACHE2){
-        const _pmtR2=_CACHE2.find(r=>{const _i=gv(r,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','GQ App No','gqappno');const _ri=(_i!==null&&_i!=='')?_i:(r._raw?.[0]?.v??'');return _ri!==''&&_ri!=null&&String(_ri).trim()===String(aid).trim();});
-        if(_pmtR2){const _ls=gv(_pmtR2,'Loan Stage','loan stage','loanstage')||_pmtR2._raw?.[6]?.v||'';if(_ls)bREC.loanStage=String(_ls);}
       }
 
       // Run same calc logic as calc()
@@ -1690,9 +1605,8 @@ async function bulkExport(){
       const mR2=irr(cf2),apr2=mR2*12;
       const localS2=buildSched(netP2,emi,ne,mR2,false,0);
 
-      // Payment data now comes directly from parseRec (same row)
-      const amtPaid=bREC._netPaid;
-      const bounce=bREC._bounce;
+      const amtPaid=netPaid2;
+      const bounce=bounce2;
       const normalPaid=Math.max(0,amtPaid-advAmt);
       let _rem=normalPaid,emisPaid=0;
       for(let k=0;k<localS1.length;k++){if(_rem>=localS1[k].emi){_rem-=localS1[k].emi;emisPaid=k+1;}else break;}
@@ -1710,18 +1624,6 @@ async function bulkExport(){
         const lastPd=new Date(bREC._firstEMIDate);
         if(emisPaid>0) lastPd.setMonth(lastPd.getMonth()+(emisPaid-1));
         dm_val=Math.round((_validTill-lastPd)/86400000);
-        // DD/MM swap auto-correct (same logic as single calc)
-        if(dm_val<0){
-          const orig=bREC._firstEMIDate;
-          const swapped=new Date(orig.getFullYear(),orig.getDate()-1,orig.getMonth()+1);
-          if(!isNaN(swapped)&&swapped.getFullYear()===orig.getFullYear()){
-            const swLP=new Date(swapped);
-            if(emisPaid>0) swLP.setMonth(swLP.getMonth()+(emisPaid-1));
-            const swDm=Math.round((_validTill-swLP)/86400000);
-            if(swDm>=0) dm_val=swDm;
-          }
-          if(dm_val<0) dm_val=30; // fallback
-        }
       } else {
         const _ms=new Date(_validTill.getFullYear(),_validTill.getMonth(),1);
         dm_val=Math.round((_validTill-_ms)/86400000);
@@ -1933,7 +1835,7 @@ function switchBulkTab(idx,btn){
   document.querySelectorAll('.bst').forEach(b=>{b.style.background='#f1f5f9';b.style.color=b.dataset.color||'#374151';});
   btn.style.background='#3d52d6'; btn.style.color='#fff';
 }
-// -- HELPERS --
+// ── HELPERS ──────────────────────────────────────────────
 function ss(t,m){const e=document.getElementById('sb');e.className=t;e.innerHTML=m;e.style.display='block';}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 function clearAll(){
@@ -1944,31 +1846,44 @@ function clearAll(){
   document.getElementById('bc-tag').style.display='none';
   document.getElementById('sb').style.display='none';
   document.getElementById('strip').style.display='none';
+  const _flb=document.getElementById('fc-letter-bar');
+  if(_flb) _flb.style.display='none';
   document.getElementById('ms').style.display='none';
   REC=null;S1=[];S2=[];
+  // Reset main view to calculator
   switchNav('calc',document.getElementById('nav-calc'));
 }
 function switchNav(id, btn){
+  // Show/hide main views
   document.getElementById('mv-calc').style.display=id==='calc'?'block':'none';
   document.getElementById('mv-bulk').style.display=id==='bulk'?'block':'none';
   const mfcl=document.getElementById('mv-fcletter');
   if(mfcl) mfcl.style.display=id==='fcletter'?'block':'none';
+  // Show/hide fc-letter-bar (only for calc)
+  const flb=document.getElementById('fc-letter-bar');
+  if(flb) flb.style.display=id==='calc'&&document.getElementById('ms').style.display!=='none'?'flex':'none';
+  // Show/hide sub-items
   const subCalc=document.getElementById('sb-sub-calc');
   const subBulk=document.getElementById('sb-sub-bulk');
   if(subCalc) subCalc.style.display=id==='calc'?'block':'none';
   if(subBulk) subBulk.style.display=id==='bulk'?'block':'none';
+  // Update nav active states
   document.querySelectorAll('.sb-nav').forEach(el=>el.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  // Set today's date in fcletter-date if empty
   if(id==='fcletter'){const fd=document.getElementById('fcletter-date');if(fd&&!fd.value){const _td=new Date();const _pad=n=>String(n).padStart(2,'0');fd.value=`${_td.getFullYear()}-${_pad(_td.getMonth()+1)}-${_pad(_td.getDate())}`;}}
 }
 function switchMainView(id,btn){
+  // Legacy wrapper — routes to switchNav
   const navId=id==='calc'?'calc':id==='bulk'?'bulk':'calc';
   const navBtn=document.getElementById('nav-'+navId);
   switchNav(navId, navBtn);
 }
 function switchBulkType(id, btn){
+  // Highlight selected bulk sub-item
   document.querySelectorAll('#sb-sub-bulk .sb-item').forEach(el=>el.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  // If bulk preview is showing, scroll to that tab section
   const preview=document.getElementById('bulk-preview');
   if(preview&&preview.style.display!=='none'){
     const tabMap={both:'tab-combined',d:'tab-dropout',f:'tab-finalfc',rd:'tab-refund-d',rf:'tab-refund-f'};
@@ -1977,6 +1892,7 @@ function switchBulkType(id, btn){
   }
 }
 function switchTab(id,btn){
+  // Legacy — no-op or route to bulk
   if(id==='bulk'){const b=document.getElementById('nav-bulk');if(b)switchNav('bulk',b);return;}
 }
 function switchSched(id,btn){
@@ -1985,21 +1901,9 @@ function switchSched(id,btn){
   document.querySelectorAll('.st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-function switchClosure(id,btn){
-  const ids=['both','d','f','rd','rf'];
-  ids.forEach(x=>{
-    const el=document.getElementById('closure-'+x);
-    if(el) el.style.display=x===id?'':'none';
-    const sb=document.getElementById('sb-'+x);
-    if(sb) sb.classList.remove('active');
-  });
-  const el=document.getElementById('closure-'+id);
-  if(el) el.style.display='';
-  if(btn) btn.classList.add('active');
-  calc();
-}
+
 async function bulkGenerateLetters(){
-  if(!_cacheReady){alert('Please Sync Data first.');return;}
+  if(!_cacheReady){alert('Please Sync Data first (sidebar → Calculator → Sync Data).');return;}
   const raw=document.getElementById('fcletter-ids').value.trim();
   if(!raw){alert('Please enter App IDs.');return;}
   const dateVal=document.getElementById('fcletter-date').value;
@@ -2013,29 +1917,20 @@ async function bulkGenerateLetters(){
     prog.innerHTML=`Generating ${done+1}/${ids.length}: <strong>${aid}</strong>...`;
     await new Promise(res=>setTimeout(res,0));
     try{
-      const rec=_CACHE1&&_CACHE1.find(row=>{const _id=gv(row,'App ID','AppID','Application Id');return _id&&String(_id).trim()===String(aid).trim();});
+      const rec=_CACHE1.find(r=>{const id=gv(r,'App ID','AppID','Application Id');return id&&String(id).trim()===aid;});
       if(!rec){errors.push(aid+' (not found)');done++;continue;}
       const r=parseRec(rec);
-      if(_CACHE2){
-        const pmtR=_CACHE2.find(row=>{
-          const _id=gv(row,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','GQ App No','gqappno');
-          const _rid=(_id!==null&&_id!=='')?_id:(row._raw?.[0]?.v??'');
-          return _rid!==''&&_rid!=null&&String(_rid).trim()===String(aid).trim();
-        });
-        if(pmtR){
-          const cv2=(names,idx)=>{const v=gv(pmtR,...names);if(v!==null&&v!=='')return parseFloat(v)||0;return parseFloat(pmtR._raw?.[idx]?.v)||0;};
-          const tp=cv2(['Total Payment made till date','totalpaymentmadetilldate'],11);
-          const tc=cv2(['Total Charges Paid','totalchargespaid'],17);
-          r._netPaid=Math.max(0,tp-tc);
-          r._bounce=cv2(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
-          const cell2=pmtR._raw?.[9];
-          const fv=cell2?.f?String(cell2.f).trim():'';
-          const rv=fv||(gv(pmtR,'First EMI Date','first emi date','FirstEMIDate')||cell2?.v||'');
-          if(rv) r._firstEMIDate=parseSheetDateObj(rv);
-          const ls=gv(pmtR,'Loan Stage','loan stage','loanstage')||pmtR._raw?.[6]?.v||'';
-          if(ls) r.loanStage=String(ls);
-        }
+      const pmtRec=_CACHE2.find(row=>{const id=gv(row,'GQ Application ID','GQ App ID','App ID','AppID','Application Id');return id&&String(id).trim()===aid;});
+      if(pmtRec){
+        const cv=(names,idx)=>{const v=gv(pmtRec,...names);if(v!==null&&v!=='')return parseFloat(v)||0;return parseFloat(pmtRec._raw?.[idx]?.v)||0;};
+        r._netPaid=cv(['Total Payment made till date','totalpaymentmadetilldate'],11);
+        const tc=cv(['Total Charges Paid','totalchargespaid'],17);
+        r._bounce=cv(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
+        r._netPaid=Math.max(0,r._netPaid-tc);
+        const fraw=(()=>{const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate');if(v!==null&&v!=='')return v;return pmtRec._raw?.[9]?.v??'';})();
+        r._firstEMIDate=parseSheetDateObj(fraw);
       }
+      // Quick calc
       const intFee=r.intr/100*r.loan;
       const emi=(r.loan/r.te)+(intFee/r.te);
       const ae=r.ae,ne=r.te-ae;
@@ -2050,37 +1945,36 @@ async function bulkGenerateLetters(){
       const S1b=buildSched(netP1,emi,ne,mR1,true,retAmt);
       const S2b=buildSched(netP2,emi,ne,mR2,false,0);
       const amtP=r._netPaid||0;
-      const advAmt=ae*emi;
-      let _rem=Math.max(0,amtP-advAmt),ep=0;
+      let _rem=Math.max(0,amtP-ae*emi),ep=0;
       for(let i=0;i<S1b.length;i++){if(_rem>=S1b[i].emi){_rem-=S1b[i].emi;ep=i+1;}else break;}
       let pos1=ep>0?S1b[ep-1].cl:netP1,pos2=ep>0?S2b[ep-1].cl:netP2;
       if(_rem>0&&ep<S1b.length){pos1=Math.max(0,pos1-Math.max(0,_rem-S1b[ep].int));}
       if(_rem>0&&ep<S2b.length){pos2=Math.max(0,pos2-Math.max(0,_rem-S2b[ep].int));}
-      const fcChg=r._bounce||0;
-      const tmpREC_save=REC; REC=r;
-      document.getElementById('amtPaid').value=amtP;
-      document.getElementById('bc').value=fcChg;
-      const dmEl=document.getElementById('dmDate');
-      const oldDate=dmEl?dmEl.value:'';
-      if(dmEl) dmEl.value=dateVal;
-      const lh1=(letterType==='dropout'||letterType==='both')?buildLetterHTML('dropout'):null;
-      const lh2=(letterType==='final'||letterType==='both')?buildLetterHTML('final'):null;
-      REC=tmpREC_save;
-      if(dmEl) dmEl.value=oldDate;
-      if(lh1){const w=window.open('','_blank','width=860,height=900,scrollbars=yes');if(w){w.document.write(lh1);w.document.close();}}
-      if(lh2){await new Promise(res=>setTimeout(res,300));const w2=window.open('','_blank','width=860,height=900,scrollbars=yes');if(w2){w2.document.write(lh2);w2.document.close();}}
-    }catch(e){errors.push(aid+' (error: '+e.message+')');}
-    done++;
-    await new Promise(res=>setTimeout(res,200));
+      // DM calc
+      let dm=0;
+      const vd=new Date(dateVal);
+      if(r._firstEMIDate){
+        let eff=r._firstEMIDate;
+        if(r._liveDate&&r._firstEMIDate<r._liveDate){eff=new Date(r._liveDate);eff.setMonth(eff.getMonth()+1);}
+        const lpd=new Date(eff);if(ep>0)lpd.setMonth(lpd.getMonth()+(ep-1));
+        dm=Math.round((vd-lpd)/86400000);
+      }else{const ms=new Date(vd.getFullYear(),vd.getMonth(),1);dm=Math.round((vd-ms)/86400000);}
+      const dInt1=pos1*(mR1*12/360),dInt2=pos2*(mR2*12/360);
+      const pInt1=dm*dInt1,pInt2=dm*dInt2;
+      const fcAmt1=pos1+pInt1,fcChg1=0.0295*fcAmt1,final1=fcAmt1+fcChg1+(r._bounce||0);
+      const fcAmt2=pos2+pInt2,fcChg2=0.0295*fcAmt2,final2=fcAmt2+fcChg2+(r._bounce||0);
+      const todayStr=vd.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      const bulkC={pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,final1,final2,retAmt,bounce:r._bounce||0,today:todayStr,emi,loan:r.loan,amtPaid:amtP,emisPaid:ep,apr1:mR1*12,apr2:mR2*12,dm,netP1,netP2,ne,ae,advAmt:ae*emi,refund1:amtP-final1,refund2:amtP-final2};
+      // Open letter(s) in new window(s)
+      const openL=(type)=>{const w=window.open('','_blank','width=860,height=800,scrollbars=yes');if(w){const tmp=REC;const tmpC=LAST_CALC;REC=r;LAST_CALC=bulkC;const html2=buildLetterHTML(type);w.document.write(html2);w.document.close();REC=tmp;LAST_CALC=tmpC;}};
+      if(letterType==='dropout'||letterType==='both') openL('dropout');
+      if(letterType==='final'||letterType==='both') openL('final');
+      done++;
+    }catch(e){errors.push(aid+' ('+e.message+')');done++;}
+    await new Promise(res=>setTimeout(res,300)); // small gap so browser can open tabs
   }
-  prog.innerHTML=errors.length>0?`Done. Errors: ${errors.join(', ')}`:`<span style="color:var(--green);">&#10003; All ${done} letter(s) generated!</span>`;
+  prog.innerHTML=`&#10003; Done: ${done-errors.length} generated${errors.length>0?', '+errors.length+' errors: '+errors.join(', '):''}`;
 }
-window.onload=function(){
-  const _td=new Date();const _pad=n=>String(n).padStart(2,'0');
-  const ts=`${_td.getFullYear()}-${_pad(_td.getMonth()+1)}-${_pad(_td.getDate())}`;
-  const dm=document.getElementById('dmDate');if(dm&&!dm.value)dm.value=ts;
-  const bd=document.getElementById('bulk-date');if(bd&&!bd.value)bd.value=ts;
-};
 </script>
 </body>
 </html>
