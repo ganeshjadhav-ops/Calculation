@@ -27,7 +27,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-main{max-width:1440px;margin:0 auto;padding:0;display:flex;align-items:flex-start;}
+main{width:100%;margin:0;padding:0;display:flex;align-items:flex-start;}
 .right-content{flex:1;padding:20px 22px;min-width:0;overflow-x:hidden;}
 /* ── LEFT SIDEBAR ── */
 #left-sidebar{width:280px;min-width:280px;background:#3d52d6;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
@@ -333,27 +333,20 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div style="padding:0">
     <div class="card" style="margin-bottom:14px;">
       <div class="sh">&#128190; Bulk FC Calculation &amp; Export</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-
-        <!-- Option A: Paste -->
-        <div style="border:1.5px solid var(--border);border-radius:10px;padding:14px;">
-          <div style="font-size:.72rem;font-weight:800;color:var(--t2);margin-bottom:8px;">&#128203; Option A — Paste App IDs</div>
-          <div style="font-size:.67rem;color:var(--muted);margin-bottom:6px;">One per line. Optional: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">AppID,YYYY-MM-DD</code> for per-row date</div>
-          <textarea id="bulk-ids" rows="6" placeholder="260105&#10;1584793,2026-06-30&#10;1234567,2026-07-15&#10;..." style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:monospace;font-size:.8rem;resize:vertical;color:var(--text);"></textarea>
+      <!-- Upload Excel File -->
+      <div style="border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:.72rem;font-weight:800;color:var(--t2);">&#128196; Upload Excel File</div>
+          <button onclick="downloadBulkSample()" style="background:#f1f5f9;border:1.5px solid var(--border);border-radius:7px;padding:5px 12px;font-size:.68rem;font-weight:700;color:#3d52d6;cursor:pointer;">&#8595; Download Sample File</button>
         </div>
-
-        <!-- Option B: Excel Upload -->
-        <div style="border:1.5px solid var(--border);border-radius:10px;padding:14px;">
-          <div style="font-size:.72rem;font-weight:800;color:var(--t2);margin-bottom:8px;">&#128196; Option B — Upload Excel File</div>
-          <div style="font-size:.67rem;color:var(--muted);margin-bottom:8px;">Col A = App ID &nbsp;|&nbsp; Col B = Valid Till Date (optional)</div>
-          <label style="display:block;border:2px dashed #cbd5e1;border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:#f8fafc;">
-            <input type="file" id="bulk-file" accept=".xlsx,.xls,.csv" onchange="loadBulkFile()" style="display:none;">
-            <div style="font-size:1.4rem;margin-bottom:4px;">&#128196;</div>
-            <div style="font-size:.75rem;font-weight:700;color:#3d52d6;">Click to upload</div>
-            <div style="font-size:.65rem;color:var(--muted)">.xlsx / .xls / .csv</div>
-          </label>
-          <div id="bulk-file-info" style="margin-top:8px;font-size:.68rem;color:var(--green);min-height:16px;"></div>
-        </div>
+        <div style="font-size:.67rem;color:var(--muted);margin-bottom:8px;">Col A = App ID &nbsp;|&nbsp; Col B = Valid Till Date in DD-MM-YYYY (optional)</div>
+        <label style="display:block;border:2px dashed #cbd5e1;border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:#f8fafc;">
+          <input type="file" id="bulk-file" accept=".xlsx,.xls,.csv" onchange="loadBulkFile()" style="display:none;">
+          <div style="font-size:1.4rem;margin-bottom:4px;">&#128196;</div>
+          <div style="font-size:.75rem;font-weight:700;color:#3d52d6;">Click to upload</div>
+          <div style="font-size:.65rem;color:var(--muted)">.xlsx / .xls / .csv</div>
+        </label>
+        <div id="bulk-file-info" style="margin-top:8px;font-size:.68rem;color:var(--green);min-height:16px;"></div>
       </div>
 
       <!-- Default date + Export -->
@@ -377,10 +370,20 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 <div id="mv-fcletter" style="display:none">
   <div class="card">
     <div class="sh">&#128233; Bulk FC/DC Letter Generator</div>
-    <p style="font-size:.73rem;color:var(--t2);margin-bottom:14px;">Paste App IDs below. Each App ID will generate an FC letter using live data from the sheets. Make sure Sync is done first.</p>
-    <div style="margin-bottom:14px;">
-      <div style="font-size:.7rem;font-weight:700;color:var(--t2);margin-bottom:6px;">App IDs — one per line</div>
-      <textarea id="fcletter-ids" rows="8" placeholder="1145137&#10;1363366&#10;1584793&#10;..." style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:monospace;font-size:.82rem;resize:vertical;color:var(--text);background:#f8fafc;"></textarea>
+    <p style="font-size:.73rem;color:var(--t2);margin-bottom:14px;">Upload Excel with App IDs. Each App ID will generate a letter using live data. Make sure Sync is done first.</p>
+    <div style="margin-bottom:14px;border:1.5px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:.72rem;font-weight:800;color:var(--t2);">&#128196; Upload Excel File</div>
+        <button onclick="downloadLetterSample()" style="background:#f1f5f9;border:1.5px solid var(--border);border-radius:7px;padding:5px 12px;font-size:.68rem;font-weight:700;color:#3d52d6;cursor:pointer;">&#8595; Download Sample File</button>
+      </div>
+      <div style="font-size:.67rem;color:var(--muted);margin-bottom:8px;">Col A = App ID &nbsp;|&nbsp; Col B = Date in DD-MM-YYYY (optional, overrides below date)</div>
+      <label style="display:block;border:2px dashed #cbd5e1;border-radius:8px;padding:14px;text-align:center;cursor:pointer;background:#f8fafc;">
+        <input type="file" id="fcletter-file" accept=".xlsx,.xls,.csv" onchange="loadFCLetterFile()" style="display:none;">
+        <div style="font-size:1.2rem;margin-bottom:3px;">&#128196;</div>
+        <div style="font-size:.74rem;font-weight:700;color:#3d52d6;">Click to upload</div>
+        <div style="font-size:.63rem;color:var(--muted)">.xlsx / .xls / .csv</div>
+      </label>
+      <div id="fcletter-file-info" style="margin-top:7px;font-size:.68rem;color:var(--green);min-height:16px;"></div>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:.7rem;font-weight:700;color:var(--t2);margin-bottom:8px;">Letter Type</div>
@@ -431,6 +434,7 @@ const GID2='491266174';
 
 let REC=null,S1=[],S2=[];
 let LAST_CALC=null;
+let _bulkRows=[], _fcLetterRows=[];
 // ── DATA CACHE (Sync Data) ──────────────────────────────────────
 let _CACHE1=null,_CACHE2=null,_cacheReady=false;
 
@@ -1435,43 +1439,45 @@ function loadBulkFile(){
   const reader=new FileReader();
   reader.onload=e=>{
     try{
-      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:false});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      const lines=[];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+      _bulkRows=[];
       data.forEach((row,i)=>{
-        if(i===0&&isNaN(row[0]))return; // skip header if not numeric
-        const aid=String(row[0]||'').trim();
+        if(i===0&&isNaN(row[0])&&isNaN(String(row[0]).replace(/\D/g,'')))return; // skip text header
+        const aid=String(row[0]||'').trim().replace(/\.0$/,'');
         if(!aid||aid.length<3)return;
+        // Parse date: accept DD-MM-YYYY or YYYY-MM-DD
         let dt='';
         if(row[1]){
-          const d=row[1] instanceof Date?row[1]:new Date(row[1]);
-          if(!isNaN(d)){const p=n=>String(n).padStart(2,'0');dt=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+          const s=String(row[1]).trim();
+          if(/^\d{2}-\d{2}-\d{4}$/.test(s)){
+            // DD-MM-YYYY → convert to YYYY-MM-DD for internal use
+            const [dd,mm,yyyy]=s.split('-');
+            dt=`${yyyy}-${mm}-${dd}`;
+          } else if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+            dt=s;
+          } else {
+            const d=new Date(s);
+            if(!isNaN(d)){const p=n=>String(n).padStart(2,'0');dt=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+          }
         }
-        lines.push(dt?`${aid},${dt}`:aid);
+        _bulkRows.push([aid,dt]);
       });
-      document.getElementById('bulk-ids').value=lines.join('\n');
-      document.getElementById('bulk-file-info').innerHTML=`&#10003; Loaded ${lines.length} rows from <strong>${file.name}</strong>`;
+      document.getElementById('bulk-file-info').innerHTML=`&#10003; Loaded <strong>${_bulkRows.length} rows</strong> from ${file.name}`;
     }catch(e){document.getElementById('bulk-file-info').innerHTML=`<span style="color:red">Error: ${e.message}</span>`;}
   };
   reader.readAsArrayBuffer(file);
 }
 
+
 // ─── BULK FC EXPORT ───────────────────────────────────────────────
 async function bulkExport(){
-  const raw=document.getElementById('bulk-ids').value.trim();
   const defaultDateVal=document.getElementById('bulk-date').value||new Date().toISOString().slice(0,10);
-  if(!raw){alert('Please enter at least one App ID.');return;}
+  if(!_bulkRows||_bulkRows.length===0){alert('Please upload an Excel file with App IDs first.');return;}
   if(!_cacheReady){alert('Please Sync Data first (Step 1) for instant bulk processing.');return;}
 
-  // Parse rows: each can be "AppID" or "AppID,YYYY-MM-DD"
-  const rows_raw=raw.split(/[\n]+/).map(x=>x.trim()).filter(x=>x.length>2);
-  const idRows=[...new Map(rows_raw.map(row=>{
-    const parts=row.split(',');
-    const aid=parts[0].trim();
-    const dt=(parts[1]||'').trim()||defaultDateVal;
-    return [aid,{aid,dt}];
-  })).values()];
+  const idRows=_bulkRows.map(r=>({aid:String(r[0]||'').trim(),dt:r[1]||defaultDateVal}));
   const ids=idRows.map(r=>r.aid);
   const prog=document.getElementById('bulk-progress');
   const preview=document.getElementById('bulk-preview');
@@ -1738,18 +1744,15 @@ async function bulkExport(){
         Preview — ${ok.length} record${ok.length!==1?'s':''} calculated
       </div>
       <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:0;flex-wrap:wrap;" id="bulk-stabs">
-        <button class="bst active" onclick="switchBulkTab(0,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#3d52d6;color:#fff;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#128203; Combined</button>
-        <button class="bst" onclick="switchBulkTab(1,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#92400e;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#127891; Dropout</button>
-        <button class="bst" onclick="switchBulkTab(2,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#1d4ed8;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#9889; Final FC</button>
+        <button class="bst active" onclick="switchBulkTab(0,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#3d52d6;color:#fff;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#127891; Dropout</button>
+        <button class="bst" onclick="switchBulkTab(1,this)" style="padding:7px 13px;font-size:.7rem;font-weight:700;border:none;background:#f1f5f9;color:#1d4ed8;cursor:pointer;border-radius:6px 6px 0 0;margin-right:2px;">&#9889; Final FC</button>
         
         
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;overflow-x:auto;">
-        <div class="btp" style="display:block">${t1}</div>
-        <div class="btp" style="display:none">${t2}</div>
+        <div class="btp" style="display:block">${t2}</div>
         <div class="btp" style="display:none">${t3}</div>
-        <div class="btp" style="display:none">${t4}</div>
-        <div class="btp" style="display:none">${t5}</div>
+        
       </div>
       ${errRow}`;
     preview.style.display='block';
@@ -1828,18 +1831,80 @@ function switchSched(id,btn){
   btn.classList.add('active');
 }
 
+function loadFCLetterFile(){
+  const file=document.getElementById('fcletter-file').files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:false});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+      _fcLetterRows=[];
+      data.forEach((row,i)=>{
+        if(i===0&&isNaN(row[0])&&isNaN(String(row[0]).replace(/\D/g,'')))return;
+        const aid=String(row[0]||'').trim().replace(/\.0$/,'');
+        if(!aid||aid.length<3)return;
+        let dt='';
+        if(row[1]){
+          const s=String(row[1]).trim();
+          if(/^\d{2}-\d{2}-\d{4}$/.test(s)){
+            const [dd,mm,yyyy]=s.split('-');
+            dt=`${yyyy}-${mm}-${dd}`;
+          } else if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+            dt=s;
+          } else {
+            const d=new Date(s);
+            if(!isNaN(d)){const p=n=>String(n).padStart(2,'0');dt=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+          }
+        }
+        _fcLetterRows.push([aid,dt]);
+      });
+      document.getElementById('fcletter-file-info').innerHTML=`&#10003; Loaded <strong>${_fcLetterRows.length} App IDs</strong> from ${file.name}`;
+    }catch(e){document.getElementById('fcletter-file-info').innerHTML=`<span style="color:red">Error: ${e.message}</span>`;}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function downloadBulkSample(){
+  const wb=XLSX.utils.book_new();
+  const data=[
+    ['App ID','Date (DD-MM-YYYY)'],
+    ['260105','15-06-2026'],
+    ['1584793','30-06-2026'],
+    ['1234567','15-07-2026']
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:14},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws,'Bulk Calc');
+  XLSX.writeFile(wb,'GrayQuest_BulkCalc_Sample.xlsx');
+}
+
+function downloadLetterSample(){
+  const wb=XLSX.utils.book_new();
+  const data=[
+    ['App ID','Date (DD-MM-YYYY)'],
+    ['1145137','15-06-2026'],
+    ['1363366','30-06-2026'],
+    ['1584793','15-07-2026']
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:14},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws,'Letter IDs');
+  XLSX.writeFile(wb,'GrayQuest_BulkLetter_Sample.xlsx');
+}
+
 async function bulkGenerateLetters(){
   if(!_cacheReady){alert('Please Sync Data first (sidebar → Calculator → Sync Data).');return;}
-  const raw=document.getElementById('fcletter-ids').value.trim();
-  if(!raw){alert('Please enter App IDs.');return;}
+  if(!_fcLetterRows||_fcLetterRows.length===0){alert('Please upload an Excel file with App IDs first.');return;}
   const dateVal=document.getElementById('fcletter-date').value;
   if(!dateVal){alert('Please select a Valid Till Date.');return;}
   const letterType=document.querySelector('input[name="fcletter-type"]:checked')?.value||'dropout';
-  const ids=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const ids=_fcLetterRows.map(r=>r[0]).filter(Boolean);
   const prog=document.getElementById('fcletter-progress');
   prog.innerHTML=`Processing ${ids.length} App IDs...`;
   let done=0, errors=[];
-  for(const aid of ids){
+  for(let _ri=0;_ri<ids.length;_ri++){const aid=ids[_ri];const _rowDate=_fcLetterRows[_ri]?.[1]?String(_fcLetterRows[_ri][1]).trim():'';
     prog.innerHTML=`Generating ${done+1}/${ids.length}: <strong>${aid}</strong>...`;
     await new Promise(res=>setTimeout(res,0));
     try{
@@ -1882,7 +1947,7 @@ async function bulkGenerateLetters(){
       if(_rem>0&&ep<S2b.length){pos2=Math.max(0,pos2-Math.max(0,_rem-S2b[ep].int));}
       // DM calc
       let dm=0;
-      const vd=new Date(dateVal);
+      const vd=new Date(_rowDate||dateVal);
       if(r._firstEMIDate){
         let eff=r._firstEMIDate;
         if(r._liveDate&&r._firstEMIDate<r._liveDate){eff=new Date(r._liveDate);eff.setMonth(eff.getMonth()+1);}
