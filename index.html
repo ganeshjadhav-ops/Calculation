@@ -177,6 +177,31 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 #toast.show{transform:translateY(0);opacity:1;}
 .spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(8,145,178,.2);border-top-color:var(--gq2);border-radius:50%;animation:sp .5s linear infinite;vertical-align:middle;}
 @keyframes sp{to{transform:rotate(360deg);}}
+
+/* ── PORTAL INFO PANEL (GrayQuest 3-column style) ── */
+.portal-panel{display:grid;grid-template-columns:0.9fr 1.25fr 1fr;border-radius:var(--rs);overflow:hidden;background:var(--white);}
+.pp-col{display:flex;flex-direction:column;}
+.pp-col:not(:last-child){border-right:1.5px solid #c8d9ec;}
+.pp-head{padding:8px 14px;font-size:.61rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-bottom:1.5px solid rgba(0,0,0,.08);}
+.pp-left .pp-head{background:#dde8f5;color:#1a3c5e;}
+.pp-mid .pp-head{background:#bbd9f3;color:#0c4a6e;}
+.pp-right .pp-head{background:#fbd5d5;color:#991b1b;}
+.pp-left{background:#f4f8fd;}
+.pp-mid{background:#e8f4fd;}
+.pp-right{background:#fef1f1;}
+.pp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;border-top:1px solid rgba(0,0,0,.045);}
+.pp-row.mid-blue{background:rgba(200,230,255,.35);}
+.pp-row.mid-green{background:rgba(200,250,220,.35);}
+.pp-row.pp-sep{border-top:2px solid rgba(0,0,0,.1);}
+.pp-lbl{font-size:.69rem;color:#4b6080;font-weight:500;}
+.pp-val{font-size:.73rem;font-weight:700;text-align:right;max-width:55%;word-break:break-word;}
+.pp-val.c-blue{color:#1565c0;}.pp-val.c-green{color:#059669;}.pp-val.c-red{color:#dc2626;}
+.pp-val.c-orange{color:#d97706;}.pp-val.c-teal{color:#0891b2;}.pp-val.c-muted{color:#94a3b8;font-weight:400;}
+.pp-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.63rem;font-weight:700;}
+.pp-badge.live{background:#d1fae5;color:#065f46;}
+.pp-badge.drop{background:#fef3c7;color:#92400e;}
+.pp-badge.other{background:#fee2e2;color:#991b1b;}
+@media(max-width:900px){.portal-panel{grid-template-columns:1fr;}.pp-col:not(:last-child){border-right:none;border-bottom:1.5px solid #c8d9ec;}}
 </style>
 </head>
 <body>
@@ -283,9 +308,9 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div id="sb"></div>
 </div>
 
-<!-- INFO STRIP -->
-<div id="strip" class="card" style="padding:14px 18px;display:none;">
-  <div class="info-grid" id="igrid"></div>
+<!-- INFO STRIP — portal 3-panel -->
+<div id="strip" class="card" style="padding:0;display:none;overflow:hidden;">
+  <div id="igrid"></div>
 </div>
 
 <!-- INPUTS + RESULTS -->
@@ -447,10 +472,9 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 <div id="toast"></div>
 
 <script>
-// ── Single source: PD Dump Live Closed sheet (user's actual sheet) ──
-const SID='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
-const GID='491266174';
-const SID1=SID, SID2=SID, GID2=GID; // legacy compat
+const SID1='1FvGTH4IOzoDr6PNBKLfWVENBhevuQDrt2uy8yOwNsZ8';
+const SID2='1A6G7GZCKHnmxP9mLcDXmHfFhTSXwA-1AqfphBkCzTYA';
+const GID2='491266174';
 
 let REC=null,S1=[],S2=[];
 let LAST_CALC=null;
@@ -461,15 +485,19 @@ async function syncSheets(){
   const btn=document.getElementById('sync-btn');
   const info=document.getElementById('sync-info');
   btn.disabled=true; btn.textContent='Syncing...';
-  info.textContent='Fetching data...';
+  info.textContent='Fetching Sheet 1...';
   try{
-    const r=await fetch(`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&gid=${GID}`);
+    const [r1,r2]=await Promise.all([
+      fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
+      fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
+    ]);
     info.textContent='Parsing data...';
-    const t=await r.text();
-    _CACHE2=parseGviz(t,true);
-    _CACHE1=_CACHE2; // same data — keep legacy ref working
+    const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
+    _CACHE1=parseGviz(t1);
+    _CACHE2=parseGviz(t2,true);
     _cacheReady=true;
-    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced — ${_CACHE2.length} rows</span>`;
+    const n1=_CACHE1.length, n2=_CACHE2.length;
+    info.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ Synced — ${n1} + ${n2} rows</span>`;
     btn.innerHTML='✓ Synced';
     btn.style.background='var(--glight)';btn.style.color='var(--green)';btn.style.borderColor='#a7f3d0';
   }catch(e){
@@ -581,34 +609,103 @@ async function fetchAll(){
   document.getElementById('fb').disabled=true;
 
   try{
-    // ── Single-sheet fetch (PD Dump has everything: loan data + payment data) ──
-    let allRows;
+    let rows1, rows2raw;
     if(_cacheReady){
-      allRows=_CACHE2; // instant from cache
+      rows1=_CACHE1;
+      rows2raw=_CACHE2;
     } else {
-      const r=await fetch(`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&gid=${GID}`);
-      const t=await r.text();
-      allRows=parseGviz(t,true);
+      const [r1,r2]=await Promise.all([
+        fetch(`https://docs.google.com/spreadsheets/d/${SID1}/gviz/tq?tqx=out:json`),
+        fetch(`https://docs.google.com/spreadsheets/d/${SID2}/gviz/tq?tqx=out:json&gid=${GID2}`)
+      ]);
+      const [t1,t2]=await Promise.all([r1.text(),r2.text()]);
+      rows1=parseGviz(t1);
+      rows2raw=parseGviz(t2,true);
     }
 
-    // ── Look up App ID in Col A ("GQ Application ID") with raw index fallback ──
-    const rec=allRows.find(r=>{
-      const id=gv(r,'GQ Application ID','GQ App ID','App ID','AppID');
-      const rawId=(id!==null&&id!=='')?id:(r._raw?.[0]?.v??'');
-      return rawId!==''&&rawId!=null&&String(rawId).trim()===String(aid).trim();
+    // Sheet 1 — main calc data
+    const rec=rows1.find(r=>{
+      const id=gv(r,'App ID','AppID','Application Id');
+      return id&&String(id).trim()===aid;
     });
-    if(!rec){
-      const _r0=allRows[0]||{};
-      console.warn('[Lookup] Cols:',Object.keys(_r0).filter(k=>k!=='_raw').join(' | '));
-      console.warn('[Lookup] Col A first row:',_r0._raw?.[0]?.v);
-      ss('error',`❌ App ID "${aid}" not found. Ensure the sheet is public (Share → Anyone → Viewer).`);
-      document.getElementById('fb').disabled=false;return;
-    }
-
-    // ── parseRec extracts ALL fields (loan data + payment data) from the same row ──
+    if(!rec){ss('error',`❌ App ID "${aid}" not found. Ensure Sheet 1 is public.`);document.getElementById('fb').disabled=false;return;}
     REC=parseRec(rec);
-    console.log('[REC]',{appId:REC.appId,name:REC.name,loan:REC.loan,te:REC.te,ae:REC.ae,
-      netPaid:REC._netPaid,bounce:REC._bounce,firstEMI:REC._firstEMIDate,emisPaid:REC._emisPaid});
+
+    // Sheet 2 — PD Dump: payment data only
+    try{
+      const rows2=rows2raw;
+      const pmtRec=rows2.find(r=>{
+        const id=gv(r,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','applicationid','GQ App No','gqappno');
+        const rawId=(id!==null&&id!=='')?id:(r._raw?.[0]?.v??'');
+        return rawId!==''&&rawId!=null&&String(rawId).trim()===String(aid).trim();
+      });
+      if(pmtRec){
+        const cv=(names,idx)=>{
+          const v=gv(pmtRec,...names);
+          if(v!==null&&v!=='')return parseFloat(v)||0;
+          return parseFloat(pmtRec._raw?.[idx]?.v)||0;
+        };
+        const totalPaid=cv(['Total Payment made till date','totalpaymentmadetilldate','Total Payments Made','Total EMI Paid'],11);
+        const totalChg=cv(['Total Charges Paid','totalchargespaid','Charges Paid'],17);
+        const totalOutstanding=cv(['Total Outstanding Amount','totaloutstandingamount','Outstanding Amount'],16);
+        const chargesOutstanding=cv(['Total Charges Outstanding Amount','totalchargesoutstandingamount','Charges Outstanding'],18);
+        const netPaid=Math.max(0,totalPaid-totalChg);
+        console.log('[Sheet2]',{totalPaid,totalChg,netPaid,chargesOutstanding});
+        // Col J (idx 9) — First EMI Date
+        // KEY: prefer .f (formatted display value) → gives Indian DD/MM/YYYY text correctly
+        const firstEMIDateRaw=(()=>{
+          const cell=pmtRec._raw?.[9];
+          const fmtVal=cell?.f?String(cell.f).trim():'';
+          if(fmtVal)return fmtVal;
+          const v=gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate','EMI Start Date');
+          if(v!==null&&v!=='')return v;
+          return cell?.v??'';
+        })();
+        REC._firstEMIDate=parseSheetDateObj(firstEMIDateRaw);
+        REC._netPaid=netPaid;
+        REC._totalOutstanding=totalOutstanding>0?totalOutstanding:0;
+        REC._bounce=chargesOutstanding>0?chargesOutstanding:0;
+        REC._totalPaid=totalPaid;
+        REC._totalChg=totalChg;
+        // Loan Stage from Sheet2 (Col G, idx 6)
+        const loanStageRaw=(()=>{
+          const v=gv(pmtRec,'Loan Stage','loan stage','loanstage');
+          if(v!==null&&v!=='')return v;
+          return pmtRec._raw?.[6]?.v??'';
+        })();
+        if(loanStageRaw) REC.loanStage=String(loanStageRaw);
+        // ── Additional Sheet2 fields (string-based) ──
+        const sv=(names,idx)=>{const v=gv(pmtRec,...names);if(v!==null&&v!=='')return String(v).trim();return String(pmtRec._raw?.[idx]?.v||'').trim();};
+        REC.parentName = sv(['Parent Name','parentname','Parent','parent name'],2);
+        REC.email      = sv(['Email','Email ID','emailid','Email Address'],3);
+        REC.phone      = sv(['Phone','Mobile','Phone Number','Mobile No','mobileno','Contact'],4);
+        REC.lan        = sv(['LAN','Loan Account Number','loanaccountnumber','LAN No','lan no'],8);
+        REC.product    = sv(['Product','Product Name','productname','Course','Course Name'],5);
+        const _emiDay  = sv(['EMI Due Date','emiduedate','EMI Date','emi date','EMI Day','emiday','Due Day'],10);
+        REC.emiDueDay  = _emiDay||'';
+        REC.totalAmtPayable     = cv(['Total Amount Payable','totalamountpayable','Total Payable'],14);
+        REC.totalEMIPayable     = cv(['Total EMI Payable','totalemipayable','EMI Payable','Total EMI Amount'],12);
+        REC.totalChargesPayable = cv(['Total Charges Payable','totalchargespayable','Charges Payable'],13);
+        REC.totalAmtSettled     = cv(['Total Amount Settled to Lender','totalamountsettledtolender','Amount Settled','Settled to Lender'],15);
+        REC.maxOverDueDays      = cv(['Max Over Due Days','maxoverduedays','Max OD Days','Max Overdue Days','Max Overdue'],19);
+        REC.totalEMIOutstanding = cv(['Total EMI Outstanding','totalemioutstanding','EMI Outstanding'],20);
+        REC.currentOverDueDays  = cv(['Current Over Due Days','currentoverduedays','Current OD Days','Current Overdue Days'],21);
+        REC.excessAmtCollected  = cv(['Excess Amount Collected','excessamountcollected','Excess Amount'],22);
+        REC.excessEMICollected  = cv(['Excess EMI Collected','excessemicollected','Excess EMI'],23);
+        REC.excessChargeCollected=cv(['Excess Charge Collected','excesschargecollected','Excess Charges'],24);
+        const _rc = sv(['Repayment Complete','repaymentcomplete','Repayment Status'],25);
+        REC.repaymentComplete = _rc||'—';
+        // Computed fallbacks if Sheet2 doesn't have these columns
+        if(!REC.totalAmtSettled && REC._netPaid>0) REC.totalAmtSettled=REC._netPaid;
+        if(!REC.totalEMIOutstanding && REC._totalOutstanding>0) REC.totalEMIOutstanding=REC._totalOutstanding;
+      } else {
+        const _r0=rows2[0]||{};
+        console.warn('[Sheet2] No match for App ID:',aid);
+        console.warn('[Sheet2] Cols:',Object.keys(_r0).filter(k=>k!=='_raw').join(' | '));
+        console.warn('[Sheet2] Col A first row:',_r0._raw?.[0]?.v);
+        console.warn('[Sheet2] Total rows:',rows2.length);
+      }
+    }catch(e){console.log('[Sheet2 error]',e.message);}
 
     ss('success',`&#9989; <strong>${REC.name}</strong> &nbsp;|&nbsp; &#8377;${R2(REC.loan)} &nbsp;|&nbsp; ${REC.te} EMIs (Adv: ${REC.ae})`);
     renderStrip(REC);
@@ -631,122 +728,99 @@ async function fetchAll(){
     calc();
     toast(`&#9989; ${REC.name} loaded!`);
   }catch(e){
-    ss('error',`❌ ${e.message}. Make the sheet public (Share → Anyone with link → Viewer).`);
+    ss('error',`❌ ${e.message}. Make both sheets public (Share → Anyone with link → Viewer).`);
   }
   document.getElementById('fb').disabled=false;
 }
 
 function parseRec(row){
   const g=(...v)=>gv(row,...v);
-  const num=(...v)=>{const x=parseFloat(g(...v));return isFinite(x)?x:0;};
-  const cv=(names,rawIdx)=>{
-    const v=g(...names);
-    if(v!==null&&v!=='')return parseFloat(v)||0;
-    return parseFloat(row._raw?.[rawIdx]?.v)||0;
-  };
-
-  // ── Core loan fields (PD Dump column names) ──────────────────
-  // Col O (idx 14): Tranch Amount = per-tranche principal
-  // Col H (idx 7):  Loan Amount   = total loan (multi-tranche)
-  const loan  = cv(['Tranch Amount','Tranche Amount'],14) || cv(['Loan Amount'],7);
-  // Col P (idx 15): Tranch Tenure = net EMIs (AFTER advance EMIs)
-  const te_net= Math.round(cv(['Tranch Tenure','Tranche Tenure','Number of EMIs','No of EMIs'],15));
-  // Col K (idx 10): EMI Amount = actual monthly EMI
-  const emi_direct = cv(['EMI Amount'],10);
-
-  // ── Derive advance EMIs: loan / EMI_direct → total tenure; ae = total - net ──
-  // e.g. loan=71000, emi=7100 → total=10, net=9 → ae=1
-  const te_total = (emi_direct>0&&loan>0) ? Math.max(te_net, Math.round(loan/emi_direct)) : te_net;
-  const ae       = Math.max(0, te_total - te_net);
-
-  // ── Amounts from sheet (not rates) ───────────────────────────
-  // Col Z (idx 25): Discount Amt (subvention amount)
-  const discAmt = cv(['Discount Amt','Discount Amount'],25);
-  // Col Y (idx 24): Retention Amt (FLDG amount)
-  const retAmt_  = cv(['Retention Amt','Retention Amount'],24);
-  // Col AA (idx 26): Interest Amt (processing/interest fee)
-  const intAmt  = cv(['Interest Amt','Interest Amount'],26);
-
-  // Derive % rates (used in calc() formulas: subvAmt=subv/100*loan, etc.)
-  const subv = loan>0 ? (discAmt/loan*100) : 0;
-  const netL = loan-discAmt;
-  const ret  = netL>0  ? (retAmt_/netL*100)  : 0;
-  // Interest is NOT embedded in EMI for this sheet (EMI = loan/te_total)
-  // Setting intr=0 means intFee=0 in calc() — correct for principal-only EMIs
-  const intr = 0;
-
-  // ── Payment data (same row — PD Dump has everything) ─────────
-  // Col L (idx 11): Total Payment made till date
-  const totalPaid = cv(['Total Payment made till date'],11);
-  // Col R (idx 17): Total Charges Paid
-  const totalChg  = cv(['Total Charges Paid'],17);
-  // NET PAID = Total Payment − Charges Paid (only principal portion)
-  const netPaid   = Math.max(0, totalPaid - totalChg);
-  // Col Q (idx 16): Total Outstanding Amount (POS from lender records)
-  const totalOut  = cv(['Total Outstanding Amount'],16);
-  // Col S (idx 18): Charges Outstanding (bounce/mandate)
-  const chargesOut= cv(['Total Charges Outstanding Amount'],18);
-  // Col V (idx 21): No. of EMIs Paid
-  const emisPaid_ = Math.round(cv(['No. of EMIs Paid','No of EMIs Paid'],21));
-  // Col U (idx 20): Last Payment Date
-  const lastPayRaw= g('Last Payment Date');
-  // Col J (idx 9):  First EMI Date
-  // KEY FIX: prefer .f (formatted/display value) over .v (raw Date() value)
-  // .f gives the actual text shown in sheet in Indian DD/MM/YYYY format e.g. "4-6-2021"
-  // .v might give Date(2021,3,6)=April6 when user meant June4 (DD/MM swap bug)
-  const firstEMIRaw = (()=>{
-    const cell = row._raw?.[9];
-    const fmtVal = cell?.f ? String(cell.f).trim() : '';
-    if(fmtVal) return fmtVal; // Use display text → parsed as DD/MM/YYYY ✓
-    const v=g('First EMI Date','first emi date','FirstEMIDate','EMI Start Date');
-    if(v!==null&&v!=='')return v;
-    return cell?.v??'';
-  })();
-
-  // ── Display fields ────────────────────────────────────────────
-  const loanStage = g('Loan Stage')||'';
-
   return{
-    appId:   g('GQ Application ID','GQ App ID','App ID','AppID')||'',
-    name:    g('Name of Student','Student Name','Name')||'—',
-    parentName: g('Parent Name')||'—',
-    loan,
-    te:  te_total,   // total EMIs (incl. advance) — matches original calc() usage
-    ae,              // advance EMI count
-    subv, ret, intr,
-    discAmt, retAmt:retAmt_, intAmt,
-    grp:     g('Group Name','groupname')||'—',
-    nbfc:    g('LENDER','Lender','NBFC')||'—',
-    loanStage,
-    tranch:  g('Tranch Type','Tranche Type')||'',
-    dateStr: '—',
-    _liveDate: null,      // not in PD Dump sheet — DD/MM auto-correct handles dates
-    _netPaid:    netPaid,
-    _totalOutstanding: totalOut>0?totalOut:0,
-    _bounce:     chargesOut>0?chargesOut:0,
-    _totalPaid:  totalPaid,
-    _totalChg:   totalChg,
-    _firstEMIDate: parseSheetDateObj(firstEMIRaw),
-    _emisPaid:   emisPaid_,
-    _lastPayDate:parseSheetDateObj(lastPayRaw),
+    appId: g('App ID','AppID','Application Id')||'',
+    name:  g('Student Name','student name','Name')||'\u2014',
+    loan:  parseFloat(g('Tranche Amount','tranche amount','Loan Amount'))||0,
+    te:    parseInt(g('Number of EMIs','numberofemis','No of EMIs'))||0,
+    ae:    parseInt(g('Advance EMIs','advance emis','Adv EMI'))||0,
+    subv:  parseFloat(g('Discount Rate','discount rate','Subvention %','Subvention','discount%'))||0,
+    ret:   parseFloat(g('FLDG %','FLDG','Retention %','fldg%'))||0,
+    intr:  parseFloat(g('Total Regular Int Rate','interest rate','totalregularintrate'))||0,
+    grp:   g('Group Name','groupname')||'\u2014',
+    nbfc:  g('NBFC','nbfc')||'\u2014',
+    dateStr:parseSheetDate(g('Loan Live Date','loan live date','Start Date','disbursement date')),
+    _liveDate:parseSheetDateObj(g('Loan Live Date','loan live date','Start Date','disbursement date')),
+    loanStage:'',
+    _netPaid:0,_totalOutstanding:0,_bounce:0,_totalPaid:0,_totalChg:0,_firstEMIDate:null,
+    // Extra Sheet2 fields
+    parentName:'',email:'',phone:'',lan:'',product:'',
+    emiDueDay:'',totalAmtPayable:0,totalEMIPayable:0,totalChargesPayable:0,
+    totalAmtSettled:0,maxOverDueDays:0,totalEMIOutstanding:0,
+    currentOverDueDays:0,excessAmtCollected:0,excessEMICollected:0,
+    excessChargeCollected:0,repaymentComplete:'—'
   };
 }
 
 function renderStrip(r){
-  document.getElementById('igrid').innerHTML=[
-    ['App ID',       r.appId,                       'blue'],
-    ['Student',      r.name,                        ''],
-    ['Parent',       r.parentName,                  ''],
-    ['Loan Amt',     '₹'+R2(r.loan),               'green'],
-    ['EMIs',         `${r.te} total (${r.ae} adv)`, ''],
-    ['Loan Stage',   r.loanStage,                   ''],
-    ['Discount Amt', r.discAmt>0?'₹'+R2(r.discAmt):'—', r.discAmt>0?'orange':''],
-    ['Retention Amt',r.retAmt>0?'₹'+R2(r.retAmt):'—',''],
-    ['Interest Fee', r.intAmt>0?'₹'+R2(r.intAmt):'—',''],
-    ['Group',        r.grp,                         ''],
-    ['Lender',       r.nbfc,                        ''],
-  ].map(([l,v,c])=>`<div class="ibox"><div class="ib-l">${l}</div><div class="ib-v ${c}" title="${v}">${v}</div></div>`).join('');
+  const _ls=r.loanStage||'';
+  const _lsLow=_ls.toLowerCase();
+  const _lsBadge=_ls?(_lsLow.includes('live')?`<span class="pp-badge live">${_ls}</span>`:(_lsLow.includes('drop')?`<span class="pp-badge drop">${_ls}</span>`:`<span class="pp-badge other">${_ls}</span>`)):'<span class="pp-val c-muted">\u2014</span>';
+  const _lsColor=_ls?(_lsLow.includes('live')?'c-green':(_lsLow.includes('drop')?'c-orange':'c-red')):'';
+  const ppRow=(lbl,val,cls='',extra='')=>`<div class="pp-row ${extra}"><span class="pp-lbl">${lbl}</span><span class="pp-val ${cls}" title="${val}">${val}</span></div>`;
+  const ppMoney=(lbl,val,cls='c-blue',extra='')=>`<div class="pp-row ${extra}"><span class="pp-lbl">${lbl}</span><span class="pp-val ${cls}">${val>0?'&#8377;'+R2(val):'<span style="color:#94a3b8;font-weight:400">\u2014</span>'}</span></div>`;
+  const ppNum=(lbl,val,cls='',extra='')=>`<div class="pp-row ${extra}"><span class="pp-lbl">${lbl}</span><span class="pp-val ${cls}">${val!==null&&val!==undefined&&val!==''?val:'<span style="color:#94a3b8;font-weight:400">\u2014</span>'}</span></div>`;
+  // EMI Due Date display
+  const _emiDue=r.emiDueDay?`${r.emiDueDay}${isNaN(r.emiDueDay)?'':' of Every Month'}`:'\u2014';
+  // Repayment complete badge
+  const _rcLow=String(r.repaymentComplete||'').toLowerCase();
+  const _rc=r.repaymentComplete&&r.repaymentComplete!=='\u2014'?((_rcLow==='yes'||_rcLow==='true'||_rcLow==='1')?'<span style="color:#059669;font-weight:700">\u2713 Yes</span>':'<span style="color:#dc2626;font-weight:700">\u2717 No</span>'):'<span style="color:#94a3b8;font-weight:400">\u2014</span>';
+  document.getElementById('igrid').innerHTML=`
+  <div class="portal-panel">
+    <!-- \u2500\u2500\u2500 LEFT: Borrower Information \u2500\u2500\u2500 -->
+    <div class="pp-col pp-left">
+      <div class="pp-head">Borrower Information</div>
+      ${ppRow('Application ID', r.appId||'\u2014', 'c-blue')}
+      ${ppRow('Student Name', r.name||'\u2014')}
+      ${ppRow('Parent Name', r.parentName||'\u2014', r.parentName?'':'c-muted')}
+      ${ppRow('Email', r.email||'\u2014', r.email?'':'c-muted')}
+      ${ppRow('Phone', r.phone||'\u2014', r.phone?'':'c-muted')}
+      <div class="pp-row"><span class="pp-lbl">Loan Stage</span>${_lsBadge}</div>
+      ${ppRow('Lender (NBFC)', r.nbfc||'\u2014')}
+      ${ppRow('LAN', r.lan||'\u2014', r.lan?'c-teal':'c-muted')}
+      ${ppRow('Group / Product', r.product||r.grp||'\u2014')}
+      ${ppRow('Live Date', r.dateStr||'\u2014')}
+      ${ppRow('EMIs (Structure)', `${r.te} EMIs (Adv: ${r.ae})`)}
+      ${ppRow('Discount %', r.subv>0?r.subv+'%':'0%', r.subv>0?'c-orange':'')}
+      ${ppRow('Interest Rate', r.intr>0?r.intr+'%':'0%', r.intr>0?'c-red':'')}
+      ${ppRow('FLDG %', r.ret>0?r.ret+'%':'0%')}
+    </div>
+    <!-- \u2500\u2500\u2500 MIDDLE: Payment Summary \u2500\u2500\u2500 -->
+    <div class="pp-col pp-mid">
+      <div class="pp-head">Payment Summary</div>
+      ${ppRow('EMI Due Date', _emiDue, 'c-teal')}
+      ${ppMoney('Total Fee / Loan Amount', r.loan, 'c-blue', 'pp-sep mid-blue')}
+      ${ppMoney('Total Amount Payable', r.totalAmtPayable||0, 'c-blue', 'mid-blue')}
+      ${ppMoney('Total EMI Payable', r.totalEMIPayable||0, 'c-blue', 'mid-blue')}
+      ${ppMoney('Total Charges Payable', r.totalChargesPayable||0, 'c-blue', 'mid-blue')}
+      ${ppMoney('Total Amount Paid', r._totalPaid||0, 'c-green', 'pp-sep mid-green')}
+      ${ppMoney('Total EMI Paid', r._netPaid||0, 'c-green', 'mid-green')}
+      ${ppMoney('Total Charges Paid', r._totalChg||0, 'c-green', 'mid-green')}
+      ${ppMoney('Total Amount Settled to Lender', r.totalAmtSettled||r._netPaid||0, 'c-green', 'mid-green')}
+    </div>
+    <!-- \u2500\u2500\u2500 RIGHT: Outstanding Details \u2500\u2500\u2500 -->
+    <div class="pp-col pp-right">
+      <div class="pp-head">Outstanding Details</div>
+      ${ppNum('Max Over Due Days', r.maxOverDueDays>0?r.maxOverDueDays:'0', r.maxOverDueDays>0?'c-red':'')}
+      ${ppMoney('Total Outstanding', r._totalOutstanding||0, r._totalOutstanding>0?'c-red':'c-green', 'pp-sep')}
+      ${ppMoney('Total EMI Outstanding', r.totalEMIOutstanding||r._totalOutstanding||0, r._totalOutstanding>0?'c-red':'c-green')}
+      ${ppMoney('Total Charges Outstanding', r._bounce||0, r._bounce>0?'c-red':'')}
+      ${ppNum('Current Over Due Days', r.currentOverDueDays>0?r.currentOverDueDays:'0', r.currentOverDueDays>0?'c-red':'')}
+      ${ppMoney('Excess Amount Collected', r.excessAmtCollected||0, '', 'pp-sep')}
+      ${ppMoney('Excess EMI Collected', r.excessEMICollected||0)}
+      ${ppMoney('Excess Charge Collected', r.excessChargeCollected||0)}
+      <div class="pp-row pp-sep"><span class="pp-lbl">Repayment Complete</span>${_rc}</div>
+    </div>
+  </div>`;
 }
+
 
 // ── BUILD SCHEDULE ────────────────────────────────────────
 function buildSched(netP, emi, ne, mR, withRet, retAmt){
@@ -1559,21 +1633,48 @@ async function bulkExport(){
     const aid=ids[i];
     prog.innerHTML=`<span style="color:var(--blue)">Processing ${i+1}/${ids.length}: App ID ${aid}...</span>`;
     try{
-      // Single-sheet lookup — same sheet has all data (loan + payment)
-      const row=_CACHE2 && _CACHE2.find(r=>{
-        const id=gv(r,'GQ Application ID','GQ App ID','App ID','AppID');
-        const rawId=(id!==null&&id!=='')?id:(r._raw?.[0]?.v??'');
-        return rawId!==''&&rawId!=null && String(rawId).trim()===String(aid).trim();
+      // Sheet1 — main loan data (original logic)
+      const row=_CACHE1 && _CACHE1.find(r=>{
+        const id=gv(r,'App ID','AppID','Application Id');
+        return id && String(id).trim()===String(aid).trim();
       });
-      if(!row){results.push({aid,error:'Not found in sheet'});continue;}
+      if(!row){results.push({aid,error:'Not found in Sheet1'});continue;}
 
-      // parseRec now extracts ALL fields including payment data
       const bREC=parseRec(row);
       if(!bREC.loan||!bREC.te){results.push({aid,error:'Invalid loan data'});continue;}
 
+      // Sheet2 — payment data only
+      let netPaid2=0, bounce2=0, firstEMI2=null;
+      if(_CACHE2){
+        const pmtRec=_CACHE2.find(r=>{
+          const _bid=gv(r,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','applicationid','GQ App No','gqappno');
+          const _rawBid=(_bid!==null&&_bid!=='')?_bid:(r._raw?.[0]?.v??'');
+          return _rawBid!==''&&_rawBid!=null && String(_rawBid).trim()===String(aid).trim();
+        });
+        if(pmtRec){
+          const cvB=(names,idx)=>{const v=gv(pmtRec,...names);if(v!==null&&v!=='')return parseFloat(v)||0;return parseFloat(pmtRec._raw?.[idx]?.v)||0;};
+          const totalPaid=cvB(['Total Payment made till date','totalpaymentmadetilldate'],11);
+          const totalChg=cvB(['Total Charges Paid','totalchargespaid'],17);
+          netPaid2=Math.max(0,totalPaid-totalChg);
+          bounce2=cvB(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
+          // First EMI Date — prefer .f formatted value (Indian DD/MM/YYYY)
+          const cell2=pmtRec._raw?.[9];
+          const fmtV=cell2?.f?String(cell2.f).trim():'';
+          const rawV=fmtV||(gv(pmtRec,'First EMI Date','first emi date','FirstEMIDate')||cell2?.v||'');
+          firstEMI2=parseSheetDateObj(rawV);
+        }
+      }
+      bREC._netPaid=netPaid2; bREC._bounce=bounce2;
+      if(firstEMI2) bREC._firstEMIDate=firstEMI2;
+      // Loan Stage from Sheet2 (Col G, idx 6)
+      if(_CACHE2){
+        const _pmtR2=_CACHE2.find(r=>{const _i=gv(r,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','GQ App No','gqappno');const _ri=(_i!==null&&_i!=='')?_i:(r._raw?.[0]?.v??'');return _ri!==''&&_ri!=null&&String(_ri).trim()===String(aid).trim();});
+        if(_pmtR2){const _ls=gv(_pmtR2,'Loan Stage','loan stage','loanstage')||_pmtR2._raw?.[6]?.v||'';if(_ls)bREC.loanStage=String(_ls);}
+      }
+
       // Run same calc logic as calc()
       const {loan,te,ae,subv,ret:retP,intr,name:studentName,grp,nbfc}=bREC;
-      const intFee=intr/100*loan; // intr=0 for PD Dump sheet → intFee=0
+      const intFee=intr/100*loan;
       const emi=(loan/te)+(intFee/te);
       const advAmt=ae*emi;
       const ne=te-ae;
@@ -1832,7 +1933,7 @@ function switchBulkTab(idx,btn){
   document.querySelectorAll('.bst').forEach(b=>{b.style.background='#f1f5f9';b.style.color=b.dataset.color||'#374151';});
   btn.style.background='#3d52d6'; btn.style.color='#fff';
 }
-// ── HELPERS ──────────────────────────────────────────────
+// -- HELPERS --
 function ss(t,m){const e=document.getElementById('sb');e.className=t;e.innerHTML=m;e.style.display='block';}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 function clearAll(){
@@ -1843,41 +1944,31 @@ function clearAll(){
   document.getElementById('bc-tag').style.display='none';
   document.getElementById('sb').style.display='none';
   document.getElementById('strip').style.display='none';
-  // fc-letter-btn auto-hidden via clearAll #ms
   document.getElementById('ms').style.display='none';
   REC=null;S1=[];S2=[];
-  // Reset main view to calculator
   switchNav('calc',document.getElementById('nav-calc'));
 }
 function switchNav(id, btn){
-  // Show/hide main views
   document.getElementById('mv-calc').style.display=id==='calc'?'block':'none';
   document.getElementById('mv-bulk').style.display=id==='bulk'?'block':'none';
   const mfcl=document.getElementById('mv-fcletter');
   if(mfcl) mfcl.style.display=id==='fcletter'?'block':'none';
-  // fc-letter-btn is inside #ms, auto-shows with it
-  // Show/hide sub-items
   const subCalc=document.getElementById('sb-sub-calc');
   const subBulk=document.getElementById('sb-sub-bulk');
   if(subCalc) subCalc.style.display=id==='calc'?'block':'none';
   if(subBulk) subBulk.style.display=id==='bulk'?'block':'none';
-  // Update nav active states
   document.querySelectorAll('.sb-nav').forEach(el=>el.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  // Set today's date in fcletter-date if empty
   if(id==='fcletter'){const fd=document.getElementById('fcletter-date');if(fd&&!fd.value){const _td=new Date();const _pad=n=>String(n).padStart(2,'0');fd.value=`${_td.getFullYear()}-${_pad(_td.getMonth()+1)}-${_pad(_td.getDate())}`;}}
 }
 function switchMainView(id,btn){
-  // Legacy wrapper — routes to switchNav
   const navId=id==='calc'?'calc':id==='bulk'?'bulk':'calc';
   const navBtn=document.getElementById('nav-'+navId);
   switchNav(navId, navBtn);
 }
 function switchBulkType(id, btn){
-  // Highlight selected bulk sub-item
   document.querySelectorAll('#sb-sub-bulk .sb-item').forEach(el=>el.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  // If bulk preview is showing, scroll to that tab section
   const preview=document.getElementById('bulk-preview');
   if(preview&&preview.style.display!=='none'){
     const tabMap={both:'tab-combined',d:'tab-dropout',f:'tab-finalfc',rd:'tab-refund-d',rf:'tab-refund-f'};
@@ -1886,7 +1977,6 @@ function switchBulkType(id, btn){
   }
 }
 function switchTab(id,btn){
-  // Legacy — no-op or route to bulk
   if(id==='bulk'){const b=document.getElementById('nav-bulk');if(b)switchNav('bulk',b);return;}
 }
 function switchSched(id,btn){
@@ -1895,9 +1985,21 @@ function switchSched(id,btn){
   document.querySelectorAll('.st').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-
+function switchClosure(id,btn){
+  const ids=['both','d','f','rd','rf'];
+  ids.forEach(x=>{
+    const el=document.getElementById('closure-'+x);
+    if(el) el.style.display=x===id?'':'none';
+    const sb=document.getElementById('sb-'+x);
+    if(sb) sb.classList.remove('active');
+  });
+  const el=document.getElementById('closure-'+id);
+  if(el) el.style.display='';
+  if(btn) btn.classList.add('active');
+  calc();
+}
 async function bulkGenerateLetters(){
-  if(!_cacheReady){alert('Please Sync Data first (sidebar → Calculator → Sync Data).');return;}
+  if(!_cacheReady){alert('Please Sync Data first.');return;}
   const raw=document.getElementById('fcletter-ids').value.trim();
   if(!raw){alert('Please enter App IDs.');return;}
   const dateVal=document.getElementById('fcletter-date').value;
@@ -1911,16 +2013,30 @@ async function bulkGenerateLetters(){
     prog.innerHTML=`Generating ${done+1}/${ids.length}: <strong>${aid}</strong>...`;
     await new Promise(res=>setTimeout(res,0));
     try{
-      // Single-sheet lookup — parseRec extracts all fields including payment data
-      const rec=_CACHE2&&_CACHE2.find(row=>{
-        const _id=gv(row,'GQ Application ID','GQ App ID','App ID','AppID');
-        const _rid=(_id!==null&&_id!=='')?_id:(row._raw?.[0]?.v??'');
-        return _rid!==''&&_rid!=null&&String(_rid).trim()===String(aid).trim();
-      });
+      const rec=_CACHE1&&_CACHE1.find(row=>{const _id=gv(row,'App ID','AppID','Application Id');return _id&&String(_id).trim()===String(aid).trim();});
       if(!rec){errors.push(aid+' (not found)');done++;continue;}
-      const r=parseRec(rec); // all fields including _netPaid, _bounce, _firstEMIDate
-      // Quick calc
-      const intFee=r.intr/100*r.loan; // intr=0 for PD Dump → intFee=0
+      const r=parseRec(rec);
+      if(_CACHE2){
+        const pmtR=_CACHE2.find(row=>{
+          const _id=gv(row,'GQ Application ID','GQ App ID','App ID','AppID','Application Id','GQ App No','gqappno');
+          const _rid=(_id!==null&&_id!=='')?_id:(row._raw?.[0]?.v??'');
+          return _rid!==''&&_rid!=null&&String(_rid).trim()===String(aid).trim();
+        });
+        if(pmtR){
+          const cv2=(names,idx)=>{const v=gv(pmtR,...names);if(v!==null&&v!=='')return parseFloat(v)||0;return parseFloat(pmtR._raw?.[idx]?.v)||0;};
+          const tp=cv2(['Total Payment made till date','totalpaymentmadetilldate'],11);
+          const tc=cv2(['Total Charges Paid','totalchargespaid'],17);
+          r._netPaid=Math.max(0,tp-tc);
+          r._bounce=cv2(['Total Charges Outstanding Amount','totalchargesoutstandingamount'],18);
+          const cell2=pmtR._raw?.[9];
+          const fv=cell2?.f?String(cell2.f).trim():'';
+          const rv=fv||(gv(pmtR,'First EMI Date','first emi date','FirstEMIDate')||cell2?.v||'');
+          if(rv) r._firstEMIDate=parseSheetDateObj(rv);
+          const ls=gv(pmtR,'Loan Stage','loan stage','loanstage')||pmtR._raw?.[6]?.v||'';
+          if(ls) r.loanStage=String(ls);
+        }
+      }
+      const intFee=r.intr/100*r.loan;
       const emi=(r.loan/r.te)+(intFee/r.te);
       const ae=r.ae,ne=r.te-ae;
       const subvAmt=r.subv/100*r.loan;
@@ -1934,36 +2050,37 @@ async function bulkGenerateLetters(){
       const S1b=buildSched(netP1,emi,ne,mR1,true,retAmt);
       const S2b=buildSched(netP2,emi,ne,mR2,false,0);
       const amtP=r._netPaid||0;
-      let _rem=Math.max(0,amtP-ae*emi),ep=0;
+      const advAmt=ae*emi;
+      let _rem=Math.max(0,amtP-advAmt),ep=0;
       for(let i=0;i<S1b.length;i++){if(_rem>=S1b[i].emi){_rem-=S1b[i].emi;ep=i+1;}else break;}
       let pos1=ep>0?S1b[ep-1].cl:netP1,pos2=ep>0?S2b[ep-1].cl:netP2;
       if(_rem>0&&ep<S1b.length){pos1=Math.max(0,pos1-Math.max(0,_rem-S1b[ep].int));}
       if(_rem>0&&ep<S2b.length){pos2=Math.max(0,pos2-Math.max(0,_rem-S2b[ep].int));}
-      // DM calc
-      let dm=0;
-      const vd=new Date(dateVal);
-      if(r._firstEMIDate){
-        let eff=r._firstEMIDate;
-        if(r._liveDate&&r._firstEMIDate<r._liveDate){eff=new Date(r._liveDate);eff.setMonth(eff.getMonth()+1);}
-        const lpd=new Date(eff);if(ep>0)lpd.setMonth(lpd.getMonth()+(ep-1));
-        dm=Math.round((vd-lpd)/86400000);
-      }else{const ms=new Date(vd.getFullYear(),vd.getMonth(),1);dm=Math.round((vd-ms)/86400000);}
-      const dInt1=pos1*(mR1*12/360),dInt2=pos2*(mR2*12/360);
-      const pInt1=dm*dInt1,pInt2=dm*dInt2;
-      const fcAmt1=pos1+pInt1,fcChg1=0.0295*fcAmt1,final1=fcAmt1+fcChg1+(r._bounce||0);
-      const fcAmt2=pos2+pInt2,fcChg2=0.0295*fcAmt2,final2=fcAmt2+fcChg2+(r._bounce||0);
-      const todayStr=vd.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-      const bulkC={pos1,pos2,pInt1,pInt2,fcAmt1,fcAmt2,fcChg1,fcChg2,final1,final2,retAmt,bounce:r._bounce||0,today:todayStr,emi,loan:r.loan,amtPaid:amtP,emisPaid:ep,apr1:mR1*12,apr2:mR2*12,dm,netP1,netP2,ne,ae,advAmt:ae*emi,refund1:amtP-final1,refund2:amtP-final2};
-      // Open letter(s) in new window(s)
-      const openL=(type)=>{const w=window.open('','_blank','width=860,height=800,scrollbars=yes');if(w){const tmp=REC;const tmpC=LAST_CALC;REC=r;LAST_CALC=bulkC;const html2=buildLetterHTML(type);w.document.write(html2);w.document.close();REC=tmp;LAST_CALC=tmpC;}};
-      if(letterType==='dropout'||letterType==='both') openL('dropout');
-      if(letterType==='final'||letterType==='both') openL('final');
-      done++;
-    }catch(e){errors.push(aid+' ('+e.message+')');done++;}
-    await new Promise(res=>setTimeout(res,300)); // small gap so browser can open tabs
+      const fcChg=r._bounce||0;
+      const tmpREC_save=REC; REC=r;
+      document.getElementById('amtPaid').value=amtP;
+      document.getElementById('bc').value=fcChg;
+      const dmEl=document.getElementById('dmDate');
+      const oldDate=dmEl?dmEl.value:'';
+      if(dmEl) dmEl.value=dateVal;
+      const lh1=(letterType==='dropout'||letterType==='both')?buildLetterHTML('dropout'):null;
+      const lh2=(letterType==='final'||letterType==='both')?buildLetterHTML('final'):null;
+      REC=tmpREC_save;
+      if(dmEl) dmEl.value=oldDate;
+      if(lh1){const w=window.open('','_blank','width=860,height=900,scrollbars=yes');if(w){w.document.write(lh1);w.document.close();}}
+      if(lh2){await new Promise(res=>setTimeout(res,300));const w2=window.open('','_blank','width=860,height=900,scrollbars=yes');if(w2){w2.document.write(lh2);w2.document.close();}}
+    }catch(e){errors.push(aid+' (error: '+e.message+')');}
+    done++;
+    await new Promise(res=>setTimeout(res,200));
   }
-  prog.innerHTML=`&#10003; Done: ${done-errors.length} generated${errors.length>0?', '+errors.length+' errors: '+errors.join(', '):''}`;
+  prog.innerHTML=errors.length>0?`Done. Errors: ${errors.join(', ')}`:`<span style="color:var(--green);">&#10003; All ${done} letter(s) generated!</span>`;
 }
+window.onload=function(){
+  const _td=new Date();const _pad=n=>String(n).padStart(2,'0');
+  const ts=`${_td.getFullYear()}-${_pad(_td.getMonth()+1)}-${_pad(_td.getDate())}`;
+  const dm=document.getElementById('dmDate');if(dm&&!dm.value)dm.value=ts;
+  const bd=document.getElementById('bulk-date');if(bd&&!bd.value)bd.value=ts;
+};
 </script>
 </body>
 </html>
