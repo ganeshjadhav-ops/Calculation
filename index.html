@@ -408,6 +408,20 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
 
 
 <!-- FC LETTER TYPE MODAL -->
+<div id="bulk-row-modal-overlay" onclick="closeBulkRowModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;"></div>
+<div id="bulk-row-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:28px 32px;width:360px;z-index:1001;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+  <div style="font-size:1rem;font-weight:800;color:#1a3c5e;margin-bottom:6px;">Generate FC Letter</div>
+  <div style="font-size:.75rem;color:#94a3b8;margin-bottom:20px;">Choose letter type for <strong id="bulk-row-modal-name"></strong></div>
+  <button onclick="confirmBulkRowLetter('dropout')" style="width:100%;margin-bottom:10px;padding:13px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:10px;cursor:pointer;text-align:left;">
+    <div style="font-size:.85rem;font-weight:800;color:#92400e;">🎓 Dropout Closure Letter</div>
+    <div style="font-size:.7rem;color:#b45309;margin-top:2px;">With retention deducted — for students dropping out</div>
+  </button>
+  <button onclick="confirmBulkRowLetter('final')" style="width:100%;padding:13px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #3d52d6;border-radius:10px;cursor:pointer;text-align:left;">
+    <div style="font-size:.85rem;font-weight:800;color:#1d4ed8;">⚡ Final Foreclosure Letter</div>
+    <div style="font-size:.7rem;color:#3d52d6;margin-top:2px;">Without retention — full loan closure</div>
+  </button>
+  <button onclick="closeBulkRowModal()" style="width:100%;margin-top:12px;padding:10px;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;color:#64748b;">Cancel</button>
+</div>
 <div id="fc-modal-overlay" onclick="closeFCModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;"></div>
 <div id="fc-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:28px 32px;width:360px;z-index:1001;box-shadow:0 20px 60px rgba(0,0,0,.25);">
   <div style="font-size:1rem;font-weight:800;color:#1a3c5e;margin-bottom:6px;">Generate FC Letter</div>
@@ -434,7 +448,7 @@ const GID2='491266174';
 
 let REC=null,S1=[],S2=[];
 let LAST_CALC=null;
-let _bulkRows=[], _fcLetterRows=[];
+let _bulkRows=[], _fcLetterRows=[], _bulkResults=[];
 // ── DATA CACHE (Sync Data) ──────────────────────────────────────
 let _CACHE1=null,_CACHE2=null,_cacheReady=false;
 
@@ -1297,6 +1311,49 @@ function closeFCModal(){
   document.getElementById('fc-modal').style.display='none';
   document.getElementById('fc-modal-overlay').style.display='none';
 }
+let _bulkRowLetterIdx=-1;
+function openBulkRowLetter(idx){
+  const r=_bulkResults[idx];
+  if(!r||r.error){alert('No valid data for this row.');return;}
+  _bulkRowLetterIdx=idx;
+  document.getElementById('bulk-row-modal-name').textContent=(r.student||r.aid)+' — '+r.aid;
+  document.getElementById('bulk-row-modal').style.display='block';
+  document.getElementById('bulk-row-modal-overlay').style.display='block';
+}
+function closeBulkRowModal(){
+  document.getElementById('bulk-row-modal').style.display='none';
+  document.getElementById('bulk-row-modal-overlay').style.display='none';
+  _bulkRowLetterIdx=-1;
+}
+function confirmBulkRowLetter(type){
+  closeBulkRowModal();
+  const r=_bulkResults[_bulkRowLetterIdx];
+  if(!r)return;
+  // Build a synthetic LAST_CALC from bulk result
+  const bulkC={
+    pos1:r.pos1,pos2:r.pos2,pInt1:r.pInt1,pInt2:r.pInt2,
+    fcAmt1:r.fcAmt1,fcAmt2:r.fcAmt2,fcChg1:r.fcChg1,fcChg2:r.fcChg2,
+    final1:r.dropoutClosure,final2:r.finalFC,
+    retAmt:r.retAmt,bounce:r.bounce,today:r.asOfDate,
+    emi:r.emi,loan:r.loan,amtPaid:r.amtPaid,
+    emisPaid:r.emisPaid,excessPmt:r.excessPmt,dm:r.days,
+    netP1:r.pos1,ne:r.ne,ae:r.ae,advAmt:r.ae*r.emi,
+    refund1:r.refund1||0,refund2:r.refund2||0
+  };
+  const tmp=REC, tmpC=LAST_CALC;
+  REC=r; LAST_CALC=bulkC;
+  const html2=buildLetterHTML(type);
+  REC=tmp; LAST_CALC=tmpC;
+  if(html2){
+    const blob=new Blob([html2],{type:'text/html'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='GrayQuest_'+(type==='dropout'?'Dropout':'FinalFC')+'_'+r.aid+'.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+}
 function buildLetterHTML(type){
   if(!REC||!LAST_CALC){return '';}
   const isDropout = (type === 'dropout');
@@ -1583,6 +1640,7 @@ async function bulkExport(){
     await new Promise(res=>setTimeout(res,0)); // yield to UI
   }
 
+  _bulkResults=[...results]; // store for per-row letter generation
   prog.innerHTML=`<span style="color:var(--green)">&#10003; Done! ${results.filter(r=>!r.error).length}/${ids.length} processed.</span>`;
 
   // Build Excel
@@ -1590,13 +1648,13 @@ async function bulkExport(){
     'Amount Paid','EMIs Paid','Excess Payment','POS (Dropout)','Prorated Int (Dropout)',
     'FC Base (Dropout)','FC Charge (Dropout)','Retention','Bounce Charges','Dropout Closure',
     'POS (Final FC)','Prorated Int (Final)','FC Base (Final)','FC Charge (Final)',
-    'Final Foreclosure','Refund (Dropout)','Refund (Final FC)','Days','As of Date','Remark'];
+    'Final Foreclosure','Days','As of Date','Remark'];
 
   const rows=results.map(r=>r.error?
-    [r.aid,'','','','','','','','','','','','','','','','','','','','','','','',r.error]:
+    [r.aid,'','','','','','','','','','','','','','','','','','','','','','',r.error]:
     [r.aid,r.student,r.institute,r.nbfc,r.loan,r.emi,r.ne,r.ae,
      r.amtPaid,r.emisPaid,r.excessPmt,r.pos1,r.pInt1,r.fcAmt1,r.fcChg1,r.retAmt,r.bounce,r.dropoutClosure,
-     r.pos2,r.pInt2,r.fcAmt2,r.fcChg2,r.finalFC,r.refund1,r.refund2,r.days,r.asOfDate,'OK']
+     r.pos2,r.pInt2,r.fcAmt2,r.fcChg2,r.finalFC,r.days,r.asOfDate,'OK']
   );
 
   const wb=XLSX.utils.book_new();
@@ -1650,7 +1708,7 @@ async function bulkExport(){
         <th style="${hdrCls}right">POS</th><th style="${hdrCls}right">Prorated Int</th>
         <th style="${hdrCls}right">FC Base</th><th style="${hdrCls}right">FC Charge</th>
         <th style="${hdrCls}right">Retention</th><th style="${hdrCls}right">Bounce</th>
-        <th style="${hdrCls}right">&#127891; Dropout Closure</th><th style="${hdrCls}center">Date</th>
+        <th style="${hdrCls}right">&#127891; Dropout Closure</th><th style="${hdrCls}center">Date</th><th style="${hdrCls}center">Letter</th>
       </tr></thead><tbody>`;
     ok.forEach((r,i)=>{
       t2+=`<tr style="background:${i%2?'#fffbeb':'#fff'}">
@@ -1664,6 +1722,7 @@ async function bulkExport(){
         <td style="${tdCls}text-align:right;color:#dc2626">&#8377;${IN2(r.bounce)}</td>
         <td style="${tdCls}text-align:right;font-weight:800;color:#92400e">&#8377;${IN2(r.dropoutClosure)}</td>
         <td style="${tdCls}text-align:center;color:#64748b;font-size:.68rem">${r.asOfDate}</td>
+        <td style="${tdCls}text-align:center"><button onclick="openBulkRowLetter(${i})" style="background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;">&#128233; Letter</button></td>
       </tr>`;
     });
     t2+='</tbody></table>';
@@ -1675,7 +1734,7 @@ async function bulkExport(){
         <th style="${hdrCls}right">POS</th><th style="${hdrCls}right">Prorated Int</th>
         <th style="${hdrCls}right">FC Base</th><th style="${hdrCls}right">FC Charge</th>
         <th style="${hdrCls}right">Bounce</th>
-        <th style="${hdrCls}right">&#9889; Final Foreclosure</th><th style="${hdrCls}center">Date</th>
+        <th style="${hdrCls}right">&#9889; Final Foreclosure</th><th style="${hdrCls}center">Date</th><th style="${hdrCls}center">Letter</th>
       </tr></thead><tbody>`;
     ok.forEach((r,i)=>{
       t3+=`<tr style="background:${i%2?'#eff6ff':'#fff'}">
@@ -1688,6 +1747,7 @@ async function bulkExport(){
         <td style="${tdCls}text-align:right;color:#dc2626">&#8377;${IN2(r.bounce)}</td>
         <td style="${tdCls}text-align:right;font-weight:800;color:#1d4ed8">&#8377;${IN2(r.finalFC)}</td>
         <td style="${tdCls}text-align:center;color:#64748b;font-size:.68rem">${r.asOfDate}</td>
+        <td style="${tdCls}text-align:center"><button onclick="openBulkRowLetter(${i})" style="background:linear-gradient(135deg,#1565C0,#1976d2);color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;">&#128233; Letter</button></td>
       </tr>`;
     });
     t3+='</tbody></table>';
