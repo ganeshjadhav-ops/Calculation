@@ -70,14 +70,14 @@ main{width:100%;margin:0;padding:0;display:flex;align-items:flex-start;}
 
 /* ── INFO STRIP ── */
 #strip{display:none;}
-.info-grid{display:grid;grid-template-columns:repeat(10,1fr);border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;}
+.info-grid{display:grid;grid-template-columns:repeat(11,1fr);border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;}
 .ibox{padding:10px 12px;border-right:1px solid var(--border);background:var(--white);}
 .ibox:last-child{border-right:none;}
 .ibox:hover{background:#f8fafc;}
 .ib-l{font-size:.57rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
 .ib-v{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ib-v.blue{color:var(--blue);}.ib-v.green{color:var(--green);}.ib-v.orange{color:var(--orange);}.ib-v.red{color:var(--red);}.ib-v.teal{color:var(--teal);}
-@media(max-width:1000px){.info-grid{grid-template-columns:repeat(5,1fr);}.ibox{border-bottom:1px solid var(--border);}}
+@media(max-width:1200px){.info-grid{grid-template-columns:repeat(6,1fr);}.ibox{border-bottom:1px solid var(--border);}}
 
 /* ── INPUTS ── */
 #ms{display:none;}
@@ -668,6 +668,14 @@ async function fetchAll(){
         REC._bounce           = chargesOutstanding > 0 ? chargesOutstanding : 0;
         REC._totalPaid        = totalPaid;
         REC._totalChg         = totalChg;
+        // Col G (idx 6) — Loan Stage (from PD Dump sheet)
+        const loanStage=(()=>{
+          const v=gv(pmtRec,'Loan Stage','loan stage','LoanStage','Stage','loan_stage');
+          if(v!==null&&v!=='')return String(v).trim();
+          const raw=pmtRec._raw?.[6]?.f??pmtRec._raw?.[6]?.v??'';
+          return raw?String(raw).trim():'';
+        })();
+        if(loanStage)REC.stage=loanStage;
       } else {
         // Sheet2 lookup failed — log actual columns for debugging
         const _r0 = rows2[0]||{};
@@ -691,8 +699,8 @@ async function fetchAll(){
     document.getElementById('ep-tag').style.display='none';
     document.getElementById('emi-derived-info').textContent='';
     // Auto-set date to today if not already set
-    if(!document.getElementById('dmDate').value){
-      const _td=new Date(); const _pad=n=>String(n).padStart(2,'0');
+    {
+      const _td=new Date();_td.setDate(_td.getDate()+15); const _pad=n=>String(n).padStart(2,'0');
       document.getElementById('dmDate').value=`${_td.getFullYear()}-${_pad(_td.getMonth()+1)}-${_pad(_td.getDate())}`;
     }
     document.getElementById('bc-tag').style.display='none';
