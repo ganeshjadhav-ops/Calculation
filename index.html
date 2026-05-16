@@ -79,6 +79,30 @@ main{width:100%;margin:0;padding:0;display:flex;align-items:flex-start;}
 .ib-v.blue{color:var(--blue);}.ib-v.green{color:var(--green);}.ib-v.orange{color:var(--orange);}.ib-v.red{color:var(--red);}.ib-v.teal{color:var(--teal);}
 @media(max-width:1200px){.info-grid{grid-template-columns:repeat(6,1fr);}.ibox{border-bottom:1px solid var(--border);}}
 
+/* ── REQUESTS TAB ── */
+#mv-requests{display:none;}
+.req-table{width:100%;border-collapse:collapse;font-size:.75rem;}
+.req-table th{background:#f1f5f9;padding:9px 10px;text-align:left;font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t2);border-bottom:2px solid var(--border);}
+.req-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.req-table tr:hover td{background:#f8fafc;}
+.req-badge-pill{display:inline-flex;align-items:center;justify-content:center;background:#ef4444;color:#fff;font-size:.55rem;font-weight:800;border-radius:99px;min-width:16px;height:16px;padding:0 5px;margin-left:5px;vertical-align:middle;}
+.req-status{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.63rem;font-weight:700;}
+.req-status.pending{background:#fef3c7;color:#92400e;}
+.req-status.approved{background:#d1fae5;color:#065f46;}
+.req-status.rejected{background:#fee2e2;color:#991b1b;}
+.req-type-pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.63rem;font-weight:700;}
+.req-type-pill.dropout{background:#eff6ff;color:#1d4ed8;}
+.req-type-pill.fc{background:#f5f3ff;color:#6d28d9;}
+.req-type-pill.other{background:#f1f5f9;color:var(--t2);}
+/* Admin lock button */
+#admin-lock-btn{background:none;border:none;cursor:pointer;padding:11px 22px;color:rgba(255,255,255,.28);font-size:.7rem;font-weight:600;text-align:left;width:100%;transition:all .15s;letter-spacing:.02em;display:flex;align-items:center;gap:7px;}
+#admin-lock-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.06);}
+/* Passcode modal */
+#pass-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;}
+#pass-modal.open{display:flex;}
+#pass-box{background:#fff;border-radius:16px;padding:30px 32px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+
+
 /* ── INPUTS ── */
 #ms{display:none;}
 .inp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -232,6 +256,18 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div class="sb-nav" id="nav-fcletter" onclick="switchNav('fcletter',this)">
     <span class="sb-nav-label">Bulk FC/DC Letter</span>
   </div>
+
+  <div class="sb-divider"></div>
+
+  <!-- TOP-LEVEL NAV: Calculation Requests (admin only — hidden until unlocked) -->
+  <div class="sb-nav" id="nav-requests" onclick="switchNav('requests',this)" style="display:none;">
+    <span class="sb-nav-label" style="display:flex;align-items:center;">Calc Requests<span id="req-pill" class="req-badge-pill" style="display:none;">0</span></span>
+  </div>
+
+  <!-- Spacer pushes lock button to bottom -->
+  <div style="flex:1;min-height:20px;"></div>
+  <div class="sb-divider"></div>
+  <button id="admin-lock-btn" onclick="openPassModal()"><span>🔒</span><span id="lock-label">Admin Access</span></button>
 
 </div><!-- end left-sidebar -->
 
@@ -407,6 +443,79 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
     <div id="fcletter-progress" style="font-size:.73rem;color:var(--t2);margin-top:12px;min-height:20px;"></div>
   </div>
 </div><!-- end mv-fcletter -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CALCULATION REQUESTS PANEL (admin) -->
+<div id="mv-requests" style="display:none;">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div>
+        <div style="font-weight:800;font-size:1rem;color:var(--text);">📋 Calculation Requests</div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Requests received from the institute/student refund form</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="req-poll-status" style="font-size:.67rem;color:var(--muted);"></span>
+        <button class="btn btn-ghost" onclick="loadRequests()" style="font-size:.72rem;padding:6px 14px;">↻ Refresh</button>
+        <button onclick="toggleReqConfig()" style="background:#f1f5f9;color:var(--t2);border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;">⚙ Config</button>
+      </div>
+    </div>
+
+    <!-- Config panel -->
+    <div id="req-config" style="display:none;background:#f8fafc;border:1.5px solid var(--border);border-radius:var(--rs);padding:16px;margin-bottom:16px;">
+      <div style="font-size:.7rem;font-weight:800;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">📄 Form Response Sheet Configuration</div>
+      <div style="display:grid;grid-template-columns:1fr 200px;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:.63rem;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;">GOOGLE SHEET ID (Form Responses Sheet)</label>
+          <input id="req-sid" placeholder="Paste the Form response spreadsheet ID here" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.73rem;font-family:monospace;">
+        </div>
+        <div>
+          <label style="font-size:.63rem;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;">SHEET GID (tab, default 0)</label>
+          <input id="req-gid" placeholder="0" value="0" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.73rem;font-family:monospace;">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:7px;font-size:.73rem;font-weight:600;cursor:pointer;color:var(--t2);">
+          <input type="checkbox" id="req-autopoll" onchange="toggleAutoPoll()" style="cursor:pointer;accent-color:var(--blue);">
+          Auto-refresh every 60 sec
+        </label>
+        <button onclick="saveReqConfig()" style="background:#1d4ed8;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.73rem;">Save &amp; Load</button>
+      </div>
+      <div style="margin-top:10px;padding:8px 12px;background:#eff6ff;border-radius:6px;font-size:.68rem;color:#1d4ed8;line-height:1.5;">
+        💡 <strong>How to find the Sheet ID:</strong> Open the Google Sheet linked to your Refund Request Form → copy the long ID from the URL between <code>/d/</code> and <code>/edit</code>. Make sure the sheet is set to <em>Anyone with link → Viewer</em>.
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="req-stats" style="display:none;display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;"></div>
+
+    <!-- Table -->
+    <div id="req-empty" style="text-align:center;padding:50px 20px;color:var(--muted);font-size:.82rem;">
+      ⚙️ Configure the Form response Sheet ID above and click <strong>Refresh</strong> to load requests.
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="req-table" id="req-tbl" style="display:none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Timestamp</th>
+            <th>App ID</th>
+            <th>Institute / School</th>
+            <th>Branch / City</th>
+            <th>Type</th>
+            <th>Proof</th>
+            <th>Requested By</th>
+            <th>Institute Email</th>
+            <th>GQ Employee</th>
+            <th>Refund Policy</th>
+            <th>Status</th>
+            <th style="min-width:140px;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="req-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- end mv-requests -->
 
 
 <!-- FC LETTER TYPE MODAL -->
@@ -1517,7 +1626,24 @@ function buildLetterHTML(type){
     <span>Generated: ${today} &bull; GrayQuest Dropout Repayment Calculator</span>
     <span>App ID: ${appId} &bull; Confidential</span>
   </div>
-</div></body></html>`;
+</div>
+<!-- ADMIN PASSCODE MODAL -->
+<div id="pass-modal">
+  <div id="pass-box">
+    <div style="font-size:1.15rem;font-weight:800;margin-bottom:5px;color:var(--text);">🔒 Admin Access</div>
+    <div style="font-size:.77rem;color:var(--t2);margin-bottom:20px;line-height:1.5;">Enter the admin passcode to access the Calculation Requests tab.</div>
+    <input type="password" id="pass-inp" placeholder="Enter passcode" autocomplete="off"
+      onkeydown="if(event.key==='Enter')checkPass()"
+      style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.92rem;margin-bottom:8px;outline:none;box-sizing:border-box;transition:border .15s;"
+      onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='var(--border)'">
+    <div id="pass-err" style="color:#dc2626;font-size:.71rem;margin-bottom:10px;display:none;">❌ Incorrect passcode. Try again.</div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="checkPass()" style="flex:1;background:#1d4ed8;color:#fff;border:none;padding:11px;border-radius:9px;font-weight:700;cursor:pointer;font-size:.85rem;">Unlock</button>
+      <button onclick="closePassModal()" style="flex:1;background:#f1f5f9;color:var(--t2);border:1px solid var(--border);padding:11px;border-radius:9px;font-weight:600;cursor:pointer;font-size:.85rem;">Cancel</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
   return lw;
 }
 function openLetter(type){
@@ -1917,6 +2043,8 @@ function switchNav(id, btn){
   document.getElementById('mv-bulk').style.display=id==='bulk'?'block':'none';
   const mfcl=document.getElementById('mv-fcletter');
   if(mfcl) mfcl.style.display=id==='fcletter'?'block':'none';
+  const mreq=document.getElementById('mv-requests');
+  if(mreq) mreq.style.display=id==='requests'?'block':'none';
   // fc-letter-btn is inside #ms, auto-shows with it
   // Show/hide sub-items
   const subCalc=document.getElementById('sb-sub-calc');
@@ -2097,6 +2225,229 @@ async function bulkGenerateLetters(){
   }
   prog.innerHTML=`&#10003; Done: ${done-errors.length} generated${errors.length>0?', '+errors.length+' errors: '+errors.join(', '):''}`;
 }
+
+// ═══════════════════════════════════════════════════════════
+// CALCULATION REQUESTS — Admin Module
+// ═══════════════════════════════════════════════════════════
+const ADMIN_PASS = 'GQ@2026'; // ← change this passcode anytime
+let _adminUnlocked = false;
+let _reqPollTimer  = null;
+let _reqData       = [];
+
+// ── Passcode modal ──
+function openPassModal(){
+  if(_adminUnlocked){
+    switchNav('requests', document.getElementById('nav-requests'));
+    if(_reqData.length===0) loadRequests();
+    return;
+  }
+  document.getElementById('pass-inp').value = '';
+  document.getElementById('pass-err').style.display = 'none';
+  document.getElementById('pass-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pass-inp').focus(), 120);
+}
+function closePassModal(){
+  document.getElementById('pass-modal').classList.remove('open');
+}
+function checkPass(){
+  const v = document.getElementById('pass-inp').value;
+  if(v === ADMIN_PASS){
+    _adminUnlocked = true;
+    closePassModal();
+    document.getElementById('nav-requests').style.display = '';
+    document.getElementById('lock-label').textContent = '✓ Admin Mode';
+    document.getElementById('admin-lock-btn').style.color = 'rgba(255,255,255,.65)';
+    switchNav('requests', document.getElementById('nav-requests'));
+    // Restore saved config
+    const sid = localStorage.getItem('req_sid')||'';
+    const gid = localStorage.getItem('req_gid')||'0';
+    if(sid){ document.getElementById('req-sid').value = sid; document.getElementById('req-gid').value = gid; loadRequests(); }
+    else { document.getElementById('req-config').style.display = 'block'; }
+  } else {
+    document.getElementById('pass-err').style.display = 'block';
+    document.getElementById('pass-inp').select();
+  }
+}
+
+// ── Config helpers ──
+function toggleReqConfig(){
+  const c = document.getElementById('req-config');
+  c.style.display = c.style.display === 'none' ? 'block' : 'none';
+}
+function saveReqConfig(){
+  const sid = document.getElementById('req-sid').value.trim();
+  const gid = document.getElementById('req-gid').value.trim() || '0';
+  if(!sid){ alert('Please paste the Form Response Sheet ID.'); return; }
+  localStorage.setItem('req_sid', sid);
+  localStorage.setItem('req_gid', gid);
+  document.getElementById('req-config').style.display = 'none';
+  loadRequests();
+}
+
+// ── Auto-poll ──
+function toggleAutoPoll(){
+  if(document.getElementById('req-autopoll').checked){
+    _reqPollTimer = setInterval(loadRequests, 60000);
+  } else {
+    clearInterval(_reqPollTimer); _reqPollTimer = null;
+  }
+}
+
+// ── Load requests from Form response sheet ──
+async function loadRequests(){
+  const sid = localStorage.getItem('req_sid') || document.getElementById('req-sid').value.trim();
+  const gid = localStorage.getItem('req_gid') || '0';
+  if(sid && document.getElementById('req-sid').value === '') document.getElementById('req-sid').value = sid;
+  if(!sid){
+    document.getElementById('req-empty').innerHTML = '⚙️ Configure the Form response Sheet ID above and click <strong>Refresh</strong> to load requests.';
+    document.getElementById('req-empty').style.display = 'block';
+    document.getElementById('req-tbl').style.display = 'none';
+    return;
+  }
+  document.getElementById('req-poll-status').textContent = 'Loading…';
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json${gid&&gid!=='0'?'&gid='+gid:''}`;
+    const res = await fetch(url);
+    const txt = await res.text();
+    _reqData = parseGviz(txt);
+    renderRequests(_reqData);
+    const t = new Date();
+    document.getElementById('req-poll-status').textContent =
+      `Updated: ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
+  } catch(e){
+    document.getElementById('req-poll-status').textContent = 'Error: ' + e.message;
+    document.getElementById('req-empty').innerHTML = '❌ Could not load: ' + e.message + '<br><small>Make sure the sheet is public (Anyone with link → Viewer)</small>';
+    document.getElementById('req-empty').style.display = 'block';
+    document.getElementById('req-tbl').style.display = 'none';
+  }
+}
+
+// ── Column value helper for form response rows ──
+function rv(row, ...names){
+  for(const n of names){
+    const nv = nm(n);
+    const k = Object.keys(row).find(k => nm(k) === nv);
+    if(k !== undefined && row[k] !== '' && row[k] !== null && row[k] !== undefined)
+      return String(row[k]).trim();
+  }
+  return '—';
+}
+
+// ── Render the requests table ──
+function renderRequests(rows){
+  const approvals = JSON.parse(localStorage.getItem('req_approvals') || '{}');
+  const tbody = document.getElementById('req-tbody');
+  tbody.innerHTML = '';
+  let pending = 0, approved = 0, rejected = 0;
+
+  rows.forEach((row, i) => {
+    const ts       = rv(row, 'Timestamp','timestamp','Time','Submitted At');
+    const appId    = rv(row, 'APP ID','App ID','AppID','APPID','Application ID','app_id');
+    const inst     = rv(row, 'INSTITUTE/SCHOOL NAME','Institute Name','Institute','School Name','institute');
+    const branch   = rv(row, 'BRANCH/CITY NAME','Branch','City','Branch/City','branch');
+    const ctype    = rv(row, 'CANCELLATION TYPE','Cancellation Type','Type','Request Type','cancellation_type');
+    const proof    = rv(row, 'CANCELLATION PROOF UPLOAD','Proof Upload','Proof','Document Link','cancellation_proof_upload');
+    const reqBy    = rv(row, 'Refund Request Raised By (Name)','Raised By','Requested By','raised_by');
+    const instEmail= rv(row, 'Email ID of Institute','Institute Email','Email of Institute','institute_email');
+    const gqEmail  = rv(row, 'Email ID of GQ Employee','GQ Employee Email','Employee Email','gq_employee_email');
+    const refund   = rv(row, 'Refund Policy','Refund','refund_policy');
+
+    if(!appId || appId === '—') return; // skip header/empty rows
+
+    const key = `${appId}_${i}`;
+    const status = approvals[key] || 'pending';
+    if(status === 'pending') pending++;
+    else if(status === 'approved') approved++;
+    else rejected++;
+
+    const ctypeLower = ctype.toLowerCase();
+    const isDropout = ctypeLower.includes('dropout');
+    const isFC = ctypeLower.includes('foreclosure') || ctypeLower.includes('final') || ctypeLower.includes('fc');
+    const typeClass = isDropout ? 'dropout' : isFC ? 'fc' : 'other';
+    const typeLabel = isDropout ? 'Dropout' : isFC ? 'Final FC' : (ctype === '—' ? '—' : ctype);
+
+    const hasProof = proof && proof !== '—' && (proof.startsWith('http') || proof.startsWith('https'));
+    const proofHtml = hasProof
+      ? `<a href="${proof}" target="_blank" style="color:#1d4ed8;font-weight:700;font-size:.7rem;text-decoration:none;">📎 View</a>`
+      : `<span style="color:var(--muted);font-size:.7rem;">—</span>`;
+
+    const actionHtml = status === 'pending'
+      ? `<div style="display:flex;gap:5px;flex-wrap:wrap;">
+           <button onclick="approveReq('${key}','${appId}','${typeClass}')"
+             style="background:#1d4ed8;color:#fff;border:none;padding:5px 11px;border-radius:7px;font-size:.67rem;font-weight:700;cursor:pointer;white-space:nowrap;">✓ Approve</button>
+           <button onclick="rejectReq('${key}')"
+             style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;padding:5px 11px;border-radius:7px;font-size:.67rem;font-weight:700;cursor:pointer;">✗ Reject</button>
+         </div>`
+      : `<span style="font-size:.7rem;color:var(--muted);">—</span>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:.68rem;">${i+1}</td>
+      <td style="font-size:.68rem;color:var(--t2);white-space:nowrap;">${ts}</td>
+      <td><span style="font-weight:800;color:var(--blue);font-size:.8rem;cursor:pointer;" onclick="quickLoadAid('${appId}')" title="Click to load in calculator">${appId}</span></td>
+      <td style="font-size:.72rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${inst}">${inst}</td>
+      <td style="font-size:.72rem;">${branch}</td>
+      <td><span class="req-type-pill ${typeClass}">${typeLabel}</span></td>
+      <td>${proofHtml}</td>
+      <td style="font-size:.72rem;">${reqBy}</td>
+      <td style="font-size:.68rem;color:var(--t2);">${instEmail}</td>
+      <td style="font-size:.68rem;color:var(--t2);">${gqEmail}</td>
+      <td style="font-size:.7rem;">${refund}</td>
+      <td><span class="req-status ${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></td>
+      <td>${actionHtml}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Update pill badge
+  const pill = document.getElementById('req-pill');
+  if(pending > 0){ pill.textContent = pending; pill.style.display = ''; }
+  else { pill.style.display = 'none'; }
+
+  // Stats bar
+  const statsEl = document.getElementById('req-stats');
+  if(statsEl){
+    statsEl.style.display = 'flex';
+    statsEl.innerHTML = [
+      ['Total', rows.length, '#6b7280','#f1f5f9'],
+      ['Pending', pending, '#92400e','#fef3c7'],
+      ['Approved', approved, '#065f46','#d1fae5'],
+      ['Rejected', rejected, '#991b1b','#fee2e2'],
+    ].map(([l,v,c,bg])=>`<div style="padding:7px 14px;background:${bg};border-radius:8px;font-size:.72rem;font-weight:700;color:${c};">${l}: ${v}</div>`).join('');
+  }
+
+  document.getElementById('req-tbl').style.display = tbody.children.length ? 'table' : 'none';
+  document.getElementById('req-empty').style.display = tbody.children.length ? 'none' : 'block';
+  if(!tbody.children.length) document.getElementById('req-empty').innerHTML = '📭 No requests found in the sheet.';
+}
+
+// ── Approve: open App ID in calculator ──
+function approveReq(key, appId, typeClass){
+  const approvals = JSON.parse(localStorage.getItem('req_approvals') || '{}');
+  approvals[key] = 'approved';
+  localStorage.setItem('req_approvals', JSON.stringify(approvals));
+  // Switch to calculator and auto-load App ID
+  quickLoadAid(appId);
+  toast('✓ Approved — Loading ' + appId + ' in Calculator');
+  setTimeout(() => renderRequests(_reqData), 400);
+}
+
+// ── Reject request ──
+function rejectReq(key){
+  if(!confirm('Reject this request?')) return;
+  const approvals = JSON.parse(localStorage.getItem('req_approvals') || '{}');
+  approvals[key] = 'rejected';
+  localStorage.setItem('req_approvals', JSON.stringify(approvals));
+  renderRequests(_reqData);
+  toast('Request rejected.');
+}
+
+// ── Quick-load App ID from requests table into calculator ──
+function quickLoadAid(appId){
+  switchNav('calc', document.getElementById('nav-calc'));
+  document.getElementById('aid').value = appId;
+  fetchAll();
+}
+
 </script>
 </body>
 </html>
