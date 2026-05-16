@@ -2234,40 +2234,34 @@ let _adminUnlocked = false;
 let _reqPollTimer  = null;
 let _reqData       = [];
 
-// ── Passcode modal ──
+// ── Passcode — uses browser prompt() so no HTML element needed ──
 function openPassModal(){
   if(_adminUnlocked){
     switchNav('requests', document.getElementById('nav-requests'));
     if(_reqData.length===0) loadRequests();
     return;
   }
-  document.getElementById('pass-inp').value = '';
-  document.getElementById('pass-err').style.display = 'none';
-  document.getElementById('pass-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('pass-inp').focus(), 120);
-}
-function closePassModal(){
-  document.getElementById('pass-modal').classList.remove('open');
-}
-function checkPass(){
-  const v = document.getElementById('pass-inp').value;
-  if(v === ADMIN_PASS){
+  const v = prompt('🔒 Enter Admin Passcode:');
+  if(v === null) return; // user cancelled
+  if(v.trim() === ADMIN_PASS){
     _adminUnlocked = true;
-    closePassModal();
     document.getElementById('nav-requests').style.display = '';
-    document.getElementById('lock-label').textContent = '✓ Admin Mode';
+    const lbl = document.getElementById('lock-label');
+    if(lbl) lbl.textContent = '✓ Admin Mode';
     document.getElementById('admin-lock-btn').style.color = 'rgba(255,255,255,.65)';
     switchNav('requests', document.getElementById('nav-requests'));
-    // Restore saved config
     const sid = localStorage.getItem('req_sid')||'';
     const gid = localStorage.getItem('req_gid')||'0';
-    if(sid){ document.getElementById('req-sid').value = sid; document.getElementById('req-gid').value = gid; loadRequests(); }
-    else { document.getElementById('req-config').style.display = 'block'; }
+    const sidEl = document.getElementById('req-sid');
+    const gidEl = document.getElementById('req-gid');
+    if(sid && sidEl){ sidEl.value = sid; if(gidEl) gidEl.value = gid; loadRequests(); }
+    else { const cfg=document.getElementById('req-config'); if(cfg) cfg.style.display='block'; }
   } else {
-    document.getElementById('pass-err').style.display = 'block';
-    document.getElementById('pass-inp').select();
+    alert('❌ Incorrect passcode. Try again.');
   }
 }
+function closePassModal(){ /* no-op, kept for compatibility */ }
+function checkPass(){ /* no-op, kept for compatibility */ }
 
 // ── Config helpers ──
 function toggleReqConfig(){
