@@ -2299,18 +2299,47 @@ async function loadRequests(){
     return;
   }
   document.getElementById('req-poll-status').textContent = 'Loading…';
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json${gid&&gid!=='0'?'&gid='+gid:''}`;
+  // Helper: try a gviz URL, return parsed rows or null
+  const tryFetch = async (url) => {
+    console.log('[Requests] Trying:', url);
     const res = await fetch(url);
     const txt = await res.text();
-    _reqData = parseGviz(txt);
-    renderRequests(_reqData);
+    console.log('[Requests] Status:', res.status, '| First 200:', txt.substring(0,200));
+    if(!res.ok) return null;
+    if(txt.includes('<html')||txt.includes('<!DOCTYPE')) return null;
+    if(!txt.includes('setResponse')) return null;
+    return parseGviz(txt);
+  };
+  try {
+    let rows = null;
+    // Attempt 1: with GID
+    if(gid && gid !== '0'){
+      rows = await tryFetch(`https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json&gid=${gid}`);
+    }
+    // Attempt 2: without GID (reads first/default tab)
+    if(!rows){
+      rows = await tryFetch(`https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json`);
+    }
+    // Attempt 3: with sheet name param
+    if(!rows){
+      rows = await tryFetch(`https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:json&sheet=Form%20Responses%201`);
+    }
+    if(!rows) throw new Error('Could not read sheet. Make sure Share → Anyone with link → Viewer is ON.');
+    _reqData = rows;
+    renderRequests(rows);
     const t = new Date();
     document.getElementById('req-poll-status').textContent =
       `Updated: ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
   } catch(e){
-    document.getElementById('req-poll-status').textContent = 'Error: ' + e.message;
-    document.getElementById('req-empty').innerHTML = '❌ Could not load: ' + e.message + '<br><small>Make sure the sheet is public (Anyone with link → Viewer)</small>';
+    console.error('[Requests] Failed:', e.message);
+    document.getElementById('req-poll-status').textContent = 'Error';
+    document.getElementById('req-empty').innerHTML =
+      `❌ <strong>${e.message}</strong><br><br>
+       <div style="margin-top:10px;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:.72rem;color:#92400e;line-height:1.6;">
+        <strong>Fix:</strong> In your Google Sheet → click <strong>Share</strong> (top right) →
+        Under "General access" change <strong>Restricted → Anyone with the link</strong> → Role: <strong>Viewer</strong> → Done.<br>
+        Then click Refresh here.
+       </div>`;
     document.getElementById('req-empty').style.display = 'block';
     document.getElementById('req-tbl').style.display = 'none';
   }
