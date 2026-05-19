@@ -605,6 +605,12 @@ td:first-child{text-align:center;font-weight:700;color:var(--blue);}
   <div class="card" style="border-top:3px solid #d97706;">
     <div class="sh">👥 User Management — Admin Only</div>
 
+    <!-- HOW IT WORKS -->
+    <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:var(--rs);padding:12px 16px;margin-bottom:14px;font-size:.73rem;color:#065f46;">
+      <strong>⚡ How to give access to a new person:</strong><br>
+      1. Create their user below &nbsp;→&nbsp; 2. Click <strong>🔗 Setup Link</strong> next to their name &nbsp;→&nbsp; 3. Send the copied link to them on WhatsApp/Email &nbsp;→&nbsp; 4. They open it once in their browser — account auto-registers → they login normally.
+    </div>
+
     <!-- ADD NEW USER FORM -->
     <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:var(--rs);padding:18px 20px;margin-bottom:18px;">
       <div style="font-size:.72rem;font-weight:800;color:#92400e;margin-bottom:12px;letter-spacing:.05em;text-transform:uppercase;">+ Create New User</div>
@@ -909,16 +915,64 @@ function renderUsersTable(){
       <td style="font-family:monospace;color:#94a3b8;letter-spacing:.05em;">${maskedPass}</td>
       <td><span class="role-pill ${u.role}">${u.role.toUpperCase()}</span></td>
       <td style="font-size:.72rem;color:var(--t2);">${createdStr}</td>
-      <td>
-        <button onclick="resetPassword('${u.username}')" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;margin-right:5px;">🔑 Reset Pass</button>
+      <td style="white-space:nowrap;">
+        <button onclick="copySetupLink('${u.username}')" style="background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;margin-right:4px;" title="Generate a link to share with this user — they open it once to register their account">🔗 Setup Link</button>
+        <button onclick="resetPassword('${u.username}')" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;margin-right:4px;">🔑 Reset Pass</button>
         ${!isSelf&&!isLastAdmin?`<button onclick="deleteUser('${u.username}')" style="background:#fee2e2;border:1px solid #fecaca;color:#dc2626;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;">🗑 Delete</button>`:''}
       </td>
     </tr>`;
   }).join('');
 }
 
+// ── Generate & Copy Setup Link ──
+function copySetupLink(username){
+  const users=getUsers();
+  const u=users.find(x=>x.username===username);
+  if(!u){alert('User not found.');return;}
+  const payload=btoa(JSON.stringify({username:u.username,password:u.password,role:u.role}));
+  const base=window.location.href.split('#')[0];
+  const link=base+'#gq-setup='+payload;
+  navigator.clipboard.writeText(link).then(()=>{
+    toast('✓ Setup link copied! Share it with '+username+'. They open it once to register.');
+  }).catch(()=>{
+    prompt('Copy this link and share with '+username+':',link);
+  });
+}
+
+// ── Process Setup Link on page load ──
+function processSetupLink(){
+  const hash=window.location.hash;
+  if(!hash||!hash.includes('gq-setup='))return false;
+  try{
+    const b64=hash.split('gq-setup=')[1];
+    const data=JSON.parse(atob(b64));
+    if(!data.username||!data.password)return false;
+    const users=getUsers();
+    // Register if not already exists
+    if(!users.find(u=>u.username.toLowerCase()===data.username.toLowerCase())){
+      users.push({username:data.username,password:data.password,role:data.role||'user',createdAt:new Date().toISOString()});
+      saveUsers(users);
+    }
+    // Clear hash
+    history.replaceState(null,'',window.location.pathname+window.location.search);
+    // Pre-fill login
+    document.getElementById('login-user').value=data.username;
+    document.getElementById('login-pass').focus();
+    // Show welcome
+    showLoginError('');
+    const msg=document.getElementById('login-error');
+    if(msg){msg.style.color='#059669';msg.textContent='✓ Account registered! Enter your password to sign in.';}
+    return true;
+  }catch(e){
+    history.replaceState(null,'',window.location.pathname+window.location.search);
+    return false;
+  }
+}
+
 // ── ON PAGE LOAD ──
 window.addEventListener('DOMContentLoaded',()=>{
+  // Check for setup link first
+  processSetupLink();
   const sess=getSession();
   if(sess){
     // Check user still exists
